@@ -238,31 +238,32 @@ const CAL_COLORS = {
   "YOUR_FAMILY_CALENDAR_ID@group.calendar.google.com": ["Sage","#33b679"],
   "ko.south_korea#holiday@group.v.calendar.google.com": ["Basil","#0b8043"]
 };
-/* What each event color means. Google Calendar allows only 11 event colors, so
-   Pistachio, Pumpkin, Cocoa, Mango and Birch use the closest stand-in ("was"). */
+/* Categories. Google Calendar allows only 11 event colors, so some categories use a
+   stand-in color in Google ("google") but are drawn here in the real color ("show").
+   An event's own color decides its category; an event with no color of its own is
+   sorted by its title ("rx"). */
 const KEY_GROUPS = ["중요","학업","과외","대외활동","개인","기타"];
 const KEY_ORDER = ["11","7","9","1","10","6","3","4","2","5","8","default"];
-/* Misc (no color of its own on the main calendar) is drawn in gray, because the main
-   calendar's default color, Peacock, is also the event color used for 과제. */
 const MISC_GRAY = "#8b949f";
 const CATS = {
-  "11": {g:"중요", label:"중요 이벤트"},
-  "7":  {g:"학업", label:"과제", was:"Eucalyptus"},
-  "9":  {g:"과외", label:"과외 A"},
-  "1":  {g:"과외", label:"과외 B"},
-  "10": {g:"대외활동", label:"활동 A", was:"Pistachio"},
-  "6":  {g:"대외활동", label:"활동 B", was:"Pumpkin"},
-  "3":  {g:"대외활동", label:"해커톤", was:"Cocoa"},
-  "4":  {g:"개인", label:"데이트"},
-  "5":  {g:"개인", label:"여행", was:"Mango"},
-  "2":  {g:"개인", label:"가족 · 날짜 미정"},
-  "8":  {g:"기타", label:"공지 사항", was:"Birch"},
-  "default": {g:"기타", label:"Misc"}
+  "11": {g:"중요", label:"중요 이벤트", show:["Tomato","#d50000"]},
+  "7":  {g:"학업", label:"과제", show:["Eucalyptus","#009688"], google:"Peacock", rx:/과제|assignment|homework/i},
+  "9":  {g:"과외", label:"과외 A", show:["Blueberry","#3f51b5"], rx:/과외 A/i},
+  "1":  {g:"과외", label:"과외 B", show:["Lavender","#7986cb"], rx:/과외 B/i},
+  "10": {g:"대외활동", label:"활동 A", show:["Pistachio","#c0ca33"], google:"Basil", rx:/활동 A/i},
+  "6":  {g:"대외활동", label:"활동 B", show:["Pumpkin","#ef6c00"], google:"Tangerine", rx:/활동 B/i},
+  "3":  {g:"대외활동", label:"해커톤", show:["Cocoa","#795548"], google:"Grape", rx:/해커톤|hackathon/i},
+  "4":  {g:"개인", label:"데이트", show:["Flamingo","#e67c73"]},
+  "2":  {g:"개인", label:"가족 · 날짜 미정", show:["Sage","#33b679"]},
+  "5":  {g:"개인", label:"여행", show:["Mango","#f09300"], google:"Banana", rx:/여행|Flight to|Stay at|항공권|호텔/i},
+  "8":  {g:"기타", label:"공지 사항", show:["Graphite","#616161"], rx:/공지|통보/i},
+  "default": {g:"기타", label:"Misc", show:["Default", MISC_GRAY]}
 };
 function catKey(e){
   if (e.holiday) return "holiday";
   if (e.cid && CATS[e.cid]) return e.cid;
-  if (!e.cid && e.calColor === "Sage") return "2";
+  for (const id of KEY_ORDER){ const c = CATS[id]; if (c.rx && c.rx.test(e.title)) return id; }
+  if (e.calColor === "Sage") return "2";
   return "default";
 }
 function catOf(e){ const k = catKey(e); return k === "holiday" ? {g:"기타", label:"휴일"} : CATS[k]; }
@@ -358,15 +359,16 @@ function normEvent(ev, cal){
   else { s = new Date(ev.start && ev.start.dateTime); e = new Date((ev.end && ev.end.dateTime) || (ev.start && ev.start.dateTime)); }
   if (isNaN(s)) return null;
   if (isNaN(e)) e = s;
-  const c = ev.colorId && COLORS[ev.colorId] ? {name:COLORS[ev.colorId][0], hex:COLORS[ev.colorId][1]}
-    : cal.primary ? {name: "Default", hex: MISC_GRAY} : {name: cal.colorName, hex: cal.color};
   const title = (ev.summary || "(No title)").trim();
-  return {
-    id: ev.id, title, allDay, s, e, color: c, cal: cal.name, holiday: cal.holiday,
+  const o = {
+    id: ev.id, title, allDay, s, e, cal: cal.name, holiday: cal.holiday,
     loc: ev.location || "", desc: cleanText(ev.description), link: ev.htmlLink || "",
     free: ev.transparency === "transparent", key: KEY_RE.test(title), tomato: ev.colorId === "11" || (!ev.colorId && cal.colorName === "Tomato"),
     cid: ev.colorId || null, calColor: cal.colorName
   };
+  const k = catKey(o);
+  o.color = k === "holiday" ? {name: cal.colorName, hex: cal.color} : {name: CATS[k].show[0], hex: CATS[k].show[1]};
+  return o;
 }
 function allEvents(){
   if (!S.cals) return [];
@@ -688,12 +690,13 @@ function renderKey(){
       if (c.g !== g) continue;
       const n = counts[id] || 0;
       const li = el("li","ki" + (n ? " on" : "") + (id === "11" ? " red" : ""));
-      const sw = el("span","sw"); sw.style.setProperty("--c", id === "default" ? MISC_GRAY : COLORS[id][1]); li.appendChild(sw);
+      const sw = el("span","sw"); sw.style.setProperty("--c", c.show[1]); li.appendChild(sw);
       const lab = el("span","kl", c.label + " ");
-      lab.appendChild(el("span","kn", id === "default" ? "Default" : COLORS[id][0] + (c.was ? " (" + c.was + ")" : "")));
+      lab.appendChild(el("span","kn", c.show[0]));
+      if (c.google) li.title = "In Google Calendar, use " + c.google;
       li.appendChild(lab);
       li.appendChild(el("span","kc", n ? String(n) : ""));
-      li.title = n ? n + " today" : "";
+      if (n) li.title = (li.title ? li.title + " · " : "") + n + " today";
       ul.appendChild(li);
     }
     grp.appendChild(ul); box.appendChild(grp);
