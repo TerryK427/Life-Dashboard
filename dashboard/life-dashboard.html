@@ -24,6 +24,7 @@
   --bad:#e0796d;
   --bad-soft:rgba(224,121,109,.10);
   --ok:#7fc39b;
+  --ok-soft:rgba(127,195,155,.10);
   --red:#f2655c;
   --red-soft:rgba(213,0,0,.16);
   --red-line:rgba(242,101,92,.55);
@@ -185,6 +186,48 @@ ul{list-style:none;margin:0;padding:0}
 .mail li.imp a{background:var(--warn-soft)}
 .mail li.imp .subj{color:var(--warn)}
 .more{font-size:12px;color:var(--dim)}
+
+/* Free-time finder */
+.ff-card{container-type:inline-size}
+.ff{display:grid;grid-template-columns:252px minmax(0,1fr);gap:28px;align-items:start}
+@container (max-width:620px){.ff{grid-template-columns:minmax(0,1fr)}}
+.ff-left{display:flex;flex-direction:column;gap:10px;min-width:0}
+.ff-right{min-width:0}
+.ff-nav{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ff-nav b{font-size:13px;font-weight:600}
+.navbtn{width:28px;height:28px;border-radius:6px;border:1px solid var(--line-strong);background:var(--raise);color:var(--fg);cursor:pointer;font-size:16px;line-height:1;padding:0}
+.navbtn:hover{border-color:var(--dim)}
+.mini{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.mw{font-size:10.5px;color:var(--dim);text-align:center;padding:2px 0}
+.md{aspect-ratio:1/1;max-width:100%;border:1px solid transparent;background:transparent;border-radius:6px;color:var(--fg);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:0;font-family:var(--mono);font-size:12px;font-variant-numeric:tabular-nums}
+.md:hover{background:var(--raise)}
+.md.is-past .mn{color:var(--dim)}
+.md.is-hol .mn{color:var(--bad)}
+.md.is-today{border-color:var(--line-strong)}
+.md.is-today .mn{color:var(--accent);font-weight:500}
+.md.is-sel{background:var(--accent-soft);border-color:var(--accent)}
+.mdots{display:flex;gap:2px;height:4px}
+.mdots i{width:4px;height:4px;border-radius:50%;background:var(--c,var(--dim))}
+.ff-jump{align-self:flex-start}
+.ff-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px;margin-bottom:8px}
+.ff-head b{font-size:15px;font-weight:600}
+.ff-sum{font-size:12.5px;color:var(--ok)}
+.agenda{display:flex;flex-direction:column;gap:3px}
+.ag{display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;align-items:center;padding:7px 8px;border-radius:6px}
+.ag-time{font-family:var(--mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.ag-body{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;min-width:0;border-left:3px solid var(--c,var(--dim));padding-left:10px}
+.ag-t{overflow-wrap:anywhere}
+.ag-m{font-size:12px;color:var(--muted)}
+.ag-free{background:var(--ok-soft)}
+.ag-free .ag-body{border-left:3px dashed var(--ok)}
+.ag-free .ag-t{color:var(--ok);font-weight:500}
+.ag-free .ag-time{color:var(--ok)}
+.ag-cls .ag-t{color:var(--muted)}
+.pill.cls{background:var(--raise);color:var(--muted);border:1px solid var(--line-strong)}
+.ff-foot{margin:12px 0 0;font-size:11.5px;color:var(--dim)}
+.ff-win{font-size:12px;color:var(--dim);display:inline-flex;align-items:center;gap:6px}
+.ff-win select{background:var(--raise);color:var(--fg);border:1px solid var(--line-strong);border-radius:5px;font:inherit;font-size:12px;padding:2px 4px}
+@media (max-width:480px){.ag{grid-template-columns:82px minmax(0,1fr);gap:8px}}
 .card-tools{display:flex;align-items:baseline;gap:12px}
 /* Hide-from-dashboard button: appears on hover with a mouse, always shown (dim) on touch screens */
 .dis{flex:none;width:24px;height:24px;border-radius:6px;border:1px solid var(--line-strong);background:var(--raise);color:var(--muted);display:grid;place-items:center;cursor:pointer;padding:0}
@@ -248,6 +291,24 @@ ul{list-style:none;margin:0;padding:0}
     <section class="card span" aria-labelledby="h-week">
       <div class="card-h"><h2 id="h-week">Next 7 days <span class="n" id="week-n"></span></h2><span class="note-s">Amber = needs attention</span></div>
       <div id="week-box"><div class="empty">Your week will appear here.</div></div>
+    </section>
+
+    <section class="card span ff-card" aria-labelledby="h-ff">
+      <div class="card-h"><h2 id="h-ff">Free time</h2>
+        <span class="ff-win">Day <select id="ff-from" aria-label="Day starts at"></select> – <select id="ff-to" aria-label="Day ends at"></select></span>
+      </div>
+      <div class="ff">
+        <div class="ff-left">
+          <div class="ff-nav"><button class="navbtn" id="ff-prev" type="button" aria-label="Previous month">&#8249;</button><b id="ff-month"></b><button class="navbtn" id="ff-next" type="button" aria-label="Next month">&#8250;</button></div>
+          <div id="ff-cal"></div>
+          <button class="linkbtn ff-jump" id="ff-today" type="button">Jump to today</button>
+        </div>
+        <div class="ff-right">
+          <div class="ff-head"><b id="ff-date"></b><span class="ff-sum" id="ff-sum"></span></div>
+          <div id="ff-day"><div class="empty">Pick a day to see its events and free time.</div></div>
+          <p class="ff-foot">Class times show only here. They aren't added to your calendar or the rest of the dashboard, and they stop after Dec 18.</p>
+        </div>
+      </div>
     </section>
 
     <section class="card" aria-labelledby="h-mail">
@@ -444,6 +505,7 @@ function onCalendars(ev){
     const input = {calendarId: cal.id, startTime: r.startTime, endTime: r.endTime, orderBy: "startTime", pageSize: 250};
     calWatches[cal.id] = S.mcp.watchTool(GC, "list_events", input, e => onEvents(cal.id, e), {cache:{staleTime:60000, gcTime:86400000}, refetchInterval:300000});
   }
+  ensureMonth();
   renderAll();
 }
 function onEvents(calId, ev){
@@ -776,7 +838,160 @@ function renderKey(){
   btn.textContent = keyAll ? "Today only" : "Show all";
   btn.setAttribute("aria-expanded", keyAll ? "true" : "false");
 }
-function renderAll(){ renderHeader(); renderToday(); renderKey(); renderHeadsUp(); renderWeek(); renderMail(); }
+/* ---------- free-time finder (class times live here only) ---------- */
+/* Weekly class times: weekday (0 = Sun) -> [start, end, name]. Used ONLY by this
+   finder, never shown elsewhere and never written to Google Calendar. */
+const CLASSES = {
+  /* Example schedule. Replace with your own class times. */
+  1: [["10:00","11:15","수업 A"]],
+  3: [["13:00","14:15","수업 B"],["14:30","15:45","수업 C"]],
+  4: [["16:00","17:15","수업 D"]]
+};
+const CLASSES_END = "YYYY-MM-DD";   // last day of classes (inclusive)
+const MIN_FREE = 30;                 // minutes; shorter gaps aren't counted as free time
+const F = { sel: sod(new Date()), view: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+            data: {}, unsubs: [], key: "", err: null, win: [8, 23] };
+try { const w = JSON.parse(localStorage.getItem("ld-win") || "null"); if (Array.isArray(w) && w.length === 2 && w[0] < w[1]) F.win = w; } catch(e){}
+
+function atTime(day, h, m){ const d = new Date(day); d.setHours(h, m || 0, 0, 0); return d; }
+function hhmm(day, s){ const [h, m] = s.split(":").map(Number); return atTime(day, h, m); }
+function endLabel(d, day){ return +d === +addDays(sod(day), 1) ? "24:00" : hm(d); }
+function fmtDur(min){ const h = Math.floor(min / 60), m = min % 60; return h ? h + "h" + (m ? " " + m + "m" : "") : m + "m"; }
+function classesOn(day, dayEvents){
+  if (ymd(day) > CLASSES_END) return [];
+  if (dayEvents.some(e => e.holiday)) return [];   // no classes on public holidays
+  return (CLASSES[day.getDay()] || []).map(([a, b, t]) => ({title: t, s: hhmm(day, a), e: hhmm(day, b)}));
+}
+function monthEvents(){
+  if (!S.cals) return [];
+  const out = [];
+  for (const cal of S.cals){
+    const list = F.data[cal.id];
+    if (!Array.isArray(list)) continue;
+    for (const ev of list){ const n = normEvent(ev, cal); if (n) out.push(n); }
+  }
+  return out;
+}
+function ensureMonth(){
+  if (!S.mcp || !S.cals) return;
+  const m0 = new Date(F.view.getFullYear(), F.view.getMonth(), 1), m1 = new Date(F.view.getFullYear(), F.view.getMonth() + 1, 1);
+  const key = ymd(m0) + "|" + S.cals.map(c => c.id).join(",");
+  if (key === F.key) return;
+  for (const u of F.unsubs) u();
+  F.unsubs = []; F.data = {}; F.err = null; F.key = key;
+  for (const cal of S.cals){
+    const input = {calendarId: cal.id, startTime: localIso(m0), endTime: localIso(m1), orderBy: "startTime", pageSize: 250};
+    F.unsubs.push(S.mcp.watchTool(GC, "list_events", input, ev => {
+      if (ev.type === "error"){
+        if (AUTHZ.has(ev.error.code)) delete F.data[cal.id];
+        if (!Array.isArray(F.data[cal.id])) F.err = ev.error;
+      } else {
+        const p = ev.result && ev.result.payload;
+        F.data[cal.id] = (p && p.events) || []; F.err = null;
+      }
+      renderFinder();
+    }, {cache:{staleTime:300000, gcTime:86400000}, refetchInterval:600000}));
+  }
+}
+function freeBlocks(day, busy){
+  let start = atTime(day, F.win[0]);
+  const end = F.win[1] >= 24 ? addDays(sod(day), 1) : atTime(day, F.win[1]);
+  if (+sod(day) === +sod(new Date())){            // today: only what's left
+    const r = new Date(Math.ceil(Date.now() / 300000) * 300000);
+    if (r > start) start = r;
+  }
+  const iv = busy.map(b => [Math.max(+b.s, +start), Math.min(+b.e, +end)]).filter(([a, b]) => b > a).sort((x, y) => x[0] - y[0]);
+  const out = []; let cur = +start;
+  for (const [a, b] of iv){ if (a - cur >= MIN_FREE * 60000) out.push({s: new Date(cur), e: new Date(a)}); cur = Math.max(cur, b); }
+  if (+end - cur >= MIN_FREE * 60000) out.push({s: new Date(cur), e: new Date(end)});
+  return out;
+}
+function renderMini(){
+  const box = $("ff-cal"); box.textContent = "";
+  const y = F.view.getFullYear(), mo = F.view.getMonth();
+  $("ff-month").textContent = F.view.toLocaleDateString("en-US", {month: "long", year: "numeric"});
+  const evs = monthEvents();
+  const grid = el("div", "mini");
+  for (const w of ["S","M","T","W","T","F","S"]) grid.appendChild(el("span", "mw", w));
+  const first = new Date(y, mo, 1), days = new Date(y, mo + 1, 0).getDate(), today = sod(new Date());
+  for (let i = 0; i < first.getDay(); i++) grid.appendChild(el("span"));
+  for (let d = 1; d <= days; d++){
+    const day = new Date(y, mo, d), list = eventsOn(day, evs);
+    const b = el("button", "md"); b.type = "button";
+    if (+day === +today) b.classList.add("is-today");
+    if (day < today) b.classList.add("is-past");
+    if (list.some(e => e.holiday)) b.classList.add("is-hol");
+    if (+day === +F.sel) b.classList.add("is-sel");
+    b.setAttribute("aria-pressed", +day === +F.sel ? "true" : "false");
+    b.setAttribute("aria-label", day.toLocaleDateString("en-US", {weekday: "long", month: "long", day: "numeric"}) + (list.length ? ", " + list.length + " events" : ""));
+    b.appendChild(el("span", "mn", String(d)));
+    const dots = el("span", "mdots");
+    for (const e of list.filter(e => !e.holiday).slice(0, 3)){ const i = el("i"); i.style.setProperty("--c", e.color.hex); dots.appendChild(i); }
+    b.appendChild(dots);
+    b.addEventListener("click", () => { F.sel = day; renderFinder(); });
+    grid.appendChild(b);
+  }
+  box.appendChild(grid);
+}
+function renderAgenda(){
+  const box = $("ff-day"); box.textContent = "";
+  const day = F.sel, sum = $("ff-sum");
+  $("ff-date").textContent = day.toLocaleDateString("en-US", {weekday: "long", month: "long", day: "numeric"});
+  sum.textContent = "";
+  if (!S.cals){ box.appendChild(S.calErr ? errBox(S.calErr, GC, allowCalendar) : el("div", "empty", "Loading your calendar…")); return; }
+  if (F.err && !Object.keys(F.data).length){ box.appendChild(errBox(F.err, GC)); return; }
+  if (S.cals.some(c => !Array.isArray(F.data[c.id]))){ box.appendChild(el("div", "empty", "Loading this month…")); return; }
+  const evs = eventsOn(day, monthEvents());
+  const allDay = evs.filter(e => e.allDay), timed = evs.filter(e => !e.allDay);
+  const cls = classesOn(day, evs);
+  const free = freeBlocks(day, timed.concat(cls));
+  const total = Math.round(free.reduce((n, f) => n + (f.e - f.s) / 60000, 0));
+  const isToday = +day === +sod(new Date()), past = day < sod(new Date());
+  if (!past) sum.textContent = free.length ? "Free " + fmtDur(total) + (isToday ? " left today" : "") + " · " + free.length + (free.length === 1 ? " block" : " blocks") : (isToday ? "No free time left today" : "No free time");
+  const rows = [];
+  for (const e of allDay) rows.push({k: "ev", e, at: -Infinity});
+  for (const e of timed) rows.push({k: "ev", e, at: +e.s});
+  for (const c of cls) rows.push({k: "cls", e: c, at: +c.s});
+  if (!past) for (const f of free) rows.push({k: "free", e: f, at: +f.s});
+  rows.sort((a, b) => a.at - b.at || (a.k === "free") - (b.k === "free"));
+  if (!rows.length){ box.appendChild(el("div", "empty", "Nothing on this day.")); return; }
+  const ul = el("ul", "agenda");
+  for (const r of rows){
+    const li = el("li", "ag ag-" + r.k);
+    li.appendChild(el("span", "ag-time", r.k === "ev" && r.e.allDay ? "All day" : hm(r.e.s) + "–" + endLabel(r.e.e, day)));
+    const b = el("div", "ag-body");
+    if (r.k === "free"){ b.appendChild(el("span", "ag-t", "Free")); b.appendChild(el("span", "ag-m", fmtDur(Math.round((r.e.e - r.e.s) / 60000)))); }
+    else if (r.k === "cls"){ b.appendChild(el("span", "ag-t", r.e.title)); b.appendChild(el("span", "pill cls", "Class")); }
+    else {
+      b.style.setProperty("--c", r.e.color.hex);
+      b.appendChild(el("span", "ag-t", r.e.title));
+      b.appendChild(el("span", "ag-m", catOf(r.e).label));
+      if (r.e.tomato) b.appendChild(el("span", "pill red", "Important"));
+    }
+    li.appendChild(b); ul.appendChild(li);
+  }
+  box.appendChild(ul);
+}
+function renderFinder(){ renderMini(); renderAgenda(); }
+function goMonth(delta){
+  F.view = new Date(F.view.getFullYear(), F.view.getMonth() + delta, 1);
+  const today = sod(new Date());
+  F.sel = (today.getFullYear() === F.view.getFullYear() && today.getMonth() === F.view.getMonth()) ? today : new Date(F.view);
+  ensureMonth(); renderFinder();
+}
+(function initFinder(){
+  const from = $("ff-from"), to = $("ff-to");
+  for (let h = 5; h <= 12; h++){ const o = el("option", null, pad(h) + ":00"); o.value = h; from.appendChild(o); }
+  for (let h = 17; h <= 24; h++){ const o = el("option", null, pad(h) + ":00"); o.value = h; to.appendChild(o); }
+  from.value = F.win[0]; to.value = F.win[1];
+  const save = () => { F.win = [Number(from.value), Number(to.value)]; try { localStorage.setItem("ld-win", JSON.stringify(F.win)); } catch(e){} renderAgenda(); };
+  from.addEventListener("change", save); to.addEventListener("change", save);
+  $("ff-prev").addEventListener("click", () => goMonth(-1));
+  $("ff-next").addEventListener("click", () => goMonth(1));
+  $("ff-today").addEventListener("click", () => { const t = sod(new Date()); F.view = new Date(t.getFullYear(), t.getMonth(), 1); F.sel = t; ensureMonth(); renderFinder(); });
+})();
+
+function renderAll(){ renderHeader(); renderToday(); renderKey(); renderHeadsUp(); renderWeek(); renderMail(); renderFinder(); }
 
 /* ---------- hide from dashboard (Heads up, Key emails) ---------- */
 const CHECK_SVG = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.4 6.4 11.6 13 4.6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>';
