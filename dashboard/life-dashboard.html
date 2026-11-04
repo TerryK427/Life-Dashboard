@@ -240,10 +240,14 @@ const CAL_COLORS = {
 };
 /* What each event color means. Google Calendar allows only 11 event colors, so
    Pistachio, Pumpkin, Cocoa, Mango and Birch use the closest stand-in ("was"). */
-const KEY_GROUPS = ["중요","과외","대외활동","개인","기타"];
-const KEY_ORDER = ["11","9","1","10","6","3","4","2","5","8","default"];
+const KEY_GROUPS = ["중요","학업","과외","대외활동","개인","기타"];
+const KEY_ORDER = ["11","7","9","1","10","6","3","4","2","5","8","default"];
+/* Misc (no color of its own on the main calendar) is drawn in gray, because the main
+   calendar's default color, Peacock, is also the event color used for 과제. */
+const MISC_GRAY = "#8b949f";
 const CATS = {
   "11": {g:"중요", label:"중요 이벤트"},
+  "7":  {g:"학업", label:"과제", was:"Eucalyptus"},
   "9":  {g:"과외", label:"과외 A"},
   "1":  {g:"과외", label:"과외 B"},
   "10": {g:"대외활동", label:"활동 A", was:"Pistachio"},
@@ -354,7 +358,8 @@ function normEvent(ev, cal){
   else { s = new Date(ev.start && ev.start.dateTime); e = new Date((ev.end && ev.end.dateTime) || (ev.start && ev.start.dateTime)); }
   if (isNaN(s)) return null;
   if (isNaN(e)) e = s;
-  const c = ev.colorId && COLORS[ev.colorId] ? {name:COLORS[ev.colorId][0], hex:COLORS[ev.colorId][1]} : {name: cal.colorName, hex: cal.color};
+  const c = ev.colorId && COLORS[ev.colorId] ? {name:COLORS[ev.colorId][0], hex:COLORS[ev.colorId][1]}
+    : cal.primary ? {name: "Default", hex: MISC_GRAY} : {name: cal.colorName, hex: cal.color};
   const title = (ev.summary || "(No title)").trim();
   return {
     id: ev.id, title, allDay, s, e, color: c, cal: cal.name, holiday: cal.holiday,
@@ -674,7 +679,6 @@ function renderKey(){
   const box = $("key-box"); box.textContent = "";
   const counts = {};
   if (S.cals){ for (const e of eventsOn(new Date(), allEvents())){ const k = catKey(e); counts[k] = (counts[k] || 0) + 1; } }
-  const mainHex = (S.cals && (S.cals.find(c => c.primary) || {}).color) || COLORS["7"][1];
   for (const g of KEY_GROUPS){
     const grp = el("div","kg");
     grp.appendChild(el("h4", null, g));
@@ -684,7 +688,7 @@ function renderKey(){
       if (c.g !== g) continue;
       const n = counts[id] || 0;
       const li = el("li","ki" + (n ? " on" : "") + (id === "11" ? " red" : ""));
-      const sw = el("span","sw"); sw.style.setProperty("--c", id === "default" ? mainHex : COLORS[id][1]); li.appendChild(sw);
+      const sw = el("span","sw"); sw.style.setProperty("--c", id === "default" ? MISC_GRAY : COLORS[id][1]); li.appendChild(sw);
       const lab = el("span","kl", c.label + " ");
       lab.appendChild(el("span","kn", id === "default" ? "Default" : COLORS[id][0] + (c.was ? " (" + c.was + ")" : "")));
       li.appendChild(lab);
