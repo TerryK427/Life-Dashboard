@@ -143,7 +143,7 @@ ul{list-style:none;margin:0;padding:0}
 @media (max-width:480px){.ev{grid-template-columns:22px 52px minmax(0,1fr)}.open{grid-column:3}}
 
 /* Heads up */
-.hu li{display:grid;grid-template-columns:8px minmax(0,1fr);gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.hu li{display:grid;grid-template-columns:8px minmax(0,1fr) auto;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
 .hu li:first-child{border-top:0;padding-top:2px}
 .sev{width:8px;height:8px;border-radius:2px;margin-top:7px;background:var(--dim)}
 .sev.bad{background:var(--bad)}.sev.warn{background:var(--warn)}.sev.info{background:var(--accent)}
@@ -172,7 +172,9 @@ ul{list-style:none;margin:0;padding:0}
 .day .none{font-size:12px;color:var(--dim)}
 
 /* Mail */
-.mail li{border-top:1px solid var(--line)}
+.mail li{border-top:1px solid var(--line);display:flex;align-items:flex-start;gap:6px}
+.mail li > a{flex:1;min-width:0}
+.mail li > .dis{margin-top:8px}
 .mail li:first-child{border-top:0}
 .mail a{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;padding:9px 6px;margin:0 -6px;text-decoration:none;border-radius:6px}
 .mail a:hover{background:var(--raise)}
@@ -183,6 +185,13 @@ ul{list-style:none;margin:0;padding:0}
 .mail li.imp a{background:var(--warn-soft)}
 .mail li.imp .subj{color:var(--warn)}
 .more{font-size:12px;color:var(--dim)}
+.card-tools{display:flex;align-items:baseline;gap:12px}
+/* Hide-from-dashboard button: appears on hover with a mouse, always shown (dim) on touch screens */
+.dis{flex:none;width:24px;height:24px;border-radius:6px;border:1px solid var(--line-strong);background:var(--raise);color:var(--muted);display:grid;place-items:center;cursor:pointer;padding:0}
+.dis svg{width:12px;height:12px}
+.dis:hover{color:var(--ok);border-color:var(--ok)}
+@media (hover:hover){.dis{opacity:0;transition:opacity .15s}.hu li:hover .dis,.mail li:hover .dis,.dis:focus-visible{opacity:1}}
+@media (hover:none){.dis{opacity:.55}}
 
 /* Sticky note */
 .card.paper{background:var(--paper);border-color:var(--paper-line)}
@@ -232,7 +241,7 @@ ul{list-style:none;margin:0;padding:0}
     </section>
 
     <section class="card" aria-labelledby="h-hu">
-      <div class="card-h"><h2 id="h-hu">Heads up <span class="n" id="hu-n"></span></h2></div>
+      <div class="card-h"><h2 id="h-hu">Heads up <span class="n" id="hu-n"></span></h2><button class="linkbtn" id="hu-restore" type="button" hidden></button></div>
       <div id="hu-box"><div class="empty">Deadlines, overlaps, early starts and important mail show up here.</div></div>
     </section>
 
@@ -242,7 +251,7 @@ ul{list-style:none;margin:0;padding:0}
     </section>
 
     <section class="card" aria-labelledby="h-mail">
-      <div class="card-h"><h2 id="h-mail">Key emails <span class="n" id="mail-n"></span></h2><span class="note-s">Last 7 days · no promotions</span></div>
+      <div class="card-h"><h2 id="h-mail">Key emails <span class="n" id="mail-n"></span></h2><span class="card-tools"><button class="linkbtn" id="mail-restore" type="button" hidden></button><span class="note-s">Last 7 days · no promotions</span></span></div>
       <div id="mail-box"><div class="empty">Your inbox, minus promotions, will appear here.</div></div>
     </section>
 
@@ -315,7 +324,7 @@ const md = d => (d.getMonth()+1)+"/"+d.getDate();
 const S = {
   mcp:null, cals:null, events:{}, calErr:null, calStamp:null,
   threads:null, impIds:new Set(), mailErr:null, mailStamp:null,
-  done:{}, dayKey: ymd(new Date())
+  done:{}, hidden:{}, dayKey: ymd(new Date())
 };
 let calListUnsub = null, calWatches = {}, mailUnsubs = [];
 
@@ -489,7 +498,7 @@ function mailItems(){
     const subject = (first.subject || last.subject || "(No subject)").trim();
     const snippet = (last.snippet || first.snippet || "").trim();
     const imp = S.impIds.has(t.id) || IMP_RE.test(subject) || IMP_RE.test(snippet);
-    return {id: t.id, subject, snippet, from: senderName(last.sender || first.sender), when: msgDate(last), count: t.messageCount || msgs.length, imp,
+    return {id: t.id, key: "m:" + t.id + ":" + (t.messageCount || msgs.length), subject, snippet, from: senderName(last.sender || first.sender), when: msgDate(last), count: t.messageCount || msgs.length, imp,
       url: t.viewUrl || last.viewUrl || ("https://mail.google.com/mail/#inbox/" + encodeURIComponent(t.id))};
   }).filter(Boolean);
 }
@@ -626,9 +635,12 @@ function overlaps(timed){
 
 function renderMail(){
   const box = $("mail-box"); box.textContent = "";
+  setRestore("mail-restore", []);
   if (S.mailErr && !S.threads){ box.appendChild(errBox(S.mailErr, GM, allowMail)); $("mail-n").textContent = ""; return; }
   if (!S.threads){ box.appendChild(el("div","empty","Your inbox, minus promotions, will appear here.")); return; }
-  const items = mailItems();
+  const allMail = mailItems();
+  setRestore("mail-restore", allMail.filter(m => isHidden(m.key)).map(m => m.key));
+  const items = allMail.filter(m => !isHidden(m.key));
   const ordered = items.filter(m => m.imp).concat(items.filter(m => !m.imp));
   $("mail-n").textContent = items.length ? String(items.length) : "";
   if (!ordered.length){ box.appendChild(el("div","empty","No new mail this week outside promotions.")); return; }
@@ -643,7 +655,9 @@ function renderMail(){
     a.appendChild(el("span","when", shortWhen(m.when)));
     a.appendChild(el("div","from", m.from + (m.count > 1 ? " · " + m.count + " messages" : "")));
     if (m.snippet) a.appendChild(el("div","snip", m.snippet));
-    li.appendChild(a); ul.appendChild(li);
+    li.appendChild(a);
+    li.appendChild(hideBtn(m.key, "Hide from dashboard (stays in Gmail)"));
+    ul.appendChild(li);
   }
   box.appendChild(ul);
   if (ordered.length > 12) box.appendChild(el("div","more", "+" + (ordered.length - 12) + " more in Gmail"));
@@ -678,25 +692,32 @@ function headsUp(){
     }
   }
   if (S.threads){
+    /* Hidden emails stay in the list (render skips them) so this card's Restore link can count them;
+       the "first 3" limits count only visible ones. */
     const mail = mailItems();
-    const imp = mail.filter(m => m.imp);
-    for (const m of imp.slice(0,3)) items.push({lv:"warn", t:"Important email: " + m.subject, s: m.from, at: now, url: m.url});
-    if (imp.length > 3) items.push({lv:"warn", t: (imp.length - 3) + " more important emails", s:"See Key emails", at: now});
-    for (const m of mail.filter(m => !m.imp && KEY_RE.test(m.subject)).slice(0,3)) items.push({lv:"info", t:"Check email: " + m.subject, s: m.from, at: now, url: m.url});
+    const shown3 = list => list.filter(m => isHidden(m.key)).concat(list.filter(m => !isHidden(m.key)).slice(0,3));
+    const imp = mail.filter(m => m.imp), impVisible = imp.filter(m => !isHidden(m.key)).length;
+    for (const m of shown3(imp)) items.push({lv:"warn", t:"Important email: " + m.subject, s: m.from, at: now, url: m.url, key: m.key});
+    if (impVisible > 3) items.push({lv:"warn", t: (impVisible - 3) + " more important emails", s:"See Key emails", at: now, key: "h:more-important"});
+    for (const m of shown3(mail.filter(m => !m.imp && KEY_RE.test(m.subject)))) items.push({lv:"info", t:"Check email: " + m.subject, s: m.from, at: now, url: m.url, key: m.key});
   }
   const seen = new Set();
   return items.filter(x => { const k = x.t; if (seen.has(k)) return false; seen.add(k); return true; })
-    .sort((a,b) => rank[a.lv] - rank[b.lv] || (a.at - b.at)).slice(0, 10);
+    .map(x => { if (!x.key) x.key = "h:" + x.t + "|" + ymd(new Date(x.at)); return x; })
+    .sort((a,b) => rank[a.lv] - rank[b.lv] || (a.at - b.at));
 }
 
 function renderHeadsUp(){
   const box = $("hu-box"); box.textContent = "";
+  setRestore("hu-restore", []);
   if (!S.cals && !S.threads){
     if (S.calErr || S.mailErr) box.appendChild(el("div","empty","Heads up fills in once Calendar and Gmail load."));
     else box.appendChild(el("div","empty","Deadlines, overlaps, early starts and important mail show up here."));
     return;
   }
-  const items = headsUp();
+  const allItems = headsUp();
+  setRestore("hu-restore", allItems.filter(x => isHidden(x.key)).map(x => x.key));
+  const items = allItems.filter(x => !isHidden(x.key)).slice(0, 10);
   $("hu-n").textContent = items.length ? String(items.length) : "";
   if (!items.length){ box.appendChild(el("div","empty","Nothing needs attention. Clear road ahead.")); return; }
   const ul = el("ul","hu");
@@ -707,7 +728,9 @@ function renderHeadsUp(){
     if (x.url){ const a = el("a","t", x.t); a.href = x.url; a.target = "_blank"; a.rel = "noopener"; a.style.textDecoration = "none"; b.appendChild(a); }
     else b.appendChild(el("div","t", x.t));
     if (x.s) b.appendChild(el("div","s", x.s));
-    li.appendChild(b); ul.appendChild(li);
+    li.appendChild(b);
+    li.appendChild(hideBtn(x.key, x.url ? "Hide from dashboard (stays in Gmail)" : "Hide from dashboard (stays in your calendar)"));
+    ul.appendChild(li);
   }
   box.appendChild(ul);
 }
@@ -755,7 +778,33 @@ function renderKey(){
 }
 function renderAll(){ renderHeader(); renderToday(); renderKey(); renderHeadsUp(); renderWeek(); renderMail(); }
 
+/* ---------- hide from dashboard (Heads up, Key emails) ---------- */
+const CHECK_SVG = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.4 6.4 11.6 13 4.6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+function isHidden(k){ return !!(k && S.hidden[k]); }
+function hideBtn(key, label){
+  const b = el("button","dis"); b.type = "button"; b.title = label; b.setAttribute("aria-label", label);
+  b.innerHTML = CHECK_SVG;
+  b.addEventListener("click", ev => { ev.preventDefault(); ev.stopPropagation(); setHidden([key], true); });
+  return b;
+}
+function setRestore(id, keys){
+  const b = $(id);
+  b.hidden = !keys.length;
+  b.textContent = keys.length + " hidden · Restore";
+  b.onclick = () => setHidden(keys, false);
+}
+function setHidden(keys, on){
+  const next = Object.assign({}, S.hidden);
+  for (const k of keys){ if (on) next[k] = Date.now(); else delete next[k]; }
+  const cutoff = Date.now() - 30 * 86400000;
+  for (const k of Object.keys(next)) if (next[k] < cutoff) delete next[k];
+  S.hidden = next; renderHeadsUp(); renderMail();
+  if (hiddenRef){ saving = saving.then(() => hiddenRef.set({items: next})).catch(() => {}); }
+  else { try { localStorage.setItem("ld-hidden", JSON.stringify(next)); } catch(e){} }
+}
+
 /* ---------- done ticks + sticky note (saved per person) ---------- */
+let hiddenRef = null;
 let doneRef = null, noteRef = null, noteLocal = false, saving = Promise.resolve(), dirty = false, noteTimer = null;
 const ta = $("note");
 function doneKey(e, day){ return (e.id || e.title) + "|" + ymd(day); }
@@ -786,7 +835,8 @@ function saveNote(){
 }
 function localFallback(){
   noteLocal = true;
-  try { ta.value = localStorage.getItem("ld-note") || ""; S.done = JSON.parse(localStorage.getItem("ld-done") || "{}"); } catch(e){}
+  try { ta.value = localStorage.getItem("ld-note") || ""; S.done = JSON.parse(localStorage.getItem("ld-done") || "{}"); S.hidden = JSON.parse(localStorage.getItem("ld-hidden") || "{}"); } catch(e){}
+  renderHeadsUp(); renderMail();
   setNoteStatus(ta.value ? "Saved in this browser" : "");
   renderToday();
 }
@@ -798,7 +848,8 @@ async function bootStore(){
   const uid = await user.id();
   if (!uid){ localFallback(); return; }
   const col = db.collection("data/users/" + uid);
-  noteRef = col.doc("note"); doneRef = col.doc("done");
+  noteRef = col.doc("note"); doneRef = col.doc("done"); hiddenRef = col.doc("hidden");
+  hiddenRef.onSnapshot(s => { const d = s.data(); S.hidden = (d && d.items) || {}; renderHeadsUp(); renderMail(); }, () => {});
   setNoteStatus("Loading…");
   const slow = setTimeout(() => { if (!ta.value) setNoteStatus("Can't reach your note yet"); }, 10000);
   noteRef.onSnapshot(s => {
