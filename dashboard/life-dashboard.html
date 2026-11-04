@@ -70,6 +70,28 @@ ul{list-style:none;margin:0;padding:0}
 
 /* Today */
 .today{display:flex;flex-direction:column}
+
+/* Color key beside Today */
+.today-card{container-type:inline-size}
+.today-wrap{display:grid;grid-template-columns:minmax(0,1fr) 196px;gap:20px;align-items:start}
+.key{border-left:1px solid var(--line);padding-left:18px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.key h3{margin:0;font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--dim)}
+.key-groups{display:flex;flex-direction:column;gap:12px}
+.kg h4{margin:0 0 5px;font-size:11.5px;font-weight:600;color:var(--muted)}
+.kg ul{display:flex;flex-direction:column;gap:4px}
+.ki{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:8px;align-items:center;font-size:12.5px;color:var(--dim);line-height:1.35}
+.ki .sw{width:10px;height:10px;border-radius:3px;background:var(--c,var(--dim))}
+.ki .kl{overflow-wrap:anywhere}
+.ki .kn{font-size:11px;color:var(--dim)}
+.ki .kc{font-family:var(--mono);font-size:11px;font-variant-numeric:tabular-nums}
+.ki.on{color:var(--fg)}
+.ki.on .kc{color:var(--accent)}
+.ki.red.on,.ki.red.on .kc{color:var(--red)}
+@container (max-width:640px){
+  .today-wrap{grid-template-columns:minmax(0,1fr)}
+  .key{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:14px}
+  .key-groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px 18px}
+}
 .ev{display:grid;grid-template-columns:22px 62px minmax(0,1fr) auto;gap:4px 12px;align-items:start;padding:10px 0;border-top:1px solid var(--line)}
 .ev:first-child{border-top:0}
 .tick{width:18px;height:18px;margin-top:2px;border-radius:50%;border:1.5px solid var(--dim);background:transparent;cursor:pointer;padding:0;display:grid;place-items:center}
@@ -166,9 +188,15 @@ ul{list-style:none;margin:0;padding:0}
   </header>
 
   <div class="board">
-    <section class="card" aria-labelledby="h-today">
+    <section class="card today-card" aria-labelledby="h-today">
       <div class="card-h"><h2 id="h-today">Today <span class="n" id="today-n"></span></h2><span class="note-s" id="today-s"></span></div>
-      <div id="today-box"><div class="empty">Your events for today will appear here.</div></div>
+      <div class="today-wrap">
+        <div id="today-box"><div class="empty">Your events for today will appear here.</div></div>
+        <aside class="key" aria-labelledby="h-key">
+          <h3 id="h-key">Color key</h3>
+          <div class="key-groups" id="key-box"></div>
+        </aside>
+      </div>
     </section>
 
     <section class="card" aria-labelledby="h-hu">
@@ -210,6 +238,30 @@ const CAL_COLORS = {
   "YOUR_FAMILY_CALENDAR_ID@group.calendar.google.com": ["Sage","#33b679"],
   "ko.south_korea#holiday@group.v.calendar.google.com": ["Basil","#0b8043"]
 };
+/* What each event color means. Google Calendar allows only 11 event colors, so
+   Pistachio, Pumpkin, Cocoa, Mango and Birch use the closest stand-in ("was"). */
+const KEY_GROUPS = ["중요","과외","대외활동","개인","기타"];
+const KEY_ORDER = ["11","9","1","10","6","3","4","2","5","8","default"];
+const CATS = {
+  "11": {g:"중요", label:"중요 이벤트"},
+  "9":  {g:"과외", label:"과외 A"},
+  "1":  {g:"과외", label:"과외 B"},
+  "10": {g:"대외활동", label:"활동 A", was:"Pistachio"},
+  "6":  {g:"대외활동", label:"활동 B", was:"Pumpkin"},
+  "3":  {g:"대외활동", label:"해커톤", was:"Cocoa"},
+  "4":  {g:"개인", label:"데이트"},
+  "5":  {g:"개인", label:"여행", was:"Mango"},
+  "2":  {g:"개인", label:"가족 · 날짜 미정"},
+  "8":  {g:"기타", label:"공지 사항", was:"Birch"},
+  "default": {g:"기타", label:"Misc"}
+};
+function catKey(e){
+  if (e.holiday) return "holiday";
+  if (e.cid && CATS[e.cid]) return e.cid;
+  if (!e.cid && e.calColor === "Sage") return "2";
+  return "default";
+}
+function catOf(e){ const k = catKey(e); return k === "holiday" ? {g:"기타", label:"휴일"} : CATS[k]; }
 const AUTHZ = new Set(["needs_reauth","server_not_connected","blocked_by_policy","approval_required","not_in_manifest","selection_required","consent_required","not_granted","capability_disabled","capability_removed"]);
 
 const $ = id => document.getElementById(id);
@@ -307,7 +359,8 @@ function normEvent(ev, cal){
   return {
     id: ev.id, title, allDay, s, e, color: c, cal: cal.name, holiday: cal.holiday,
     loc: ev.location || "", desc: cleanText(ev.description), link: ev.htmlLink || "",
-    free: ev.transparency === "transparent", key: KEY_RE.test(title), tomato: ev.colorId === "11" || (!ev.colorId && cal.colorName === "Tomato")
+    free: ev.transparency === "transparent", key: KEY_RE.test(title), tomato: ev.colorId === "11" || (!ev.colorId && cal.colorName === "Tomato"),
+    cid: ev.colorId || null, calColor: cal.colorName
   };
 }
 function allEvents(){
@@ -462,8 +515,8 @@ function renderToday(){
     else if (e.key) title.appendChild(el("span","pill imp","Key"));
     body.appendChild(title);
     const meta = el("div","meta");
-    const cn = el("span","cn", e.color.name); meta.appendChild(cn);
-    if (e.color.name !== e.cal) meta.appendChild(el("span", null, e.cal));
+    const cn = el("span","cn", catOf(e).label); meta.appendChild(cn);
+    meta.appendChild(el("span", null, e.color.name));
     if (!e.allDay){ const mins = Math.round((e.e - e.s)/60000); meta.appendChild(el("span", null, mins >= 60 ? (Math.floor(mins/60) + "h" + (mins%60 ? " " + (mins%60) + "m" : "")) : mins + "m")); }
     if (e.allDay && (e.e - e.s) > 86400000){ meta.appendChild(el("span", null, md(e.s) + "–" + md(addDays(e.e,-1)))); }
     if (e.loc) meta.appendChild(el("span", null, "📍 " + e.loc));
@@ -510,7 +563,7 @@ function renderWeek(){
       tx.appendChild(el("em","ct", e.allDay ? "All day" : hm(e.s)));
       tx.appendChild(el("span","cx", e.title));
       c.appendChild(tx);
-      c.title = e.color.name + " · " + e.cal;
+      c.title = catOf(e).label + " · " + e.color.name;
       chips.appendChild(c);
     }
     d.appendChild(chips);
@@ -617,7 +670,32 @@ function renderHeadsUp(){
   box.appendChild(ul);
 }
 
-function renderAll(){ renderHeader(); renderToday(); renderHeadsUp(); renderWeek(); renderMail(); }
+function renderKey(){
+  const box = $("key-box"); box.textContent = "";
+  const counts = {};
+  if (S.cals){ for (const e of eventsOn(new Date(), allEvents())){ const k = catKey(e); counts[k] = (counts[k] || 0) + 1; } }
+  const mainHex = (S.cals && (S.cals.find(c => c.primary) || {}).color) || COLORS["7"][1];
+  for (const g of KEY_GROUPS){
+    const grp = el("div","kg");
+    grp.appendChild(el("h4", null, g));
+    const ul = el("ul");
+    for (const id of KEY_ORDER){
+      const c = CATS[id];
+      if (c.g !== g) continue;
+      const n = counts[id] || 0;
+      const li = el("li","ki" + (n ? " on" : "") + (id === "11" ? " red" : ""));
+      const sw = el("span","sw"); sw.style.setProperty("--c", id === "default" ? mainHex : COLORS[id][1]); li.appendChild(sw);
+      const lab = el("span","kl", c.label + " ");
+      lab.appendChild(el("span","kn", id === "default" ? "Default" : COLORS[id][0] + (c.was ? " (" + c.was + ")" : "")));
+      li.appendChild(lab);
+      li.appendChild(el("span","kc", n ? String(n) : ""));
+      li.title = n ? n + " today" : "";
+      ul.appendChild(li);
+    }
+    grp.appendChild(ul); box.appendChild(grp);
+  }
+}
+function renderAll(){ renderHeader(); renderToday(); renderKey(); renderHeadsUp(); renderWeek(); renderMail(); }
 
 /* ---------- done ticks + sticky note (saved per person) ---------- */
 let doneRef = null, noteRef = null, noteLocal = false, saving = Promise.resolve(), dirty = false, noteTimer = null;
