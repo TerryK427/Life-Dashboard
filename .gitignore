@@ -1,0 +1,5 @@
+# Written by the Windows launcher on each sign-in
+startup-log.txt
+*.lnk
+.DS_Store
+Thumbs.db

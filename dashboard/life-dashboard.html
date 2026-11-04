@@ -1,0 +1,715 @@
+<title>Life Dashboard</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+/* Layout: a quiet command board. Today + Heads up on top, a 7-day strip across, Key emails + Sticky note below. Single dark theme by choice. */
+:root{
+  --bg:#0f1215;
+  --panel:#151a1f;
+  --raise:#1b2127;
+  --line:#242b33;
+  --fg:#e4e8ec;
+  --muted:#8b949f;
+  --dim:#5c6670;
+  --accent:#86b7c9;
+  --accent-soft:rgba(134,183,201,.12);
+  --warn:#e3b263;
+  --warn-soft:rgba(227,178,99,.10);
+  --bad:#e0796d;
+  --bad-soft:rgba(224,121,109,.10);
+  --ok:#7fc39b;
+  --red:#f2655c;
+  --red-soft:rgba(213,0,0,.16);
+  --red-line:rgba(242,101,92,.55);
+  --paper:#1a1916;
+  --paper-line:#2e2b23;
+  --paper-fg:#ece6d6;
+  --sans:"IBM Plex Sans KR",system-ui,-apple-system,"Segoe UI","Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,"Cascadia Mono",monospace;
+  color-scheme:dark;
+}
+html,body{background:var(--bg);color:var(--fg)}
+body{
+  font-family:var(--sans);font-size:14px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:22px 40px;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+
+/* Header */
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;padding-bottom:4px}
+.top h1{margin:0;font-size:26px;font-weight:600;letter-spacing:-.01em;text-wrap:balance}
+.top .sub{color:var(--muted);font-size:13px;margin-top:2px}
+.clock{font-family:var(--mono);font-size:30px;font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1}
+.topright{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.fresh{font-size:12px;color:var(--dim);text-align:right;font-variant-numeric:tabular-nums}
+.btn{background:var(--raise);border:1px solid var(--line);border-radius:6px;padding:6px 12px;font-size:12px;cursor:pointer;color:var(--fg)}
+.btn:hover{border-color:var(--dim)}
+.btn[disabled]{opacity:.5;cursor:default}
+
+/* Board */
+.board{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:16px;align-items:start}
+.span{grid-column:1/-1}
+@media (max-width:880px){.board{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;min-width:0;display:flex;flex-direction:column;gap:12px}
+.card-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.card h2{margin:0;font-size:12px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px}
+.n{font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:0;font-weight:400}
+.note-s{font-size:12px;color:var(--dim)}
+.empty{color:var(--dim);font-size:13px;padding:6px 0}
+.msg{font-size:13px;color:var(--muted);background:var(--raise);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.msg.err{color:var(--fg);border-color:rgba(224,121,109,.35)}
+ul{list-style:none;margin:0;padding:0}
+
+/* Today */
+.today{display:flex;flex-direction:column}
+.ev{display:grid;grid-template-columns:22px 62px minmax(0,1fr) auto;gap:4px 12px;align-items:start;padding:10px 0;border-top:1px solid var(--line)}
+.ev:first-child{border-top:0}
+.tick{width:18px;height:18px;margin-top:2px;border-radius:50%;border:1.5px solid var(--dim);background:transparent;cursor:pointer;padding:0;display:grid;place-items:center}
+.tick:hover{border-color:var(--accent)}
+.tick svg{width:10px;height:10px;opacity:0}
+.ev.done .tick{background:var(--accent);border-color:var(--accent)}
+.ev.done .tick svg{opacity:1}
+.ev.done .ev-title{text-decoration:line-through;color:var(--dim)}
+.time{font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums;line-height:1.35;color:var(--fg)}
+.time small{display:block;color:var(--dim);font-size:11px}
+.ev-title{font-weight:500;display:flex;align-items:center;gap:8px;flex-wrap:wrap;overflow-wrap:anywhere}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--c,var(--dim));flex:none;display:inline-block}
+.meta{font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:2px 10px;margin-top:2px}
+.meta .cn{display:inline-flex;align-items:center;gap:5px}
+.desc{font-size:12px;color:var(--dim);margin-top:3px;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.open{font-size:12px;color:var(--dim);text-decoration:none;padding-top:2px;white-space:nowrap}
+.open:hover{color:var(--accent)}
+.pill{font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:1px 7px;border-radius:999px;line-height:1.6}
+.pill.now{background:var(--accent-soft);color:var(--accent)}
+.pill.next{background:var(--raise);color:var(--muted);border:1px solid var(--line)}
+.pill.imp{background:var(--warn-soft);color:var(--warn)}
+.pill.red{background:var(--red-soft);color:var(--red)}
+.ev.tomato{background:var(--red-soft);border-radius:8px;margin:2px -8px;padding:10px 8px;border-top-color:transparent}
+.ev.tomato + .ev{border-top-color:transparent}
+.ev.tomato .ev-title{color:var(--red)}
+.ev.tomato .meta .cn{color:var(--red)}
+.ev.past:not(.done) .ev-title,.ev.past .time{color:var(--muted)}
+@media (max-width:480px){.ev{grid-template-columns:22px 52px minmax(0,1fr)}.open{grid-column:3}}
+
+/* Heads up */
+.hu li{display:grid;grid-template-columns:8px minmax(0,1fr);gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.hu li:first-child{border-top:0;padding-top:2px}
+.sev{width:8px;height:8px;border-radius:2px;margin-top:7px;background:var(--dim)}
+.sev.bad{background:var(--bad)}.sev.warn{background:var(--warn)}.sev.info{background:var(--accent)}
+.hu .t{overflow-wrap:anywhere}
+.hu .s{font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+
+/* Week */
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px}
+@media (max-width:1100px){.week{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:640px){.week{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.day{background:var(--raise);border:1px solid var(--line);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.day.is-today{border-color:rgba(134,183,201,.55)}
+.day-h{display:flex;align-items:baseline;justify-content:space-between;gap:6px}
+.day-h b{font-weight:600;font-size:13px}
+.day-h span{font-family:var(--mono);font-size:11px;color:var(--dim)}
+.day .flag{font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--warn)}
+.chips{display:flex;flex-direction:column;gap:5px}
+.chip{display:grid;grid-template-columns:3px minmax(0,1fr);gap:7px;font-size:12px;line-height:1.35}
+.chip i{background:var(--c,var(--dim));border-radius:2px}
+.chip .ct{font-family:var(--mono);font-size:11px;color:var(--muted);display:block;font-style:normal}
+.chip .cx{overflow-wrap:anywhere}
+.chip.hot .cx{color:var(--warn)}
+.chip.tomato .cx{color:var(--red);font-weight:500}
+.day.has-tomato{border-color:var(--red-line)}
+.day .flag.red{color:var(--red)}
+.day .none{font-size:12px;color:var(--dim)}
+
+/* Mail */
+.mail li{border-top:1px solid var(--line)}
+.mail li:first-child{border-top:0}
+.mail a{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;padding:9px 6px;margin:0 -6px;text-decoration:none;border-radius:6px}
+.mail a:hover{background:var(--raise)}
+.mail .subj{font-weight:500;overflow-wrap:anywhere;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.mail .from{font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.mail .snip{grid-column:1/-1;font-size:12px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mail .when{font-family:var(--mono);font-size:11px;color:var(--dim);white-space:nowrap}
+.mail li.imp a{background:var(--warn-soft)}
+.mail li.imp .subj{color:var(--warn)}
+.more{font-size:12px;color:var(--dim)}
+
+/* Sticky note */
+.card.paper{background:var(--paper);border-color:var(--paper-line)}
+.paper h2{color:#a89f88}
+#note{width:100%;min-height:220px;resize:vertical;background:transparent;border:0;outline:0;color:var(--paper-fg);font-family:var(--sans);font-size:14px;line-height:1.65;padding:0;box-sizing:border-box}
+#note::placeholder{color:#6d6656}
+#note:focus-visible{outline:none}
+.paper .note-s{color:#7d7563}
+
+@media (prefers-reduced-motion:no-preference){.card{transition:border-color .2s}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1 id="dateline">Today</h1>
+      <div class="sub" id="greet">Loading your day…</div>
+    </div>
+    <div class="topright">
+      <div class="fresh" id="fresh">Connecting to Calendar and Gmail…</div>
+      <button class="btn" id="refresh" type="button">Refresh</button>
+      <div class="clock" id="clock">--:--</div>
+    </div>
+  </header>
+
+  <div class="board">
+    <section class="card" aria-labelledby="h-today">
+      <div class="card-h"><h2 id="h-today">Today <span class="n" id="today-n"></span></h2><span class="note-s" id="today-s"></span></div>
+      <div id="today-box"><div class="empty">Your events for today will appear here.</div></div>
+    </section>
+
+    <section class="card" aria-labelledby="h-hu">
+      <div class="card-h"><h2 id="h-hu">Heads up <span class="n" id="hu-n"></span></h2></div>
+      <div id="hu-box"><div class="empty">Deadlines, overlaps, early starts and important mail show up here.</div></div>
+    </section>
+
+    <section class="card span" aria-labelledby="h-week">
+      <div class="card-h"><h2 id="h-week">Next 7 days <span class="n" id="week-n"></span></h2><span class="note-s">Amber = needs attention</span></div>
+      <div id="week-box"><div class="empty">Your week will appear here.</div></div>
+    </section>
+
+    <section class="card" aria-labelledby="h-mail">
+      <div class="card-h"><h2 id="h-mail">Key emails <span class="n" id="mail-n"></span></h2><span class="note-s">Last 7 days · no promotions</span></div>
+      <div id="mail-box"><div class="empty">Your inbox, minus promotions, will appear here.</div></div>
+    </section>
+
+    <section class="card paper" aria-labelledby="h-note">
+      <div class="card-h"><h2 id="h-note">Sticky note</h2><span class="note-s" id="note-s"></span></div>
+      <label for="note" hidden>Sticky note</label>
+      <textarea id="note" placeholder="Write anything. It saves as you type." spellcheck="false"></textarea>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+const GC = "Google Calendar", GM = "Gmail";
+const MAIL_Q = "in:inbox -category:promotions newer_than:7d";
+const IMP_Q  = "in:inbox -category:promotions newer_than:14d (important OR 중요)";
+const IMP_RE = /important|중요/i;
+const KEY_RE = /시험|마감|deadline|due|exam|발표|면접|interview|오디션|audition|제출|submit/i;
+const COLORS = {"1":["Lavender","#7986cb"],"2":["Sage","#33b679"],"3":["Grape","#8e24aa"],"4":["Flamingo","#e67c73"],"5":["Banana","#f6bf26"],"6":["Tangerine","#f4511e"],"7":["Peacock","#039be5"],"8":["Graphite","#616161"],"9":["Blueberry","#3f51b5"],"10":["Basil","#0b8043"],"11":["Tomato","#d50000"]};
+const CAL_FALLBACK = ["#039be5","#b38fd1","#c9787a","#8fb58a","#d6a85c"];
+/* Calendar colors as set in Google Calendar. The Calendar connector reports colors set on single events, but not each calendar's own color, so they are listed here by calendar ID. Replace the IDs with your own (list_calendars shows them). */
+const CAL_COLORS = {
+  "YOUR_EMAIL@gmail.com": ["Peacock","#039be5"],
+  "YOUR_FAMILY_CALENDAR_ID@group.calendar.google.com": ["Sage","#33b679"],
+  "ko.south_korea#holiday@group.v.calendar.google.com": ["Basil","#0b8043"]
+};
+const AUTHZ = new Set(["needs_reauth","server_not_connected","blocked_by_policy","approval_required","not_in_manifest","selection_required","consent_required","not_granted","capability_disabled","capability_removed"]);
+
+const $ = id => document.getElementById(id);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const pad = n => String(n).padStart(2,"0");
+const ymd = d => d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const localIso = d => ymd(d)+"T"+pad(d.getHours())+":"+pad(d.getMinutes())+":00";
+const sod = d => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
+const addDays = (d,n) => { const x = new Date(d); x.setDate(x.getDate()+n); return x; };
+const hm = d => pad(d.getHours())+":"+pad(d.getMinutes());
+const wd = d => d.toLocaleDateString("en-US",{weekday:"short"});
+const md = d => (d.getMonth()+1)+"/"+d.getDate();
+
+const S = {
+  mcp:null, cals:null, events:{}, calErr:null, calStamp:null,
+  threads:null, impIds:new Set(), mailErr:null, mailStamp:null,
+  done:{}, dayKey: ymd(new Date())
+};
+let calListUnsub = null, calWatches = {}, mailUnsubs = [];
+
+/* ---------- helpers ---------- */
+function parseDateOnly(v){ const p = String(v).slice(0,10).split("-").map(Number); return new Date(p[0], p[1]-1, p[2]); }
+function cleanText(html){
+  if (!html) return "";
+  try { const doc = new DOMParser().parseFromString(String(html).replace(/<br\s*\/?>/gi," · "), "text/html"); return (doc.body.textContent||"").replace(/\s+/g," ").trim(); }
+  catch(e){ return String(html).replace(/<[^>]+>/g," ").replace(/\s+/g," ").trim(); }
+}
+function senderName(s){
+  if (!s) return "Unknown sender";
+  const m = String(s).match(/^\s*"?([^"<]+?)"?\s*<([^>]+)>/);
+  if (m) return m[1].trim();
+  return String(s).trim();
+}
+function msgDate(m){
+  if (!m) return null;
+  const v = m.date ?? m.internalDate ?? m.receivedTime;
+  if (v == null) return null;
+  const d = (typeof v === "number" || /^\d+$/.test(String(v))) ? new Date(Number(v)) : new Date(v);
+  return isNaN(d) ? null : d;
+}
+function shortWhen(d){
+  if (!d) return "";
+  const today = sod(new Date());
+  if (+sod(d) === +today) return hm(d);
+  if (+sod(d) === +addDays(today,-1)) return "Yesterday";
+  return md(d);
+}
+function errCopy(err, server){
+  const name = server;
+  switch (err && err.code){
+    case "needs_reauth": return name+" needs to be reconnected. Open claude.ai Settings → Connectors and reconnect it.";
+    case "server_not_connected": return name+" isn't connected. Add it in claude.ai Settings → Connectors.";
+    case "selection_required": return "You have more than one "+name+" connector. Choose one when Claude asks, then refresh.";
+    case "approval_required": return "This page needs your OK to read "+name+".";
+    case "not_in_manifest": case "consent_required": return name+" access is turned off for this page. Allow it from the page's permissions menu.";
+    case "blocked_by_policy": return "Your organization blocks "+name+" for this page.";
+    case "not_granted": case "capability_disabled": case "capability_removed": return "Open this page in Claude to load "+name+".";
+    case "server_unavailable": return name+" didn't answer. Showing the last data; it will retry.";
+    case "tool_error": return name+" reported an error: "+(err.message||"unknown");
+    default: return "Couldn't reach "+name+" just now. It will retry on the next refresh.";
+  }
+}
+function errBox(err, server, onAllow){
+  const box = el("div","msg err");
+  box.appendChild(el("span",null,errCopy(err, server)));
+  if (err && err.code === "approval_required" && onAllow){
+    const b = el("button","btn","Allow and load"); b.type = "button";
+    b.addEventListener("click", () => { b.disabled = true; onAllow().finally(() => { b.disabled = false; }); });
+    box.appendChild(b);
+  }
+  return box;
+}
+
+/* ---------- calendar ---------- */
+function calMeta(c, i){
+  const holiday = /#holiday@/.test(c.id||"");
+  const primary = c.primary === true || (c.id && c.id === c.summary && /@/.test(c.id));
+  return {
+    id: c.id, holiday, primary,
+    name: primary ? "My calendar" : (c.summaryOverride || c.summary || "Calendar"),
+    color: CAL_COLORS[c.id] ? CAL_COLORS[c.id][1] : (c.backgroundColor || CAL_FALLBACK[i % CAL_FALLBACK.length]),
+    colorName: CAL_COLORS[c.id] ? CAL_COLORS[c.id][0] : (primary ? "Default" : (c.summary || "Calendar"))
+  };
+}
+function normEvent(ev, cal){
+  if (!ev || ev.status === "cancelled") return null;
+  const allDay = !!(ev.start && ev.start.date);
+  let s, e;
+  if (allDay){ s = parseDateOnly(ev.start.date); e = ev.end && ev.end.date ? parseDateOnly(ev.end.date) : addDays(s,1); if (+e <= +s) e = addDays(s,1); }
+  else { s = new Date(ev.start && ev.start.dateTime); e = new Date((ev.end && ev.end.dateTime) || (ev.start && ev.start.dateTime)); }
+  if (isNaN(s)) return null;
+  if (isNaN(e)) e = s;
+  const c = ev.colorId && COLORS[ev.colorId] ? {name:COLORS[ev.colorId][0], hex:COLORS[ev.colorId][1]} : {name: cal.colorName, hex: cal.color};
+  const title = (ev.summary || "(No title)").trim();
+  return {
+    id: ev.id, title, allDay, s, e, color: c, cal: cal.name, holiday: cal.holiday,
+    loc: ev.location || "", desc: cleanText(ev.description), link: ev.htmlLink || "",
+    free: ev.transparency === "transparent", key: KEY_RE.test(title), tomato: ev.colorId === "11" || (!ev.colorId && cal.colorName === "Tomato")
+  };
+}
+function allEvents(){
+  if (!S.cals) return [];
+  const out = [];
+  for (const cal of S.cals){
+    const list = S.events[cal.id];
+    if (!Array.isArray(list)) continue;
+    for (const ev of list){ const n = normEvent(ev, cal); if (n) out.push(n); }
+  }
+  return out;
+}
+function eventsOn(day, evs){
+  const d0 = sod(day), d1 = addDays(d0,1);
+  return evs.filter(e => e.s < d1 && (e.e > d0 || (+e.e === +e.s && e.s >= d0)))
+    .sort((a,b) => (b.allDay - a.allDay) || (a.s - b.s) || a.title.localeCompare(b.title));
+}
+function rangeInput(){ const t = sod(new Date()); return {startTime: localIso(t), endTime: localIso(addDays(t,7))}; }
+
+function onCalendars(ev){
+  if (ev.type === "error"){
+    S.calErr = ev.error;
+    if (AUTHZ.has(ev.error.code)){ S.cals = null; S.events = {}; }
+    renderAll(); return;
+  }
+  S.calErr = null;
+  const p = ev.result && ev.result.payload;
+  const list = (p && p.calendars) || [];
+  S.cals = list.map(calMeta);
+  const r = rangeInput();
+  for (const cal of S.cals){
+    if (calWatches[cal.id]) continue;
+    const input = {calendarId: cal.id, startTime: r.startTime, endTime: r.endTime, orderBy: "startTime", pageSize: 250};
+    calWatches[cal.id] = S.mcp.watchTool(GC, "list_events", input, e => onEvents(cal.id, e), {cache:{staleTime:60000, gcTime:86400000}, refetchInterval:300000});
+  }
+  renderAll();
+}
+function onEvents(calId, ev){
+  if (ev.type === "error"){
+    if (AUTHZ.has(ev.error.code)){ delete S.events[calId]; S.calErr = ev.error; }
+    else if (!S.events[calId]) S.calErr = ev.error;
+    renderAll(); return;
+  }
+  const p = ev.result && ev.result.payload;
+  S.events[calId] = (p && p.events) || [];
+  const at = ev.result.cache ? ev.result.cache.storedAt : Date.now();
+  S.calStamp = Math.max(S.calStamp || 0, at);
+  if (S.calErr && !AUTHZ.has(S.calErr.code)) S.calErr = null;
+  renderAll();
+}
+async function allowCalendar(){
+  try { const r = await S.mcp.callTool(GC, "list_calendars", {}); onCalendars({type:"data", result:r}); }
+  catch(e){ S.calErr = e; renderAll(); }
+}
+
+/* ---------- mail ---------- */
+function onMail(ev){
+  if (ev.type === "error"){
+    S.mailErr = ev.error;
+    if (AUTHZ.has(ev.error.code)) S.threads = null;
+    renderAll(); return;
+  }
+  S.mailErr = null;
+  const p = ev.result && ev.result.payload;
+  S.threads = (p && p.threads) || [];
+  S.mailStamp = ev.result.cache ? ev.result.cache.storedAt : Date.now();
+  renderAll();
+}
+function onImportant(ev){
+  if (ev.type === "error"){ if (AUTHZ.has(ev.error.code)) S.impIds = new Set(); renderAll(); return; }
+  const p = ev.result && ev.result.payload;
+  S.impIds = new Set(((p && p.threads) || []).map(t => t.id));
+  renderAll();
+}
+async function allowMail(){
+  try { const r = await S.mcp.callTool(GM, "search_threads", {query: MAIL_Q, pageSize: 20, view: "THREAD_VIEW_MINIMAL"}); onMail({type:"data", result:r}); }
+  catch(e){ S.mailErr = e; renderAll(); }
+}
+function mailItems(){
+  if (!S.threads) return [];
+  return S.threads.map(t => {
+    const msgs = t.messages || [];
+    const last = msgs[msgs.length-1] || {};
+    const first = msgs[0] || {};
+    const labels = new Set([].concat(...msgs.map(m => m.labelIds || [])));
+    if (labels.has("CATEGORY_PROMOTIONS")) return null;
+    const subject = (first.subject || last.subject || "(No subject)").trim();
+    const snippet = (last.snippet || first.snippet || "").trim();
+    const imp = S.impIds.has(t.id) || IMP_RE.test(subject) || IMP_RE.test(snippet);
+    return {id: t.id, subject, snippet, from: senderName(last.sender || first.sender), when: msgDate(last), count: t.messageCount || msgs.length, imp,
+      url: t.viewUrl || last.viewUrl || ("https://mail.google.com/mail/#inbox/" + encodeURIComponent(t.id))};
+  }).filter(Boolean);
+}
+
+/* ---------- render ---------- */
+function renderHeader(){
+  const now = new Date();
+  $("dateline").textContent = now.toLocaleDateString("en-US",{weekday:"long", month:"long", day:"numeric"});
+  $("clock").textContent = hm(now);
+  const h = now.getHours();
+  const part = h < 5 ? "Late night" : h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
+  const evs = allEvents();
+  const todays = S.cals ? eventsOn(now, evs) : [];
+  const left = todays.filter(e => !e.allDay && e.e > now && !e.holiday).length;
+  $("greet").textContent = S.cals ? part + " · " + (left ? left + (left === 1 ? " event left today" : " events left today") : "nothing else scheduled today") : part;
+  const parts = [];
+  if (S.calStamp) parts.push("Calendar " + hm(new Date(S.calStamp)));
+  if (S.mailStamp) parts.push("Mail " + hm(new Date(S.mailStamp)));
+  $("fresh").textContent = parts.length ? "Updated · " + parts.join(" · ") : (S.mcp ? "Loading Calendar and Gmail…" : $("fresh").textContent);
+}
+
+function renderToday(){
+  const box = $("today-box"); box.textContent = "";
+  if (S.calErr && !S.cals){ box.appendChild(errBox(S.calErr, GC, allowCalendar)); $("today-n").textContent = ""; return; }
+  if (!S.cals){ box.appendChild(el("div","empty","Your events for today will appear here.")); return; }
+  const now = new Date();
+  const list = eventsOn(now, allEvents());
+  $("today-n").textContent = list.length ? String(list.length) : "";
+  if (!list.length){ box.appendChild(el("div","empty","Nothing on the calendar today.")); $("today-s").textContent = ""; return; }
+  const doneCount = list.filter(e => S.done[doneKey(e, now)]).length;
+  $("today-s").textContent = doneCount ? doneCount + " of " + list.length + " done" : "";
+  const nextEv = list.find(e => !e.allDay && e.s > now);
+  const ul = el("ul","today");
+  for (const e of list){
+    const li = el("li","ev");
+    const k = doneKey(e, now);
+    const isNow = !e.allDay && e.s <= now && e.e > now;
+    const isPast = !e.allDay && e.e <= now;
+    if (S.done[k]) li.classList.add("done");
+    if (e.tomato) li.classList.add("tomato");
+    if (isPast) li.classList.add("past");
+
+    const tick = el("button","tick"); tick.type = "button";
+    tick.setAttribute("aria-pressed", S.done[k] ? "true" : "false");
+    tick.setAttribute("aria-label", (S.done[k] ? "Mark not done: " : "Mark done: ") + e.title);
+    tick.innerHTML = '<svg viewBox="0 0 10 10" fill="none"><path d="M2 5.2 4.1 7.3 8 2.8" stroke="#0f1215" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    tick.addEventListener("click", () => toggleDone(k));
+    li.appendChild(tick);
+
+    const t = el("div","time");
+    if (e.allDay){ t.textContent = "All day"; }
+    else { t.textContent = hm(e.s); const sm = el("small", null, hm(e.e)); t.appendChild(sm); }
+    li.appendChild(t);
+
+    const body = el("div");
+    const title = el("div","ev-title");
+    const dot = el("span","dot"); dot.style.setProperty("--c", e.color.hex); title.appendChild(dot);
+    title.appendChild(el("span", null, e.title));
+    if (isNow) title.appendChild(el("span","pill now","Now"));
+    else if (nextEv === e) title.appendChild(el("span","pill next","Next"));
+    if (e.tomato) title.appendChild(el("span","pill red","Important"));
+    else if (e.key) title.appendChild(el("span","pill imp","Key"));
+    body.appendChild(title);
+    const meta = el("div","meta");
+    const cn = el("span","cn", e.color.name); meta.appendChild(cn);
+    if (e.color.name !== e.cal) meta.appendChild(el("span", null, e.cal));
+    if (!e.allDay){ const mins = Math.round((e.e - e.s)/60000); meta.appendChild(el("span", null, mins >= 60 ? (Math.floor(mins/60) + "h" + (mins%60 ? " " + (mins%60) + "m" : "")) : mins + "m")); }
+    if (e.allDay && (e.e - e.s) > 86400000){ meta.appendChild(el("span", null, md(e.s) + "–" + md(addDays(e.e,-1)))); }
+    if (e.loc) meta.appendChild(el("span", null, "📍 " + e.loc));
+    if (e.free) meta.appendChild(el("span", null, "Free"));
+    body.appendChild(meta);
+    if (e.desc) body.appendChild(el("div","desc", e.desc));
+    li.appendChild(body);
+
+    if (e.link){ const a = el("a","open","Open ↗"); a.href = e.link; a.target = "_blank"; a.rel = "noopener"; li.appendChild(a); }
+    else li.appendChild(el("span"));
+    ul.appendChild(li);
+  }
+  box.appendChild(ul);
+}
+
+function renderWeek(){
+  const box = $("week-box"); box.textContent = "";
+  if (S.calErr && !S.cals){ box.appendChild(errBox(S.calErr, GC, allowCalendar)); return; }
+  if (!S.cals){ box.appendChild(el("div","empty","Your week will appear here.")); return; }
+  const evs = allEvents();
+  const today = sod(new Date());
+  const grid = el("div","week");
+  let total = 0;
+  for (let i = 0; i < 7; i++){
+    const day = addDays(today, i);
+    const list = eventsOn(day, evs);
+    total += list.length;
+    const timed = list.filter(e => !e.allDay && !e.free);
+    const hasTomato = list.some(e => e.tomato);
+    const d = el("div","day" + (i === 0 ? " is-today" : "") + (hasTomato ? " has-tomato" : ""));
+    const h = el("div","day-h");
+    h.appendChild(el("b", null, (i === 0 ? "Today" : i === 1 ? "Tomorrow" : wd(day))));
+    h.appendChild(el("span", null, md(day) + (list.length ? " · " + list.length : "")));
+    d.appendChild(h);
+    if (hasTomato) d.appendChild(el("div","flag red","Important"));
+    if (timed.length >= 3) d.appendChild(el("div","flag","Busy day"));
+    else if (overlaps(timed).length) d.appendChild(el("div","flag","Overlap"));
+    const chips = el("div","chips");
+    if (!list.length) chips.appendChild(el("div","none","Free"));
+    for (const e of list){
+      const c = el("div","chip" + (e.tomato ? " tomato" : e.key ? " hot" : ""));
+      const bar = el("i"); bar.style.setProperty("--c", e.color.hex); c.appendChild(bar);
+      const tx = el("div");
+      tx.appendChild(el("em","ct", e.allDay ? "All day" : hm(e.s)));
+      tx.appendChild(el("span","cx", e.title));
+      c.appendChild(tx);
+      c.title = e.color.name + " · " + e.cal;
+      chips.appendChild(c);
+    }
+    d.appendChild(chips);
+    grid.appendChild(d);
+  }
+  $("week-n").textContent = total ? String(total) : "";
+  box.appendChild(grid);
+}
+
+function overlaps(timed){
+  const out = [];
+  const s = timed.slice().sort((a,b) => a.s - b.s);
+  for (let i = 0; i < s.length; i++) for (let j = i+1; j < s.length; j++){
+    if (s[j].s < s[i].e && s[j].s >= s[i].s && s[i].e > s[i].s) out.push([s[i], s[j]]);
+  }
+  return out;
+}
+
+function renderMail(){
+  const box = $("mail-box"); box.textContent = "";
+  if (S.mailErr && !S.threads){ box.appendChild(errBox(S.mailErr, GM, allowMail)); $("mail-n").textContent = ""; return; }
+  if (!S.threads){ box.appendChild(el("div","empty","Your inbox, minus promotions, will appear here.")); return; }
+  const items = mailItems();
+  const ordered = items.filter(m => m.imp).concat(items.filter(m => !m.imp));
+  $("mail-n").textContent = items.length ? String(items.length) : "";
+  if (!ordered.length){ box.appendChild(el("div","empty","No new mail this week outside promotions.")); return; }
+  const ul = el("ul","mail");
+  for (const m of ordered.slice(0, 12)){
+    const li = el("li", m.imp ? "imp" : "");
+    const a = el("a"); a.href = m.url; a.target = "_blank"; a.rel = "noopener";
+    const subj = el("div","subj");
+    if (m.imp) subj.appendChild(el("span","pill imp","Important"));
+    subj.appendChild(el("span", null, m.subject));
+    a.appendChild(subj);
+    a.appendChild(el("span","when", shortWhen(m.when)));
+    a.appendChild(el("div","from", m.from + (m.count > 1 ? " · " + m.count + " messages" : "")));
+    if (m.snippet) a.appendChild(el("div","snip", m.snippet));
+    li.appendChild(a); ul.appendChild(li);
+  }
+  box.appendChild(ul);
+  if (ordered.length > 12) box.appendChild(el("div","more", "+" + (ordered.length - 12) + " more in Gmail"));
+  if (S.mailErr) box.appendChild(errBox(S.mailErr, GM));
+}
+
+function headsUp(){
+  const items = [];
+  const now = new Date(), today = sod(now);
+  const rank = {bad:0, warn:1, info:2};
+  if (S.cals){
+    const evs = allEvents();
+    const todays = eventsOn(now, evs);
+    const cur = todays.find(e => !e.allDay && e.s <= now && e.e > now);
+    if (cur) items.push({lv:"info", t:"Now: " + cur.title, s:"Until " + hm(cur.e), at: now});
+    const nxt = todays.find(e => !e.allDay && e.s > now);
+    if (nxt){ const mins = Math.round((nxt.s - now)/60000); items.push({lv: mins <= 60 ? "warn" : "info", t:"Next: " + nxt.title + " at " + hm(nxt.s), s: mins < 60 ? "In " + mins + " min" : "In " + Math.floor(mins/60) + "h " + (mins%60) + "m", at: nxt.s}); }
+    const tmr = eventsOn(addDays(today,1), evs).filter(e => !e.allDay);
+    if (tmr.length && tmr[0].s.getHours() < 9) items.push({lv:"warn", t:"Early start tomorrow: " + hm(tmr[0].s), s: tmr[0].title, at: tmr[0].s});
+    for (let i = 0; i < 7; i++){
+      const day = addDays(today, i);
+      const list = eventsOn(day, evs);
+      const timed = list.filter(e => !e.allDay && !e.free);
+      for (const [a,b] of overlaps(timed)) items.push({lv:"bad", t:"Overlap " + (i === 0 ? "today" : wd(day) + " " + md(day)) + " at " + hm(b.s), s: a.title + " / " + b.title, at: b.s});
+      for (const e of list){
+        const startsToday = +sod(e.s) === +day || (i === 0 && e.s < day);
+        if (e.tomato){ if (startsToday) items.push({lv:"bad", t:"Important: " + e.title, s:(i === 0 ? "Today" : wd(day) + " " + md(day)) + " · " + (e.allDay ? "all day" : hm(e.s)), at: e.s}); continue; }
+        if (e.key && +sod(e.s) === +day || (e.key && i === 0 && e.s < day)) items.push({lv:"warn", t: (i === 0 ? "Today" : wd(day) + " " + md(day)) + ": " + e.title, s: e.allDay ? "All day" : hm(e.s), at: e.s});
+        else if (e.allDay && +sod(e.s) === +day && !e.key) items.push({lv:"info", t: (e.holiday ? "Holiday: " : "") + e.title, s: (i === 0 ? "Today" : wd(day) + " " + md(day)) + " · all day", at: e.s});
+      }
+      if (i > 0 && timed.length >= 3) items.push({lv:"info", t:"Busy " + wd(day) + " " + md(day), s: timed.length + " events from " + hm(timed[0].s), at: day});
+    }
+  }
+  if (S.threads){
+    const mail = mailItems();
+    const imp = mail.filter(m => m.imp);
+    for (const m of imp.slice(0,3)) items.push({lv:"warn", t:"Important email: " + m.subject, s: m.from, at: now, url: m.url});
+    if (imp.length > 3) items.push({lv:"warn", t: (imp.length - 3) + " more important emails", s:"See Key emails", at: now});
+    for (const m of mail.filter(m => !m.imp && KEY_RE.test(m.subject)).slice(0,3)) items.push({lv:"info", t:"Check email: " + m.subject, s: m.from, at: now, url: m.url});
+  }
+  const seen = new Set();
+  return items.filter(x => { const k = x.t; if (seen.has(k)) return false; seen.add(k); return true; })
+    .sort((a,b) => rank[a.lv] - rank[b.lv] || (a.at - b.at)).slice(0, 10);
+}
+
+function renderHeadsUp(){
+  const box = $("hu-box"); box.textContent = "";
+  if (!S.cals && !S.threads){
+    if (S.calErr || S.mailErr) box.appendChild(el("div","empty","Heads up fills in once Calendar and Gmail load."));
+    else box.appendChild(el("div","empty","Deadlines, overlaps, early starts and important mail show up here."));
+    return;
+  }
+  const items = headsUp();
+  $("hu-n").textContent = items.length ? String(items.length) : "";
+  if (!items.length){ box.appendChild(el("div","empty","Nothing needs attention. Clear road ahead.")); return; }
+  const ul = el("ul","hu");
+  for (const x of items){
+    const li = el("li");
+    li.appendChild(el("span","sev " + x.lv));
+    const b = el("div");
+    if (x.url){ const a = el("a","t", x.t); a.href = x.url; a.target = "_blank"; a.rel = "noopener"; a.style.textDecoration = "none"; b.appendChild(a); }
+    else b.appendChild(el("div","t", x.t));
+    if (x.s) b.appendChild(el("div","s", x.s));
+    li.appendChild(b); ul.appendChild(li);
+  }
+  box.appendChild(ul);
+}
+
+function renderAll(){ renderHeader(); renderToday(); renderHeadsUp(); renderWeek(); renderMail(); }
+
+/* ---------- done ticks + sticky note (saved per person) ---------- */
+let doneRef = null, noteRef = null, noteLocal = false, saving = Promise.resolve(), dirty = false, noteTimer = null;
+const ta = $("note");
+function doneKey(e, day){ return (e.id || e.title) + "|" + ymd(day); }
+function toggleDone(k){
+  const next = Object.assign({}, S.done);
+  if (next[k]) delete next[k]; else next[k] = true;
+  const cutoff = ymd(addDays(new Date(), -14));
+  for (const key of Object.keys(next)){ const d = key.split("|").pop(); if (d < cutoff) delete next[key]; }
+  S.done = next; renderToday();
+  if (doneRef){ saving = saving.then(() => doneRef.set({items: next})).catch(() => { $("today-s").textContent = "Couldn't save that check. Try again."; }); }
+  else { try { localStorage.setItem("ld-done", JSON.stringify(next)); } catch(e){} }
+}
+function setNoteStatus(t){ $("note-s").textContent = t; }
+ta.addEventListener("input", () => {
+  dirty = true; setNoteStatus("Typing…");
+  clearTimeout(noteTimer);
+  noteTimer = setTimeout(saveNote, 800);
+});
+function saveNote(){
+  const text = ta.value;
+  if (noteLocal || !noteRef){
+    try { localStorage.setItem("ld-note", text); setNoteStatus("Saved in this browser " + hm(new Date())); } catch(e){ setNoteStatus("Can't save here"); }
+    dirty = false; return;
+  }
+  saving = saving.then(() => noteRef.set({text, updatedAt: new Date().toISOString()}))
+    .then(() => { if (ta.value === text){ dirty = false; setNoteStatus("Saved " + hm(new Date())); } })
+    .catch(err => { setNoteStatus(err && err.code === "quota_exceeded" ? "Note is too long to save" : "Not saved. Will retry when you type."); });
+}
+function localFallback(){
+  noteLocal = true;
+  try { ta.value = localStorage.getItem("ld-note") || ""; S.done = JSON.parse(localStorage.getItem("ld-done") || "{}"); } catch(e){}
+  setNoteStatus(ta.value ? "Saved in this browser" : "");
+  renderToday();
+}
+async function bootStore(){
+  const use = window.claude && window.claude.use;
+  if (!use){ localFallback(); return; }
+  const [db, user] = await Promise.all([window.claude.use("db"), window.claude.use("user")]);
+  if (!db || !user){ localFallback(); return; }
+  const uid = await user.id();
+  if (!uid){ localFallback(); return; }
+  const col = db.collection("data/users/" + uid);
+  noteRef = col.doc("note"); doneRef = col.doc("done");
+  setNoteStatus("Loading…");
+  const slow = setTimeout(() => { if (!ta.value) setNoteStatus("Can't reach your note yet"); }, 10000);
+  noteRef.onSnapshot(s => {
+    clearTimeout(slow);
+    const d = s.data();
+    if (!dirty && document.activeElement !== ta) ta.value = (d && d.text) || "";
+    if (!dirty) setNoteStatus(d && d.updatedAt ? "Saved " + new Date(d.updatedAt).toLocaleString("en-US",{month:"short", day:"numeric", hour:"2-digit", minute:"2-digit", hour12:false}) : "");
+  }, () => { clearTimeout(slow); setNoteStatus("Note sync stopped. Reopen the page."); });
+  doneRef.onSnapshot(s => { const d = s.data(); S.done = (d && d.items) || {}; renderToday(); }, () => {});
+}
+
+/* ---------- connectors ---------- */
+function subscribeAll(){
+  calListUnsub = S.mcp.watchTool(GC, "list_calendars", {}, onCalendars, {cache:{staleTime:3600000, gcTime:604800000}, refetchInterval:3600000});
+  mailUnsubs.push(S.mcp.watchTool(GM, "search_threads", {query: MAIL_Q, pageSize: 20, view: "THREAD_VIEW_MINIMAL"}, onMail, {cache:{staleTime:60000, gcTime:86400000}, refetchInterval:300000}));
+  mailUnsubs.push(S.mcp.watchTool(GM, "search_threads", {query: IMP_Q, pageSize: 50, view: "THREAD_VIEW_IDS_ONLY"}, onImportant, {cache:{staleTime:60000, gcTime:86400000}, refetchInterval:300000}));
+}
+function resubscribeDay(){
+  for (const id of Object.keys(calWatches)) calWatches[id]();
+  calWatches = {}; S.events = {};
+  if (calListUnsub) calListUnsub();
+  for (const u of mailUnsubs) u(); mailUnsubs = [];
+  subscribeAll();
+}
+async function bootMcp(){
+  const use = window.claude && window.claude.use;
+  if (!use){ $("fresh").textContent = "Open this page in Claude to load Calendar and Gmail."; return; }
+  const mcp = await window.claude.use("mcp");
+  if (!mcp){ $("fresh").textContent = "Open this page in Claude to load Calendar and Gmail."; $("refresh").disabled = true; return; }
+  S.mcp = mcp;
+  subscribeAll();
+}
+$("refresh").addEventListener("click", async () => {
+  if (!S.mcp) return;
+  const b = $("refresh"); b.disabled = true; b.textContent = "Refreshing…";
+  try { await Promise.all([S.mcp.invalidate(GC), S.mcp.invalidate(GM)]); } catch(e){}
+  setTimeout(() => { b.disabled = false; b.textContent = "Refresh"; }, 1500);
+});
+
+setInterval(() => {
+  const k = ymd(new Date());
+  if (k !== S.dayKey && S.mcp){ S.dayKey = k; resubscribeDay(); }
+  renderHeader(); renderToday(); renderHeadsUp();
+}, 30000);
+
+renderAll();
+bootMcp();
+bootStore();
+})();
+</script>
