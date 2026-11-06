@@ -196,6 +196,15 @@ ul{list-style:none;margin:0;padding:0}
 #todo-text{flex:1 1 100%;min-width:0;background:var(--bg);color:var(--fg);border:1px solid var(--line-strong);border-radius:6px;padding:8px 10px;font:inherit;font-size:13.5px;box-sizing:border-box}
 #todo-text:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .todo-groups{display:flex;flex-wrap:wrap;gap:6px;flex:1;min-width:0}
+#todo-due{width:92px;background:var(--bg);color:var(--fg);border:1px solid var(--line-strong);border-radius:6px;padding:6px 8px;font-family:var(--mono);font-size:12.5px;box-sizing:border-box;font-variant-numeric:tabular-nums}
+#todo-due::placeholder{font-family:var(--sans);color:var(--dim)}
+#todo-due:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+#todo-due[aria-invalid="true"]{border-color:var(--bad)}
+.td-meta{display:flex;flex-direction:column;align-items:flex-end;gap:1px;white-space:nowrap}
+.td-due{font-size:11.5px;color:var(--muted);font-family:var(--mono);font-variant-numeric:tabular-nums}
+.td-due.soon{color:var(--warn)}
+.td-due.over{color:var(--bad);font-weight:500}
+.td.done .td-due{color:var(--dim)}
 .tg{border:1px solid var(--line-strong);background:var(--raise);color:var(--muted);border-radius:999px;padding:3px 10px;font:inherit;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
 .tg i{width:7px;height:7px;border-radius:50%;background:var(--c)}
 .tg[aria-checked="true"]{color:var(--fg);border-color:var(--c);background:color-mix(in srgb,var(--c) 20%,transparent)}
@@ -395,6 +404,8 @@ ul{list-style:none;margin:0;padding:0}
         <label for="todo-text" hidden>New task</label>
         <input id="todo-text" type="text" maxlength="300" placeholder="Add a task" enterkeyhint="done">
         <div class="todo-groups" id="todo-groups" role="radiogroup" aria-label="Group"></div>
+        <label for="todo-due" hidden>Due date, optional, as MM/DD</label>
+        <input id="todo-due" type="text" inputmode="numeric" maxlength="5" placeholder="Due MM/DD" autocomplete="off">
         <button class="btn" id="todo-addbtn" type="submit">Add</button>
       </form>
       <div class="msg err" id="todo-msg" role="status" hidden></div>
@@ -1111,6 +1122,30 @@ const TODO = { items: [], col: null, local: false, ready: false, showStored: fal
 try { const g = localStorage.getItem("ld-todo-group"); if (TODO_GROUPS.some(x => x[0] === g)) TODO.group = g; } catch (e){}
 const TD_CHECK = '<svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.3 6.3 4.8 8.7 9.7 3.4" stroke="#0f1215" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const TD_X = '<svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+/* "11/20" (also "1/5") -> "YYYY-MM-DD". The nearest such date: this year, unless it was
+   more than 30 days ago, then next year. Returns null for an empty box, false if invalid. */
+function parseDue(str){
+  const v = (str || "").trim();
+  if (!v) return null;
+  const m = /^(\d{1,2})\/(\d{1,2})$/.exec(v);
+  if (!m) return false;
+  const mo = Number(m[1]), d = Number(m[2]), today = sod(new Date());
+  let y = today.getFullYear();
+  const make = yy => { const x = new Date(yy, mo - 1, d); return x.getMonth() === mo - 1 && x.getDate() === d ? x : null; };
+  let dt = make(y);
+  if (!dt) return false;
+  if (dt < addDays(today, -30)){ const nx = make(y + 1); if (nx) dt = nx; }
+  return ymd(dt);
+}
+function dueInfo(it){
+  if (!it.due) return null;
+  const dt = parseDateOnly(it.due), days = Math.round((dt - sod(new Date())) / 86400000), mmdd = pad(dt.getMonth() + 1) + "/" + pad(dt.getDate());
+  if (it.done) return {text: "Due " + mmdd, cls: ""};
+  if (days < 0) return {text: "Overdue · " + mmdd, cls: "over"};
+  if (days === 0) return {text: "Due today", cls: "soon"};
+  if (days === 1) return {text: "Due tomorrow", cls: "soon"};
+  return {text: mmdd + " · D-" + days, cls: days <= 3 ? "soon" : ""};
+}
 function todoColor(g){ const x = TODO_GROUPS.find(x => x[0] === g); return x ? x[1] : MISC_GRAY; }
 function storedNow(it){ return it.done && it.doneAt && it.doneAt < +sod(new Date()); }
 function deleteAt(it){ return +addDays(sod(new Date(it.doneAt)), 2); }
@@ -1120,8 +1155,8 @@ async function todoWrite(fn, fail){
   try { await fn(); todoMsg(""); } catch (e){ todoMsg(fail); }
   if (TODO.local){ todoSaveLocal(); renderTodo(); }
 }
-function todoAdd(text, group){
-  const it = {text, group, done: false, doneAt: null, createdAt: Date.now()};
+function todoAdd(text, group, due){
+  const it = {text, group, due: due || null, done: false, doneAt: null, createdAt: Date.now()};
   return todoWrite(async () => {
     if (TODO.col) await TODO.col.add(it);
     else { it.id = "l" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); TODO.items.push(it); }
@@ -1171,7 +1206,7 @@ function renderTodo(){
   if (!visible.length) box.appendChild(el("div", "empty", "Nothing to do yet. Add a task above."));
   for (const [g, c] of TODO_GROUPS){
     const list = visible.filter(it => (TODO_GROUPS.some(x => x[0] === it.group) ? it.group : "그 외") === g)
-      .sort((a, b) => (a.done - b.done) || (a.createdAt - b.createdAt));
+      .sort((a, b) => (a.done - b.done) || ((a.due || "9999") < (b.due || "9999") ? -1 : (a.due || "9999") > (b.due || "9999") ? 1 : 0) || (a.createdAt - b.createdAt));
     if (!list.length) continue;
     const sec = el("div", "todo-sec"); sec.style.setProperty("--c", c);
     const h = el("h4"); h.appendChild(el("i")); h.appendChild(document.createTextNode(g + " "));
@@ -1186,7 +1221,10 @@ function renderTodo(){
       ck.addEventListener("click", () => todoUpdate(it, it.done ? {done: false, doneAt: null} : {done: true, doneAt: Date.now()}));
       li.appendChild(ck);
       li.appendChild(el("span", "td-text", it.text));
-      li.appendChild(!it.done && it.createdAt < +today ? el("span", "td-from", "from " + md(new Date(it.createdAt))) : el("span"));
+      const meta = el("span", "td-meta"), due = dueInfo(it);
+      if (due) meta.appendChild(el("span", "td-due" + (due.cls ? " " + due.cls : ""), due.text));
+      if (!it.done && it.createdAt < +today) meta.appendChild(el("span", "td-from", "from " + md(new Date(it.createdAt))));
+      li.appendChild(meta);
       const armed = TODO.armed === it.id;
       const del = el("button", "td-del" + (armed ? " armed" : "")); del.type = "button";
       del.setAttribute("aria-label", armed ? "Confirm delete" : "Delete task: " + it.text);
@@ -1209,7 +1247,7 @@ function renderTodo(){
       for (const it of stored.sort((a, b) => b.doneAt - a.doneAt)){
         const row = el("div", "ts");
         const t = el("div"); t.appendChild(el("div", "ts-t", it.text));
-        t.appendChild(el("div", "ts-m", (it.group || "그 외") + " · done " + whenLabel(it.doneAt) + " · deletes " + untilLabel(deleteAt(it))));
+        t.appendChild(el("div", "ts-m", (it.group || "그 외") + (it.due ? " · due " + it.due.slice(5).replace("-", "/") : "") + " · done " + whenLabel(it.doneAt) + " · deletes " + untilLabel(deleteAt(it))));
         row.appendChild(t);
         const back = el("button", "btn", "Bring back"); back.type = "button";
         back.addEventListener("click", () => todoUpdate(it, {done: false, doneAt: null}));
@@ -1220,12 +1258,23 @@ function renderTodo(){
 }
 (function initTodo(){
   renderTodoGroups();
+  const dueBox = $("todo-due");
+  dueBox.addEventListener("input", () => {
+    let v = dueBox.value.replace(/[^\d/]/g, "");
+    if (/^\d{3,4}$/.test(v)) v = v.slice(0, 2) + "/" + v.slice(2);
+    v = v.replace(/\/+/g, "/").slice(0, 5);
+    if (v !== dueBox.value) dueBox.value = v;
+    dueBox.removeAttribute("aria-invalid");
+  });
   $("todo-form").addEventListener("submit", e => {
     e.preventDefault();
-    const inp = $("todo-text"), t = inp.value.trim();
-    if (!t) return;
+    const inp = $("todo-text"), dueBox = $("todo-due"), t = inp.value.trim();
+    if (!t){ inp.focus(); return; }
     if (!TODO.ready){ todoMsg("Your tasks are still loading. Try again in a moment."); return; }
-    inp.value = ""; todoAdd(t, TODO.group);
+    const due = parseDue(dueBox.value);
+    if (due === false){ dueBox.setAttribute("aria-invalid", "true"); todoMsg("Write the due date as MM/DD, like 11/20, or leave it empty."); dueBox.focus(); return; }
+    dueBox.removeAttribute("aria-invalid"); todoMsg("");
+    inp.value = ""; dueBox.value = ""; todoAdd(t, TODO.group, due); inp.focus();
   });
   renderTodo();
 })();
