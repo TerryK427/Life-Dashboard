@@ -189,13 +189,53 @@ ul{list-style:none;margin:0;padding:0}
 .mail li.imp .subj{color:var(--warn)}
 .more{font-size:12px;color:var(--dim)}
 
+/* To-Do */
+.stack{display:flex;flex-direction:column;gap:16px;min-width:0}
+.todo-card h2{text-transform:none;letter-spacing:0;font-size:15px;font-weight:600;color:var(--fg)}
+.todo-add{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+#todo-text{flex:1 1 100%;min-width:0;background:var(--bg);color:var(--fg);border:1px solid var(--line-strong);border-radius:6px;padding:8px 10px;font:inherit;font-size:13.5px;box-sizing:border-box}
+#todo-text:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.todo-groups{display:flex;flex-wrap:wrap;gap:6px;flex:1;min-width:0}
+.tg{border:1px solid var(--line-strong);background:var(--raise);color:var(--muted);border-radius:999px;padding:3px 10px;font:inherit;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.tg i{width:7px;height:7px;border-radius:50%;background:var(--c)}
+.tg[aria-checked="true"]{color:var(--fg);border-color:var(--c);background:color-mix(in srgb,var(--c) 20%,transparent)}
+.todo-sec h4{margin:12px 0 2px;font-size:11.5px;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:6px}
+.todo-sec:first-child h4{margin-top:2px}
+.todo-sec h4 i{width:7px;height:7px;border-radius:50%;background:var(--c)}
+.todo-sec h4 span{font-family:var(--mono);font-weight:400;color:var(--dim)}
+.td{display:grid;grid-template-columns:20px minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:6px 0;border-top:1px solid var(--line)}
+.todo-sec ul .td:first-child{border-top:0}
+.td-check{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--dim);background:transparent;padding:0;display:grid;place-items:center;cursor:pointer}
+.td-check:hover{border-color:var(--accent)}
+.td-check svg{width:11px;height:11px;opacity:0}
+.td.done .td-check{background:var(--accent);border-color:var(--accent)}
+.td.done .td-check svg{opacity:1}
+.td-text{overflow-wrap:anywhere}
+.td.done .td-text{text-decoration:line-through;color:var(--dim)}
+.td-from{font-size:11px;color:var(--warn);white-space:nowrap}
+.td-del{width:24px;height:24px;border-radius:6px;border:1px solid var(--line-strong);background:var(--raise);color:var(--muted);display:grid;place-items:center;cursor:pointer;padding:0;font-size:11px}
+.td-del svg{width:11px;height:11px}
+.td-del:hover{color:var(--bad);border-color:var(--bad)}
+.td-del.armed{width:auto;padding:0 8px;color:var(--bad);border-color:var(--bad)}
+@media (hover:hover){.td-del:not(.armed){opacity:0;transition:opacity .15s}.td:hover .td-del,.td-del:focus-visible{opacity:1}}
+@media (hover:none){.td-del:not(.armed){opacity:.55}}
+.todo-stored{border-top:1px dashed var(--line-strong);padding-top:8px;font-size:12px;color:var(--dim);display:flex;flex-direction:column;gap:4px}
+.todo-stored .ts-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ts{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:4px 0}
+.ts-t{text-decoration:line-through;overflow-wrap:anywhere;color:var(--muted)}
+.ts-m{font-size:11px;color:var(--dim)}
+
 /* Drop box */
 .drop-card{container-type:inline-size}
 .drop{display:grid;grid-template-columns:300px minmax(0,1fr);gap:24px;align-items:start}
 @container (max-width:660px){.drop{grid-template-columns:minmax(0,1fr)}}
 .drop-in{display:flex;flex-direction:column;gap:10px;min-width:0}
 .dz{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;min-height:118px;padding:16px;border:1.5px dashed var(--line-strong);border-radius:10px;background:var(--raise);cursor:pointer;color:var(--muted);font-size:12.5px}
+.dz{position:relative}
 .dz b{color:var(--fg);font-size:14px;font-weight:600}
+.dz-note{color:var(--warn);font-size:12px;margin-top:4px}
+.dz-input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:1;font-size:0}
+.dz-input::-webkit-file-upload-button{cursor:pointer}
 .dz:hover,.dz.over{border-color:var(--accent);background:var(--accent-soft)}
 .dt{display:flex;gap:8px;align-items:flex-start}
 #dt-text{flex:1;min-width:0;resize:vertical;min-height:38px;background:var(--bg);color:var(--fg);border:1px solid var(--line-strong);border-radius:6px;padding:8px 10px;font:inherit;font-size:13px;box-sizing:border-box}
@@ -348,21 +388,37 @@ ul{list-style:none;margin:0;padding:0}
       <div id="mail-box"><div class="empty">Your inbox, minus promotions, will appear here.</div></div>
     </section>
 
+    <div class="stack">
+    <section class="card todo-card" aria-labelledby="h-todo">
+      <div class="card-h"><h2 id="h-todo">To-Do for<span id="todo-date"></span></h2><span class="note-s" id="todo-n"></span></div>
+      <form class="todo-add" id="todo-form" autocomplete="off">
+        <label for="todo-text" hidden>New task</label>
+        <input id="todo-text" type="text" maxlength="300" placeholder="Add a task" enterkeyhint="done">
+        <div class="todo-groups" id="todo-groups" role="radiogroup" aria-label="Group"></div>
+        <button class="btn" id="todo-addbtn" type="submit">Add</button>
+      </form>
+      <div class="msg err" id="todo-msg" role="status" hidden></div>
+      <div id="todo-box"><div class="empty">Loading your tasks…</div></div>
+      <div class="todo-stored" id="todo-stored" hidden></div>
+    </section>
     <section class="card paper" aria-labelledby="h-note">
       <div class="card-h"><h2 id="h-note">Sticky note</h2><span class="note-s" id="note-s"></span></div>
       <label for="note" hidden>Sticky note</label>
       <textarea id="note" placeholder="Write anything. It saves as you type." spellcheck="false"></textarea>
     </section>
+    </div>
 
     <section class="card span drop-card" aria-labelledby="h-drop">
       <div class="card-h"><h2 id="h-drop">Drop box <span class="n" id="drop-n"></span></h2><span class="note-s" id="drop-usage"></span></div>
       <div class="drop">
         <div class="drop-in">
           <label class="dz" id="dz" for="dz-file" tabindex="0">
-            <input type="file" id="dz-file" multiple hidden>
+            <input type="file" id="dz-file" class="dz-input" multiple tabindex="-1" aria-label="Choose files to upload">
             <b>Drop files here</b>
             <span>or click to choose · up to 15 MB each (20 MB for photos, PDF, video)</span>
+            <span class="dz-note" id="dz-note" hidden></span>
           </label>
+          <button class="linkbtn" id="dz-perm" type="button" hidden>Turn on file uploads</button>
           <div class="dt">
             <label for="dt-text" hidden>Text or link</label>
             <textarea id="dt-text" rows="2" placeholder="Or paste text or a link to move it between devices"></textarea>
@@ -1046,6 +1102,134 @@ function goMonth(delta){
 
 function renderAll(){ renderHeader(); renderToday(); renderKey(); renderHeadsUp(); renderWeek(); renderMail(); renderFinder(); }
 
+/* ---------- to-do ---------- */
+/* A crossed-out task stays visible until midnight, is then stored (hidden but restorable),
+   and is deleted 24 hours after that, i.e. at the second midnight after it was crossed out.
+   This is worked out from timestamps, so it holds even if the dashboard was closed at midnight. */
+const TODO_GROUPS = [["과제", "#009688"], ["시험", "#d50000"], ["알바", "#3f51b5"], ["그 외", "#8b949f"]];
+const TODO = { items: [], col: null, local: false, ready: false, showStored: false, armed: null, armT: null, deleting: new Set(), group: "과제" };
+try { const g = localStorage.getItem("ld-todo-group"); if (TODO_GROUPS.some(x => x[0] === g)) TODO.group = g; } catch (e){}
+const TD_CHECK = '<svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.3 6.3 4.8 8.7 9.7 3.4" stroke="#0f1215" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const TD_X = '<svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+function todoColor(g){ const x = TODO_GROUPS.find(x => x[0] === g); return x ? x[1] : MISC_GRAY; }
+function storedNow(it){ return it.done && it.doneAt && it.doneAt < +sod(new Date()); }
+function deleteAt(it){ return +addDays(sod(new Date(it.doneAt)), 2); }
+function todoMsg(t){ const m = $("todo-msg"); m.hidden = !t; m.textContent = t || ""; }
+function todoSaveLocal(){ try { localStorage.setItem("ld-todo", JSON.stringify(TODO.items)); } catch (e){} }
+async function todoWrite(fn, fail){
+  try { await fn(); todoMsg(""); } catch (e){ todoMsg(fail); }
+  if (TODO.local){ todoSaveLocal(); renderTodo(); }
+}
+function todoAdd(text, group){
+  const it = {text, group, done: false, doneAt: null, createdAt: Date.now()};
+  return todoWrite(async () => {
+    if (TODO.col) await TODO.col.add(it);
+    else { it.id = "l" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); TODO.items.push(it); }
+  }, "Couldn't add that task. Try again.");
+}
+function todoUpdate(it, patch){
+  return todoWrite(async () => { if (TODO.col) await TODO.col.doc(it.id).update(patch); else Object.assign(it, patch); }, "Couldn't save that change. Try again.");
+}
+function todoDelete(it, quiet){
+  return todoWrite(async () => {
+    if (TODO.col) await TODO.col.doc(it.id).delete(); else TODO.items = TODO.items.filter(x => x !== it);
+  }, quiet ? "" : "Couldn't delete that task. Try again.");
+}
+async function todoCleanup(){
+  if (!TODO.ready) return;
+  const now = Date.now();
+  for (const it of TODO.items.filter(it => it.done && it.doneAt && now >= deleteAt(it) && !TODO.deleting.has(it.id))){
+    TODO.deleting.add(it.id);
+    await todoDelete(it, true);
+  }
+}
+function todoArm(it){
+  if (TODO.armed === it.id){ TODO.armed = null; todoDelete(it); return; }
+  TODO.armed = it.id; renderTodo();
+  clearTimeout(TODO.armT); TODO.armT = setTimeout(() => { TODO.armed = null; renderTodo(); }, 4000);
+}
+function renderTodoGroups(){
+  const box = $("todo-groups"); box.textContent = "";
+  for (const [g, c] of TODO_GROUPS){
+    const b = el("button", "tg"); b.type = "button"; b.setAttribute("role", "radio");
+    b.setAttribute("aria-checked", TODO.group === g ? "true" : "false"); b.style.setProperty("--c", c);
+    b.appendChild(el("i")); b.appendChild(document.createTextNode(g));
+    b.addEventListener("click", () => { TODO.group = g; try { localStorage.setItem("ld-todo-group", g); } catch (e){} renderTodoGroups(); $("todo-text").focus(); });
+    box.appendChild(b);
+  }
+}
+function renderTodo(){
+  const today = sod(new Date());
+  $("todo-date").textContent = today.toLocaleDateString("en-US", {weekday: "short", month: "short", day: "numeric"});
+  const box = $("todo-box"); box.textContent = "";
+  if (!TODO.ready){ box.appendChild(el("div", "empty", "Loading your tasks…")); return; }
+  const now = Date.now();
+  const visible = TODO.items.filter(it => !storedNow(it));
+  const stored = TODO.items.filter(it => storedNow(it) && now < deleteAt(it));
+  const left = visible.filter(it => !it.done).length;
+  $("todo-n").textContent = visible.length ? (left ? left + " left" : "All done") : "";
+  if (!visible.length) box.appendChild(el("div", "empty", "Nothing to do yet. Add a task above."));
+  for (const [g, c] of TODO_GROUPS){
+    const list = visible.filter(it => (TODO_GROUPS.some(x => x[0] === it.group) ? it.group : "그 외") === g)
+      .sort((a, b) => (a.done - b.done) || (a.createdAt - b.createdAt));
+    if (!list.length) continue;
+    const sec = el("div", "todo-sec"); sec.style.setProperty("--c", c);
+    const h = el("h4"); h.appendChild(el("i")); h.appendChild(document.createTextNode(g + " "));
+    h.appendChild(el("span", null, String(list.filter(it => !it.done).length)));
+    sec.appendChild(h);
+    const ul = el("ul");
+    for (const it of list){
+      const li = el("li", "td" + (it.done ? " done" : ""));
+      const ck = el("button", "td-check"); ck.type = "button"; ck.innerHTML = TD_CHECK;
+      ck.setAttribute("aria-pressed", it.done ? "true" : "false");
+      ck.setAttribute("aria-label", (it.done ? "Mark not done: " : "Mark done: ") + it.text);
+      ck.addEventListener("click", () => todoUpdate(it, it.done ? {done: false, doneAt: null} : {done: true, doneAt: Date.now()}));
+      li.appendChild(ck);
+      li.appendChild(el("span", "td-text", it.text));
+      li.appendChild(!it.done && it.createdAt < +today ? el("span", "td-from", "from " + md(new Date(it.createdAt))) : el("span"));
+      const armed = TODO.armed === it.id;
+      const del = el("button", "td-del" + (armed ? " armed" : "")); del.type = "button";
+      del.setAttribute("aria-label", armed ? "Confirm delete" : "Delete task: " + it.text);
+      if (armed) del.textContent = "Delete?"; else del.innerHTML = TD_X;
+      del.addEventListener("click", () => todoArm(it));
+      li.appendChild(del);
+      ul.appendChild(li);
+    }
+    sec.appendChild(ul); box.appendChild(sec);
+  }
+  const st = $("todo-stored"); st.textContent = ""; st.hidden = !stored.length;
+  if (stored.length){
+    const hdr = el("div", "ts-h");
+    hdr.appendChild(el("span", null, stored.length + " finished " + (stored.length === 1 ? "task" : "tasks") + " stored · deleted 24h after midnight"));
+    const tg = el("button", "linkbtn", TODO.showStored ? "Hide" : "Show"); tg.type = "button";
+    tg.setAttribute("aria-expanded", TODO.showStored ? "true" : "false");
+    tg.addEventListener("click", () => { TODO.showStored = !TODO.showStored; renderTodo(); });
+    hdr.appendChild(tg); st.appendChild(hdr);
+    if (TODO.showStored){
+      for (const it of stored.sort((a, b) => b.doneAt - a.doneAt)){
+        const row = el("div", "ts");
+        const t = el("div"); t.appendChild(el("div", "ts-t", it.text));
+        t.appendChild(el("div", "ts-m", (it.group || "그 외") + " · done " + whenLabel(it.doneAt) + " · deletes " + untilLabel(deleteAt(it))));
+        row.appendChild(t);
+        const back = el("button", "btn", "Bring back"); back.type = "button";
+        back.addEventListener("click", () => todoUpdate(it, {done: false, doneAt: null}));
+        row.appendChild(back); st.appendChild(row);
+      }
+    }
+  }
+}
+(function initTodo(){
+  renderTodoGroups();
+  $("todo-form").addEventListener("submit", e => {
+    e.preventDefault();
+    const inp = $("todo-text"), t = inp.value.trim();
+    if (!t) return;
+    if (!TODO.ready){ todoMsg("Your tasks are still loading. Try again in a moment."); return; }
+    inp.value = ""; todoAdd(t, TODO.group);
+  });
+  renderTodo();
+})();
+
 /* ---------- drop box: files and text between devices ---------- */
 const DROP = { items: [], col: null, assets: null, dl: null, busy: [], usage: null, ready: false, off: false, armed: null, armT: null };
 const KEEP_OPTS = [["1","1 day"],["3","3 days"],["7","7 days"],["30","30 days"],["0","Never (keep it)"]];
@@ -1073,7 +1257,8 @@ function uploadErr(e, name){
     case "upstream_auth": return "Your sign-in expired. Reload the page and try again.";
     case "read": return "Couldn't read " + name + " from your device.";
     case "store_unavailable": return "Couldn't upload " + name + " just now. Try again.";
-    default: return "Couldn't upload " + name + ". Try again.";
+    case "unsupported_type": return "Couldn't upload " + name + ": this file type was refused.";
+    default: return "Couldn't upload " + name + ". Try again." + (e && e.code ? " (" + e.code + ")" : "");
   }
 }
 function refreshUsage(){
@@ -1086,10 +1271,12 @@ function renderDropUsage(){
 }
 
 async function addFiles(files){
+  files = Array.from(files);              // copy now: the picker is cleared right after this call starts
+  if (DROP.capsP) await DROP.capsP;
   if (DROP.off || !DROP.col){ dropMsg("The drop box works when the dashboard is open in Claude.", true); return; }
-  if (!DROP.assets){ dropMsg("File uploads aren't available in this view. Text still works.", true); return; }
+  if (!DROP.assets){ dropMsg(DROP.why || "File uploads aren't available here. Text still works.", true); return; }
   dropMsg("");
-  for (const f of Array.from(files)){
+  for (const f of files){
     const type = NATIVE[extOf(f.name)], max = type ? NATIVE_MAX : WRAP_MAX;
     if (!f.size){ dropMsg(f.name + " is empty.", true); continue; }
     if (f.size > max){ dropMsg(f.name + " is " + fmtSize(f.size) + ". Files like this can be up to " + fmtSize(max) + ".", true); continue; }
@@ -1159,7 +1346,7 @@ async function downloadItem(it, btn){
     else if (c === "zip") dropMsg("Couldn't prepare " + it.name + " for download. Check your connection and try again.", true);
     else if (c === "rate_limited") dropMsg("A download prompt is already open. Finish that one first.", true);
     else if (c === "extension_not_enabled") dropMsg("This kind of file can't be downloaded in this view.", true);
-    else dropMsg("Couldn't download " + it.name + ". Try again.", true);
+    else dropMsg("Couldn't download " + it.name + ". Try again." + (c ? " (" + c + ")" : ""), true);
   } finally { btn.disabled = false; btn.textContent = label; }
 }
 function copyText(t, btn){
@@ -1246,7 +1433,20 @@ function renderDrop(){
   keep.value = KEEP_OPTS.some(o => o[0] === k) ? k : "7";
   keep.addEventListener("change", () => { try { localStorage.setItem("ld-keep", keep.value); } catch (e){} });
   const dz = $("dz"), inp = $("dz-file");
-  inp.addEventListener("change", () => { if (inp.files.length) addFiles(inp.files); inp.value = ""; });
+  /* If a tap opens no file picker (some in-app views block it), say so instead of doing nothing. */
+  let pickT = null;
+  const picked = () => { clearTimeout(pickT); pickT = null; };
+  inp.addEventListener("click", () => {
+    picked(); dropMsg("");
+    pickT = setTimeout(() => {
+      if (!pickT) return;
+      dropMsg(DROP.why || "If no file picker opened, this app view is blocking it. Open the dashboard at claude.ai in Safari or Chrome to upload from your phone. Text and links still work here.", true);
+    }, 2500);
+  });
+  window.addEventListener("blur", picked);
+  document.addEventListener("visibilitychange", () => { if (document.hidden) picked(); });
+  inp.addEventListener("cancel", picked);
+  inp.addEventListener("change", () => { picked(); if (inp.files.length) addFiles(inp.files); inp.value = ""; });
   dz.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); inp.click(); } });
   dz.addEventListener("dragover", e => { e.preventDefault(); dz.classList.add("over"); });
   dz.addEventListener("dragleave", () => dz.classList.remove("over"));
@@ -1255,7 +1455,25 @@ function renderDrop(){
   $("dt-text").addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)){ e.preventDefault(); addText(); } });
   $("dt-text").addEventListener("paste", e => { const f = e.clipboardData && e.clipboardData.files; if (f && f.length){ e.preventDefault(); addFiles(f); } });
   if (window.claude && window.claude.use){
-    Promise.all([window.claude.use("assets"), window.claude.use("downloads")]).then(([a, d]) => { DROP.assets = a; DROP.dl = d; refreshUsage(); });
+    DROP.capsP = Promise.all([window.claude.use("assets"), window.claude.use("downloads"), window.claude.use("permissions")])
+      .then(async ([a, d, perms]) => {
+        DROP.assets = a; DROP.dl = d; DROP.perms = perms;
+        if (!a){
+          let st = "unavailable";
+          try { if (perms) st = await perms.state("assets"); } catch (e){}
+          DROP.why = st === "denied"
+            ? "File uploads are turned off for this dashboard. Tap \"Turn on file uploads\" below."
+            : "This app view doesn't allow file uploads. Open the dashboard at claude.ai in your phone's browser (Safari or Chrome) to upload. Text still works here.";
+          const note = $("dz-note"); note.hidden = false;
+          note.textContent = st === "denied" ? "File uploads are turned off" : "Uploads aren't available in this view";
+          $("dz-perm").hidden = st !== "denied";
+        }
+        refreshUsage();
+      });
+    $("dz-perm").addEventListener("click", async () => {
+      try { await DROP.perms.manage(); location.reload(); }
+      catch (e){ dropMsg("Open the dashboard's Permissions menu and turn on file uploads, then reload.", true); }
+    });
   } else { DROP.off = true; }
   renderDrop();
 })();
@@ -1318,6 +1536,9 @@ function saveNote(){
 function localFallback(){
   noteLocal = true;
   DROP.off = true; renderDrop();
+  TODO.local = true;
+  try { TODO.items = JSON.parse(localStorage.getItem("ld-todo") || "[]"); } catch (e){ TODO.items = []; }
+  TODO.ready = true; renderTodo(); todoCleanup();
   try { ta.value = localStorage.getItem("ld-note") || ""; S.done = JSON.parse(localStorage.getItem("ld-done") || "{}"); S.hidden = JSON.parse(localStorage.getItem("ld-hidden") || "{}"); } catch(e){}
   renderHeadsUp(); renderMail();
   setNoteStatus(ta.value ? "Saved in this browser" : "");
@@ -1335,6 +1556,10 @@ async function bootStore(){
   DROP.col.orderBy("addedAt", "desc").onSnapshot(snap => {
     DROP.items = snap.docs.map(d => Object.assign({id: d.id}, d.data())); DROP.ready = true; renderDrop();
   }, () => { dropMsg("Drop box sync stopped. Reopen the page.", true); });
+  TODO.col = db.doc("data/users/" + uid + "/todo").collection("items");
+  TODO.col.orderBy("createdAt", "asc").onSnapshot(snap => {
+    TODO.items = snap.docs.map(d => Object.assign({id: d.id}, d.data())); TODO.ready = true; renderTodo(); todoCleanup();
+  }, () => { todoMsg("To-do sync stopped. Reopen the page."); });
   noteRef = col.doc("note"); doneRef = col.doc("done"); hiddenRef = col.doc("hidden");
   hiddenRef.onSnapshot(s => { const d = s.data(); S.hidden = (d && d.items) || {}; renderHeadsUp(); renderMail(); }, () => {});
   setNoteStatus("Loading…");
@@ -1404,7 +1629,7 @@ $("refresh").addEventListener("click", async () => {
 setInterval(() => {
   const k = ymd(new Date());
   if (k !== S.dayKey && S.mcp){ S.dayKey = k; resubscribeDay(); }
-  renderHeader(); renderToday(); renderHeadsUp(); if (DROP.items.length) renderDrop();
+  renderHeader(); renderToday(); renderHeadsUp(); if (DROP.items.length) renderDrop(); renderTodo(); todoCleanup();
 }, 30000);
 
 renderAll();
