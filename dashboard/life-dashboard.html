@@ -873,6 +873,12 @@ function headsUp(){
       if (i > 0 && timed.length >= 3) items.push({lv:"info", t:"Busy " + wd(day) + " " + md(day), s: timed.length + " events from " + hm(timed[0].s), at: day});
     }
   }
+  if (TODO.ready){
+    const d2 = ymd(addDays(today, 2)), d2Date = addDays(today, 2);
+    for (const it of TODO.items.filter(it => !it.done && it.due === d2)){
+      items.push({lv: "warn", t: "📌 D-2: " + it.text, s: (it.group || "그 외") + " · due " + wd(d2Date) + " " + md(d2Date), at: d2Date, key: "td:" + it.id + "|" + it.due});
+    }
+  }
   if (S.threads){
     /* Hidden emails stay in the list (render skips them) so this card's Restore link can count them;
        the "first 3" limits count only visible ones. */
@@ -892,7 +898,7 @@ function headsUp(){
 function renderHeadsUp(){
   const box = $("hu-box"); box.textContent = "";
   setRestore("hu-restore", []);
-  if (!S.cals && !S.threads){
+  if (!S.cals && !S.threads && !TODO.items.length){
     if (S.calErr || S.mailErr) box.appendChild(el("div","empty","Heads up fills in once Calendar and Gmail load."));
     else box.appendChild(el("div","empty","Deadlines, overlaps, early starts and important mail show up here."));
     return;
@@ -1153,7 +1159,7 @@ function todoMsg(t){ const m = $("todo-msg"); m.hidden = !t; m.textContent = t |
 function todoSaveLocal(){ try { localStorage.setItem("ld-todo", JSON.stringify(TODO.items)); } catch (e){} }
 async function todoWrite(fn, fail){
   try { await fn(); todoMsg(""); } catch (e){ todoMsg(fail); }
-  if (TODO.local){ todoSaveLocal(); renderTodo(); }
+  if (TODO.local){ todoSaveLocal(); renderTodo(); renderHeadsUp(); }
 }
 function todoAdd(text, group, due){
   const it = {text, group, due: due || null, done: false, doneAt: null, createdAt: Date.now()};
@@ -1587,7 +1593,7 @@ function localFallback(){
   DROP.off = true; renderDrop();
   TODO.local = true;
   try { TODO.items = JSON.parse(localStorage.getItem("ld-todo") || "[]"); } catch (e){ TODO.items = []; }
-  TODO.ready = true; renderTodo(); todoCleanup();
+  TODO.ready = true; renderTodo(); renderHeadsUp(); todoCleanup();
   try { ta.value = localStorage.getItem("ld-note") || ""; S.done = JSON.parse(localStorage.getItem("ld-done") || "{}"); S.hidden = JSON.parse(localStorage.getItem("ld-hidden") || "{}"); } catch(e){}
   renderHeadsUp(); renderMail();
   setNoteStatus(ta.value ? "Saved in this browser" : "");
@@ -1607,7 +1613,7 @@ async function bootStore(){
   }, () => { dropMsg("Drop box sync stopped. Reopen the page.", true); });
   TODO.col = db.doc("data/users/" + uid + "/todo").collection("items");
   TODO.col.orderBy("createdAt", "asc").onSnapshot(snap => {
-    TODO.items = snap.docs.map(d => Object.assign({id: d.id}, d.data())); TODO.ready = true; renderTodo(); todoCleanup();
+    TODO.items = snap.docs.map(d => Object.assign({id: d.id}, d.data())); TODO.ready = true; renderTodo(); renderHeadsUp(); todoCleanup();
   }, () => { todoMsg("To-do sync stopped. Reopen the page."); });
   noteRef = col.doc("note"); doneRef = col.doc("done"); hiddenRef = col.doc("hidden");
   hiddenRef.onSnapshot(s => { const d = s.data(); S.hidden = (d && d.items) || {}; renderHeadsUp(); renderMail(); }, () => {});
