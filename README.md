@@ -12,7 +12,7 @@ A personal dashboard that pulls my Google Calendar and Gmail into one dark, quie
 
 | Part | What it is | Where it runs |
 |---|---|---|
-| **Dashboard** | One page with today's events as a to-do list (time, color, details), the next 7 days, key emails, a heads-up list and a sticky note | Claude artifact, reading Calendar and Gmail live each time it opens |
+| **Dashboard** | One page with today's events as a to-do list (time, color, details), the next 7 days, key emails, a heads-up list, a to-do list, a free-time finder, a hackathon list, a drop box and a sticky note | Claude artifact, reading Calendar and Gmail live each time it opens |
 | **Laptop launcher** | Opens the dashboard as an app window about 5–10 seconds after Windows sign-in | Windows Startup folder |
 | **Morning brief** | Push at 05:47 with today's events only | Claude scheduled task (cloud) |
 | **Tomorrow preview** | Push at 21:44 with tomorrow's events, flagging early starts | Claude scheduled task (cloud) |
@@ -52,6 +52,7 @@ I built this over two days by describing what I wanted to Claude, testing the re
 11. **Fix: uploads from my phone.** Tapping the drop box on my phone did nothing. The fix made the real file button cover the whole drop area and had the page say why when uploads are blocked. In the end the Claude phone app itself blocks file pickers, so I upload from my phone's browser instead.
 12. **Feature: a to-do list.** Tasks with a group (과제, 시험, 알바, 그 외), titled with today's date. Unfinished tasks carry over to the next day. Crossed-out tasks are stored out of sight at midnight, can be brought back, and are deleted 24 hours later. It works from timestamps, so it holds even if the dashboard was closed at midnight. Later I added an optional due date, typed as MM/DD rather than picked from a calendar, which shows as "Due today", "D-14" or "Overdue" and sorts the closest deadlines first.
 13. **Fix and limit: notifications.** I asked for a second evening push for to-dos due in 2 days. Testing showed two problems: the evening brief arrived twice (it was sent through two routes). My first fix kept the wrong route, and the next night's pushes never arrived, so the runs now send their own push exactly once, and the scheduled runs can't read the dashboard's storage, so they never saw my to-dos. Instead of copying tasks into my Google Calendar, I chose to show D-2 tasks in the dashboard's Heads up, with no push.
+14. **Feature: a hackathon list.** I wanted the hackathons open for applications in Seoul and Gyeonggi (ones farther away only if they have a very high prize, are entry level, take a single day or have an interesting twist), with name, dates, host and topic, each linking to its recruitment notice (모집공고). A Claude page can't browse the web on its own, so Claude reads the notices on sites like Linkareer and Event-us when I ask and saves the list in the dashboard's private storage. The page shows open ones first, sorted by deadline, warns when a deadline is three days or less away, hides closed ones behind a toggle, and says when the list was last checked.
 
 What I take from this: the AI wrote the code quickly, but every bug above was found by using the thing for real. The AI's tests didn't catch any of them. Most of my work was in deciding what it should do and noticing when it didn't.
 

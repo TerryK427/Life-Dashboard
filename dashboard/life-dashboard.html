@@ -234,6 +234,34 @@ ul{list-style:none;margin:0;padding:0}
 .ts-t{text-decoration:line-through;overflow-wrap:anywhere;color:var(--muted)}
 .ts-m{font-size:11px;color:var(--dim)}
 
+/* Hackathons */
+.hk-card{container-type:inline-size}
+.hk-list{display:flex;flex-direction:column;gap:6px}
+.hk{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) 150px 128px;gap:14px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--raise);text-decoration:none;color:var(--fg)}
+.hk:hover{border-color:var(--accent)}
+.hk:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hk.closed{opacity:.6}
+.hk-name{font-weight:600;word-break:keep-all;overflow-wrap:anywhere;display:flex;align-items:center;gap:6px}
+.hk-name .ext{color:var(--dim);font-weight:400;font-size:12px}
+.hk-topic{font-size:12px;color:var(--muted);margin-top:2px;word-break:keep-all;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.hk-host{font-size:12.5px;color:var(--muted);overflow-wrap:anywhere}
+.hk-when{font-family:var(--mono);font-size:12px;font-variant-numeric:tabular-nums;color:var(--fg)}
+.hk-when small{display:block;font-family:var(--sans);color:var(--dim);font-size:11.5px;margin-top:1px;overflow-wrap:anywhere}
+.hk-st{justify-self:end;font-size:11px;font-weight:600;letter-spacing:.04em;padding:2px 9px;border-radius:999px;white-space:nowrap;border:1px solid var(--line-strong);color:var(--muted)}
+.hk-st.open{color:var(--ok);border-color:var(--ok);background:var(--ok-soft)}
+.hk-st.soon{color:var(--warn);border-color:var(--warn);background:var(--warn-soft)}
+.hk-lbl{display:none;font-size:10.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
+.hk-why{font-size:11.5px;color:var(--warn);margin-top:3px;word-break:keep-all;overflow-wrap:anywhere}
+.hk-sub{font-size:11.5px;color:var(--dim);margin:6px 2px 0}
+@container (max-width:720px){
+  .hk{grid-template-columns:minmax(0,1fr) auto;gap:4px 12px}
+  .hk-main{grid-column:1/-1}
+  .hk-st{grid-column:2;grid-row:1;align-self:start}
+  .hk-main{grid-column:1;grid-row:1}
+  .hk-host,.hk-when{grid-column:1/-1}
+  .hk-lbl{display:inline;margin-right:6px}
+}
+
 /* Drop box */
 .drop-card{container-type:inline-size}
 .drop{display:grid;grid-template-columns:300px minmax(0,1fr);gap:24px;align-items:start}
@@ -418,6 +446,13 @@ ul{list-style:none;margin:0;padding:0}
       <textarea id="note" placeholder="Write anything. It saves as you type." spellcheck="false"></textarea>
     </section>
     </div>
+
+    <section class="card span hk-card" aria-labelledby="h-hk">
+      <div class="card-h"><h2 id="h-hk">Hackathons <span class="n" id="hk-n"></span></h2>
+        <span class="card-tools"><span class="note-s" id="hk-upd"></span><button class="linkbtn" id="hk-toggle" type="button" aria-pressed="false">Show closed</button></span>
+      </div>
+      <div id="hk-box"><div class="empty">Loading hackathons…</div></div>
+    </section>
 
     <section class="card span drop-card" aria-labelledby="h-drop">
       <div class="card-h"><h2 id="h-drop">Drop box <span class="n" id="drop-n"></span></h2><span class="note-s" id="drop-usage"></span></div>
@@ -1119,6 +1154,79 @@ function goMonth(delta){
 
 function renderAll(){ renderHeader(); renderToday(); renderKey(); renderHeadsUp(); renderWeek(); renderMail(); renderFinder(); }
 
+/* ---------- hackathons ---------- */
+/* The list lives in this dashboard's private storage; Claude researches recruitment notices
+   (모집공고) and writes it there, so it can be refreshed without changing the page.
+   Each item: name, host, topic, location, start, end ("YYYY-MM-DD"), deadline ("YYYY-MM-DD" or null),
+   closed (true if the notice says recruitment ended), url (official notice), source,
+   why (only for events outside 서울·경기: the reason it is still listed).
+   Scope: 서울 + 경기도 only. Outside that, list an event only if it has a very high prize,
+   is entry level, takes only a day, or has an interesting unique trait. */
+const HK = { items: [], ready: false, off: false, err: false, updated: null, showClosed: false };
+try { HK.showClosed = localStorage.getItem("ld-hk-closed") === "1"; } catch (e){}
+function hkState(it){
+  const today = ymd(new Date());
+  if (it.closed || (it.deadline && it.deadline < today)) return {cls: "", text: "Closed", open: false};
+  if (!it.deadline) return {cls: "open", text: "Open", open: true};
+  const days = Math.round((parseDateOnly(it.deadline) - sod(new Date())) / 86400000);
+  if (days === 0) return {cls: "soon", text: "Closes today", open: true};
+  if (days <= 3) return {cls: "soon", text: "Closes in " + days + "d", open: true};
+  return {cls: "open", text: "Open · until " + it.deadline.slice(5).replace("-", "/"), open: true};
+}
+function hkDates(it){
+  const f = d => d.slice(5).replace("-", "/");
+  if (!it.start) return "Date TBA";
+  return it.end && it.end !== it.start ? f(it.start) + "–" + f(it.end) : f(it.start);
+}
+function renderHack(){
+  const box = $("hk-box"); box.textContent = "";
+  $("hk-upd").textContent = "서울 · 경기" + (HK.updated ? " · checked " + md(new Date(HK.updated)) : "");
+  const tg = $("hk-toggle");
+  tg.textContent = HK.showClosed ? "Open only" : "Show closed";
+  tg.setAttribute("aria-pressed", HK.showClosed ? "true" : "false");
+  if (HK.off){ box.appendChild(el("div", "empty", "The hackathon list works when the dashboard is open in Claude.")); return; }
+  if (HK.err){ box.appendChild(el("div", "empty", "Couldn't load the hackathon list. Reopen the page.")); return; }
+  if (!HK.ready){ box.appendChild(el("div", "empty", "Loading hackathons…")); return; }
+  const today = ymd(new Date());
+  const upcoming = HK.items.filter(it => !it.end || it.end >= today).map(it => Object.assign({st: hkState(it)}, it));
+  const open = upcoming.filter(x => x.st.open), closed = upcoming.filter(x => !x.st.open);
+  $("hk-n").textContent = open.length ? open.length + " open" : "";
+  open.sort((a, b) => (a.deadline || "9999").localeCompare(b.deadline || "9999") || (a.start || "").localeCompare(b.start || ""));
+  closed.sort((a, b) => (a.start || "9999").localeCompare(b.start || "9999"));
+  const shown = HK.showClosed ? open.concat(closed) : open;
+  if (!upcoming.length){ box.appendChild(el("div", "empty", "No upcoming hackathons on the list. Ask Claude to check for new 모집공고.")); return; }
+  if (!shown.length){ box.appendChild(el("div", "empty", "Nothing is accepting applications right now. " + closed.length + " upcoming " + (closed.length === 1 ? "hackathon has" : "hackathons have") + " closed recruitment. Use “Show closed” to see " + (closed.length === 1 ? "it" : "them") + ", or ask Claude to check for new 모집공고.")); return; }
+  const list = el("div", "hk-list");
+  for (const it of shown){
+    const a = el("a", "hk" + (it.st.open ? "" : " closed"));
+    if (/^https?:\/\//i.test(it.url || "")){ a.href = it.url; a.target = "_blank"; a.rel = "noopener noreferrer"; }
+    a.setAttribute("aria-label", it.name + ", " + it.st.text + ", " + hkDates(it) + ", opens the notice in a new tab");
+    const main = el("div", "hk-main");
+    const nm = el("div", "hk-name"); nm.appendChild(el("span", null, it.name)); nm.appendChild(el("span", "ext", "↗"));
+    main.appendChild(nm);
+    if (it.topic) main.appendChild(el("div", "hk-topic", it.topic));
+    if (it.why) main.appendChild(el("div", "hk-why", "Outside 서울·경기 · " + it.why));
+    a.appendChild(main);
+    const host = el("div", "hk-host"); host.appendChild(el("span", "hk-lbl", "Host")); host.appendChild(document.createTextNode(it.host || "Not listed"));
+    a.appendChild(host);
+    const when = el("div", "hk-when"); when.appendChild(el("span", "hk-lbl", "Date")); when.appendChild(document.createTextNode(hkDates(it)));
+    if (it.location) when.appendChild(el("small", null, it.location));
+    a.appendChild(when);
+    a.appendChild(el("span", "hk-st " + it.st.cls, it.st.text));
+    list.appendChild(a);
+  }
+  box.appendChild(list);
+  if (!HK.showClosed && closed.length) box.appendChild(el("div", "hk-sub", closed.length + " more upcoming " + (closed.length === 1 ? "hackathon has" : "hackathons have") + " closed recruitment. Use “Show closed” to see " + (closed.length === 1 ? "it" : "them") + "."));
+}
+(function initHack(){
+  $("hk-toggle").addEventListener("click", () => {
+    HK.showClosed = !HK.showClosed;
+    try { localStorage.setItem("ld-hk-closed", HK.showClosed ? "1" : "0"); } catch (e){}
+    renderHack();
+  });
+  renderHack();
+})();
+
 /* ---------- to-do ---------- */
 /* A crossed-out task stays visible until midnight, is then stored (hidden but restorable),
    and is deleted 24 hours after that, i.e. at the second midnight after it was crossed out.
@@ -1591,6 +1699,7 @@ function saveNote(){
 function localFallback(){
   noteLocal = true;
   DROP.off = true; renderDrop();
+  HK.off = true; renderHack();
   TODO.local = true;
   try { TODO.items = JSON.parse(localStorage.getItem("ld-todo") || "[]"); } catch (e){ TODO.items = []; }
   TODO.ready = true; renderTodo(); renderHeadsUp(); todoCleanup();
@@ -1611,6 +1720,11 @@ async function bootStore(){
   DROP.col.orderBy("addedAt", "desc").onSnapshot(snap => {
     DROP.items = snap.docs.map(d => Object.assign({id: d.id}, d.data())); DROP.ready = true; renderDrop();
   }, () => { dropMsg("Drop box sync stopped. Reopen the page.", true); });
+  HK.meta = db.doc("data/users/" + uid + "/hackathons");
+  HK.meta.onSnapshot(s => { HK.updated = (s.data() || {}).updatedAt || null; renderHack(); }, () => {});
+  db.doc("data/users/" + uid + "/hackathons").collection("items").onSnapshot(snap => {
+    HK.items = snap.docs.map(d => Object.assign({id: d.id}, d.data())); HK.ready = true; renderHack();
+  }, () => { HK.err = true; renderHack(); });
   TODO.col = db.doc("data/users/" + uid + "/todo").collection("items");
   TODO.col.orderBy("createdAt", "asc").onSnapshot(snap => {
     TODO.items = snap.docs.map(d => Object.assign({id: d.id}, d.data())); TODO.ready = true; renderTodo(); renderHeadsUp(); todoCleanup();
@@ -1684,7 +1798,7 @@ $("refresh").addEventListener("click", async () => {
 setInterval(() => {
   const k = ymd(new Date());
   if (k !== S.dayKey && S.mcp){ S.dayKey = k; resubscribeDay(); }
-  renderHeader(); renderToday(); renderHeadsUp(); if (DROP.items.length) renderDrop(); renderTodo(); todoCleanup();
+  renderHeader(); renderToday(); renderHeadsUp(); if (DROP.items.length) renderDrop(); renderTodo(); todoCleanup(); if (HK.ready) renderHack();
 }, 30000);
 
 renderAll();
