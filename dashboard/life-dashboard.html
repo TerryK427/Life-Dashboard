@@ -234,6 +234,115 @@ ul{list-style:none;margin:0;padding:0}
 .ts-t{text-decoration:line-through;overflow-wrap:anywhere;color:var(--muted)}
 .ts-m{font-size:11px;color:var(--dim)}
 
+/* View switch */
+.views{display:inline-flex;border:1px solid var(--line-strong);border-radius:8px;padding:2px;background:var(--raise)}
+.views button,.seg button{background:none;border:0;padding:5px 14px;border-radius:6px;font-size:12.5px;color:var(--muted);cursor:pointer}
+.views button[aria-selected="true"],.seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--fg)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;padding:2px}
+.seg button{padding:3px 10px;font-size:12px}
+.btn.pri{background:var(--accent-soft);border-color:rgba(134,183,201,.45)}
+.card-tools{display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.me{max-width:1280px;width:100%;display:flex;flex-direction:column;gap:16px}
+.me .card-h{flex-wrap:wrap;row-gap:8px}
+.me .card-h h2{white-space:nowrap}
+
+/* Mindmap */
+.mm-card{container-type:inline-size}
+.mm-body{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:16px;align-items:start}
+@container (max-width:760px){.mm-body{grid-template-columns:minmax(0,1fr)}.mm-panel{border-left:0!important;padding-left:0!important;border-top:1px solid var(--line);padding-top:14px}}
+.mm-stage{min-width:0}
+.mm{position:relative;height:520px;border:1px solid var(--line);border-radius:8px;background:radial-gradient(ellipse at center,#141a21 0%,var(--panel) 70%);overflow:hidden}
+.mm svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.mnode{position:absolute;left:0;top:0;transform:translate(-50%,-50%);max-width:150px;padding:4px 10px;border-radius:999px;border:1px solid var(--line-strong);background:var(--raise);font-size:12px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;color:var(--muted)}
+.mnode:hover{border-color:var(--dim);color:var(--fg)}
+.mnode.center{padding:10px 18px;font-size:15px;font-weight:600;background:var(--accent);color:#0f1215;border:0;cursor:pointer;max-width:180px}
+.mnode.br{font-weight:600;font-size:13px;color:var(--fg);border:1.5px solid var(--c);padding:5px 12px;max-width:170px}
+.mnode.td{border-style:dashed}
+.mnode.done{text-decoration:line-through;opacity:.5}
+.mnode.more{color:var(--accent);background:var(--panel)}
+.mnode[aria-pressed="true"]{outline:2px solid var(--accent);outline-offset:2px;color:var(--fg)}
+.star{color:var(--warn);margin-right:4px;text-decoration:none;display:inline-block}
+.mm-empty{position:absolute;left:50%;top:calc(50% + 46px);transform:translateX(-50%);color:var(--dim);font-size:12.5px;text-align:center;width:min(320px,90%)}
+.mm-list{display:flex;flex-direction:column;gap:10px}
+.ml-b{border:1px solid var(--line);border-left:3px solid var(--c);border-radius:8px;padding:8px 10px;background:var(--raise)}
+.ml-b > button,.ml-i{background:none;border:0;padding:2px 0;text-align:left;cursor:pointer;color:var(--fg);font-size:13px;display:block;width:100%}
+.ml-b > button{font-weight:600}
+.ml-i{color:var(--muted);font-size:12.5px;padding-left:12px}
+.ml-i.done{text-decoration:line-through;opacity:.55}
+.ml-b [aria-pressed="true"]{color:var(--accent)}
+.mm-panel{border-left:1px solid var(--line);padding-left:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.mp-k{font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--dim)}
+.mp-hint{font-size:12.5px;color:var(--muted);line-height:1.55}
+.mp-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.inp{background:var(--bg);color:var(--fg);border:1px solid var(--line-strong);border-radius:6px;padding:7px 9px;font:inherit;font-size:13px;box-sizing:border-box;min-width:0}
+.inp:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.mp-row .inp{flex:1}
+.sw-row{display:flex;align-items:flex-start;gap:8px;font-size:13px;cursor:pointer}
+.sw-row input{margin-top:3px;accent-color:var(--accent)}
+.sw-row small{display:block;color:var(--dim);font-size:11.5px}
+.mp-items{display:flex;flex-direction:column;gap:2px;max-height:220px;overflow:auto}
+.mp-it{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:3px 0;color:var(--muted)}
+.mp-it.done span{text-decoration:line-through;opacity:.6}
+.mp-it button{margin-left:auto}
+.mp-acts{display:flex;gap:8px;flex-wrap:wrap}
+.linkbtn.danger{color:var(--bad)}
+.mp-note{font-size:12px;color:var(--dim)}
+.mp-note.ok{color:var(--ok)}
+
+/* Resume */
+.rs-quick{display:flex;gap:8px;flex-wrap:wrap}
+.rs-quick .inp{flex:1 1 280px}
+.rs-cats{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px 22px}
+.rs-cat h3{margin:0 0 6px;font-size:12px;font-weight:600;color:var(--muted);display:flex;gap:8px;align-items:baseline}
+.rs-cat ul{display:flex;flex-direction:column}
+.rs-e{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;padding:9px 0;border-top:1px solid var(--line)}
+.rs-e:first-child{border-top:0}
+.rs-t{font-weight:600;font-size:13.5px;overflow-wrap:anywhere;word-break:keep-all}
+.rs-m{font-size:12.5px;color:var(--muted);overflow-wrap:anywhere;word-break:keep-all}
+.rs-d{font-size:12.5px;color:var(--muted);overflow-wrap:anywhere;word-break:keep-all;grid-column:1/-1}
+.rs-when{font-family:var(--mono);font-size:11.5px;color:var(--dim);font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+.rs-link{font-size:12px;color:var(--accent);grid-column:1/-1;overflow-wrap:anywhere}
+.rs-tools-e{grid-column:1/-1;display:flex;gap:12px;align-items:center}
+.badge{font-size:10.5px;font-weight:600;letter-spacing:.04em;padding:1px 7px;border-radius:999px;border:1px solid var(--warn);color:var(--warn);background:var(--warn-soft)}
+.fb{font-size:10.5px;color:var(--dim);font-weight:400;margin-left:4px}
+.print-only{display:none}
+
+/* Resume dialog */
+.dlg{background:var(--panel);color:var(--fg);border:1px solid var(--line-strong);border-radius:12px;width:min(760px,calc(100vw - 32px));max-height:calc(100vh - 32px);padding:20px;box-sizing:border-box}
+.dlg::backdrop{background:rgba(0,0,0,.6)}
+.dlg form{display:flex;flex-direction:column;gap:14px}
+.dlg-h{display:flex;flex-direction:column;gap:2px}
+.dlg h3{margin:0;font-size:16px}
+.fr{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.fld{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);flex:none;min-width:0}
+.fr .fld{flex:1 1 180px}
+.fr .fld.sm{flex:0 1 110px}
+.fld input,.fld select,.fld textarea{background:var(--bg);color:var(--fg);border:1px solid var(--line-strong);border-radius:6px;padding:7px 9px;font:inherit;font-size:13px;box-sizing:border-box;width:100%;resize:vertical}
+.fld input:focus-visible,.fld select:focus-visible,.fld textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.fld [aria-invalid="true"]{border-color:var(--bad)}
+.chk{display:flex;align-items:center;gap:6px;font-size:13px;padding-bottom:8px;cursor:pointer}
+.chk input{accent-color:var(--accent)}
+.langs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:640px){.langs{grid-template-columns:1fr}}
+.langs fieldset{border:1px solid var(--line);border-radius:8px;padding:10px 12px 12px;margin:0;display:flex;flex-direction:column;gap:8px;min-width:0}
+.langs legend{font-size:12px;color:var(--muted);padding:0 4px}
+.dlg-act{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.dlg-act .sp{flex:1}
+
+@media print{
+  body.print-rs{background:#fff;color:#000;padding:0}
+  body.print-rs .top,body.print-rs #view-dash,body.print-rs .mm-card,body.print-rs .rs-card .card-h,body.print-rs .rs-quick,body.print-rs #rs-msg,body.print-rs .rs-tools-e,body.print-rs .badge,body.print-rs dialog{display:none!important}
+  body.print-rs #view-me{display:block!important}
+  body.print-rs .card{border:0;box-shadow:none;background:#fff;padding:0}
+  body.print-rs .print-only{display:block}
+  body.print-rs .rs-print-h{font-size:20px;margin-bottom:14px}
+  body.print-rs .rs-cats{display:block}
+  body.print-rs .rs-cat{margin-bottom:14px;break-inside:avoid}
+  body.print-rs .rs-cat h3{font-size:13px;border-bottom:1px solid #999;padding-bottom:3px}
+  body.print-rs .rs-e{border-top:0;padding:5px 0;break-inside:avoid}
+  body.print-rs *{color:#000!important}
+}
+
 /* Hackathons */
 .hk-card{container-type:inline-size}
 .hk-list{display:flex;flex-direction:column;gap:6px}
@@ -364,6 +473,10 @@ ul{list-style:none;margin:0;padding:0}
       <div class="dayprog"><div class="dp-track" id="dp-track" role="progressbar" aria-label="Share of today that has passed" aria-valuemin="0" aria-valuemax="100"><div class="dp-fill" id="dp-fill"></div></div><span class="dp-txt" id="dp-txt"></span></div>
     </div>
     <div class="topright">
+      <div class="views" role="tablist" aria-label="View">
+        <button type="button" role="tab" id="tab-dash" aria-controls="view-dash" aria-selected="true">Dashboard</button>
+        <button type="button" role="tab" id="tab-me" aria-controls="view-me" aria-selected="false" tabindex="-1">Me</button>
+      </div>
       <div class="fresh" id="fresh">Connecting to Calendar and Gmail…</div>
       <button class="btn" id="refresh" type="button">Refresh</button>
       <div class="clockbox">
@@ -380,7 +493,7 @@ ul{list-style:none;margin:0;padding:0}
     </div>
   </header>
 
-  <div class="board">
+  <div class="board" id="view-dash" role="tabpanel" aria-labelledby="tab-dash">
     <section class="card today-card" aria-labelledby="h-today">
       <div class="card-h"><h2 id="h-today">Today <span class="n" id="today-n"></span></h2><span class="note-s" id="today-s"></span></div>
       <div class="today-wrap">
@@ -477,7 +590,80 @@ ul{list-style:none;margin:0;padding:0}
       </div>
     </section>
   </div>
+
+  <div class="me" id="view-me" role="tabpanel" aria-labelledby="tab-me" hidden>
+    <section class="card mm-card" aria-labelledby="h-mm">
+      <div class="card-h"><h2 id="h-mm">Right now <span class="n" id="mm-n"></span></h2>
+        <span class="card-tools">
+          <button class="linkbtn" id="mm-donetog" type="button"></button>
+          <span class="seg" role="group" aria-label="Layout"><button type="button" id="mm-v-map" aria-pressed="true">Map</button><button type="button" id="mm-v-list" aria-pressed="false">List</button></span>
+        </span>
+      </div>
+      <div class="mm-body">
+        <div class="mm-stage">
+          <div class="mm" id="mm" aria-label="Mindmap"></div>
+          <div class="mm-list" id="mm-list" hidden></div>
+        </div>
+        <aside class="mm-panel" id="mm-panel" aria-label="Selected branch or item"></aside>
+      </div>
+      <div class="msg err" id="mm-msg" role="status" hidden></div>
+    </section>
+
+    <section class="card rs-card" aria-labelledby="h-rs">
+      <div class="print-only rs-print-h"><b id="rs-print-name"></b></div>
+      <div class="card-h"><h2 id="h-rs">Resume <span class="n" id="rs-n"></span></h2>
+        <span class="card-tools">
+          <span class="seg" role="group" aria-label="Language"><button type="button" id="rs-ko" aria-pressed="true">한국어</button><button type="button" id="rs-en" aria-pressed="false">English</button></span>
+          <button class="btn" id="rs-copy" type="button">Copy as text</button>
+          <button class="btn" id="rs-print" type="button">Print / PDF</button>
+        </span>
+      </div>
+      <form class="rs-quick" id="rs-quick" autocomplete="off">
+        <label for="rs-q" hidden>Describe an activity</label>
+        <input id="rs-q" type="text" maxlength="600" placeholder="Type anything, e.g. “Model UN 2026 delegate, 11/21–22, best delegate award”">
+        <button class="btn pri" id="rs-qbtn" type="submit">Sort with Claude</button>
+        <button class="btn" id="rs-form" type="button">+ Form</button>
+      </form>
+      <div class="msg" id="rs-msg" role="status" hidden></div>
+      <div id="rs-box"><div class="empty">Loading your resume…</div></div>
+    </section>
+  </div>
 </div>
+
+<dialog class="dlg" id="rs-dlg" aria-labelledby="rs-dt">
+  <form id="rs-fm" novalidate>
+    <div class="dlg-h"><h3 id="rs-dt">Add to resume</h3><span class="note-s" id="rs-dsub"></span></div>
+    <div class="fr">
+      <label class="fld">Category<select id="f-cat"></select></label>
+      <label class="fld sm">Start<input id="f-start" type="text" inputmode="numeric" placeholder="2026.03" maxlength="7"></label>
+      <label class="fld sm">End<input id="f-end" type="text" inputmode="numeric" placeholder="2026.11" maxlength="7"></label>
+      <label class="chk"><input type="checkbox" id="f-on"> Ongoing</label>
+    </div>
+    <div class="langs">
+      <fieldset><legend>한국어</legend>
+        <label class="fld">Title<input id="f-ko-title" type="text" maxlength="160"></label>
+        <label class="fld">Organization<input id="f-ko-org" type="text" maxlength="160"></label>
+        <label class="fld">Role<input id="f-ko-role" type="text" maxlength="160"></label>
+        <label class="fld">Description<textarea id="f-ko-desc" rows="3" maxlength="800"></textarea></label>
+      </fieldset>
+      <fieldset><legend>English</legend>
+        <label class="fld">Title<input id="f-en-title" type="text" maxlength="160"></label>
+        <label class="fld">Organization<input id="f-en-org" type="text" maxlength="160"></label>
+        <label class="fld">Role<input id="f-en-role" type="text" maxlength="160"></label>
+        <label class="fld">Description<textarea id="f-en-desc" rows="3" maxlength="800"></textarea></label>
+      </fieldset>
+    </div>
+    <label class="fld">Link (optional)<input id="f-link" type="url" maxlength="500" placeholder="https://"></label>
+    <div class="msg" id="f-msg" role="status" hidden></div>
+    <div class="dlg-act">
+      <button class="linkbtn danger" id="f-del" type="button" hidden>Delete entry</button>
+      <span class="sp"></span>
+      <button class="btn" id="f-tr" type="button">Fill the other language with Claude</button>
+      <button class="btn" id="f-cancel" type="button">Cancel</button>
+      <button class="btn pri" id="f-save" type="submit">Save</button>
+    </div>
+  </form>
+</dialog>
 
 <script>
 (function(){
@@ -1227,6 +1413,637 @@ function renderHack(){
   renderHack();
 })();
 
+/* ---------- Me: mindmap + resume ---------- */
+/* Mindmap nodes live in data/users/<uid>/mind/nodes: a branch has parent null, an item has
+   its branch's id as parent. A branch marked "activity" belongs on a resume: completing it,
+   or any item on it, opens a confirm card that adds a resume entry.
+   Resume entries live in data/users/<uid>/resume/items, in Korean and English. */
+const ME_NAME = "Me";
+const RS_CATS = [
+  ["act", "대외활동 · 동아리", "Activities & Clubs"],
+  ["award", "수상 · 장학금", "Awards & Scholarships"],
+  ["proj", "프로젝트", "Projects"],
+  ["exp", "경력 · 봉사 · 자격증", "Experience, Volunteering & Certificates"]
+];
+const rsCat = k => RS_CATS.find(c => c[0] === k) || RS_CATS[0];
+const MM_COLORS = ["#86b7c9", "#7fc39b", "#e3b263", "#b39ddb", "#e0796d", "#4db6ac", "#f48fb1", "#a1887f"];
+const TODO_LINK = "todo:과제";
+const ME = {
+  off: false, err: false, mindReady: false, rsReady: false, nodes: [], rs: [], mindCol: null, rsCol: null,
+  sel: null, armed: null, armT: null, lang: "ko", view: "map", hideDone: false, tab: "dash",
+  sampleP: null, editing: null, fromNode: null, busy: false
+};
+try {
+  ME.view = localStorage.getItem("ld-mm-view") === "list" ? "list" : "map";
+  ME.hideDone = localStorage.getItem("ld-mm-hide") === "1";
+  ME.lang = localStorage.getItem("ld-rs-lang") === "en" ? "en" : "ko";
+  ME.tab = localStorage.getItem("ld-view") === "me" ? "me" : "dash";
+} catch (e){}
+
+function meMsg(t){ const m = $("mm-msg"); m.hidden = !t; m.textContent = t || ""; }
+function rsMsg(t, extra){
+  const m = $("rs-msg"); m.textContent = ""; m.hidden = !t;
+  if (t){ m.appendChild(el("span", null, t)); for (const k of (extra || [])) m.appendChild(k); }
+}
+async function mmWrite(fn){
+  if (!ME.mindCol){ meMsg("The mindmap works when the dashboard is open in Claude."); return null; }
+  try { const r = await fn(); meMsg(""); return r; } catch (e){ meMsg("Couldn't save that change. Try again."); return null; }
+}
+function getSample(){
+  if (!ME.sampleP) ME.sampleP = (window.claude && window.claude.use) ? window.claude.use("sample").catch(() => null) : Promise.resolve(null);
+  return ME.sampleP;
+}
+function sampleErr(e){
+  const c = e && e.code;
+  if (c === "not_granted" || c === "sampling_disabled" || c === "not_declared" || c === "capability_disabled" || c === "capability_removed") return "Claude isn't allowed on this page, so use the form instead.";
+  if (c === "rate_limited") return "Claude is busy or you've hit a usage limit. Try again in a bit, or use the form.";
+  if (c === "cancelled") return "";
+  return "Claude couldn't sort that. Try again or use the form.";
+}
+
+/* ----- mindmap data ----- */
+function mmBranches(){ return ME.nodes.filter(n => !n.parent).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)); }
+function mmBranchOf(n){ return n && n.parent ? ME.nodes.find(b => b.id === n.parent) || null : n; }
+function mmIsAct(n){ const b = mmBranchOf(n); return !!(b && b.activity); }
+function mmColor(b){ return MM_COLORS[(Number(b && b.color) || 0) % MM_COLORS.length]; }
+function mmItems(b, all){
+  let items = ME.nodes.filter(n => n.parent === b.id).sort((x, y) => (x.createdAt || 0) - (y.createdAt || 0));
+  if (b.link === TODO_LINK && TODO.ready){
+    const td = TODO.items.filter(t => !t.done && (t.group || "그 외") === "과제")
+      .map(t => ({id: "td:" + t.id, label: t.text, parent: b.id, virtual: true, todo: t, done: false, createdAt: t.createdAt}));
+    items = td.concat(items);
+  }
+  if (!all && ME.hideDone) items = items.filter(n => !n.done);
+  return items;
+}
+function mmFind(id){
+  if (!id) return null;
+  if (id === "me") return {id: "me", center: true};
+  if (id.startsWith("td:")){
+    for (const b of mmBranches()){ const x = mmItems(b, true).find(n => n.id === id); if (x) return x; }
+    return null;
+  }
+  return ME.nodes.find(n => n.id === id) || null;
+}
+function mmSelect(id){ ME.sel = (ME.sel === id) ? null : id; ME.armed = null; renderMind(); }
+async function mmAddBranch(label){
+  const ref = await mmWrite(() => ME.mindCol.add({label, parent: null, activity: false, cat: "act", link: null,
+    color: mmBranches().length % MM_COLORS.length, done: false, doneAt: null, resumeId: null, createdAt: Date.now()}));
+  if (ref && ref.id){ ME.sel = ref.id; renderMind(); }
+}
+async function mmAddItem(b, label){
+  await mmWrite(() => ME.mindCol.add({label, parent: b.id, done: false, doneAt: null, resumeId: null, createdAt: Date.now()}));
+}
+function mmUpdate(n, patch){ return mmWrite(() => ME.mindCol.doc(n.id).update(patch)); }
+async function mmDelete(n){
+  if (!n.parent){ for (const c of ME.nodes.filter(x => x.parent === n.id)) await mmWrite(() => ME.mindCol.doc(c.id).delete()); }
+  await mmWrite(() => ME.mindCol.doc(n.id).delete());
+  if (ME.sel === n.id) ME.sel = null;
+  renderMind();
+}
+function mmArm(n){
+  if (ME.armed === n.id){ ME.armed = null; mmDelete(n); return; }
+  ME.armed = n.id; renderMind();
+  clearTimeout(ME.armT); ME.armT = setTimeout(() => { ME.armed = null; renderMind(); }, 4000);
+}
+async function mmComplete(n){
+  if (n.virtual){ await todoUpdate(n.todo, {done: true, doneAt: Date.now()}); ME.sel = null; renderMind(); return; }
+  await mmUpdate(n, {done: true, doneAt: Date.now()});
+  if (!mmIsAct(n)) return;
+  const linked = n.resumeId && ME.rs.find(r => r.id === n.resumeId);
+  if (linked) openResumeEnd(linked, n); else openResumeFromNode(n);
+}
+function mmUndo(n){ return mmUpdate(n, {done: false, doneAt: null}); }
+
+/* ----- mindmap render ----- */
+function renderMind(){
+  if (typeof $ !== "function" || !$("mm")) return;
+  const map = $("mm"), list = $("mm-list");
+  $("mm-v-map").setAttribute("aria-pressed", ME.view === "map" ? "true" : "false");
+  $("mm-v-list").setAttribute("aria-pressed", ME.view === "list" ? "true" : "false");
+  $("mm-donetog").textContent = ME.hideDone ? "Show completed" : "Hide completed";
+  const narrow = map.parentElement.clientWidth > 0 && map.parentElement.clientWidth < 520;
+  const view = narrow ? "list" : ME.view;
+  map.hidden = view !== "map"; list.hidden = view !== "list";
+  const br = mmBranches();
+  const open = br.reduce((k, b) => k + mmItems(b, true).filter(n => !n.done).length, 0);
+  $("mm-n").textContent = br.length ? br.length + (br.length === 1 ? " branch" : " branches") + " · " + open + " open" : "";
+  if (ME.sel && !mmFind(ME.sel)) ME.sel = null;
+  if (ME.tab === "me"){ if (view === "map") renderMap(); else renderMindList(); }
+  renderPanel();
+}
+function mmNodeBtn(cls, text, id, extra){
+  const b = el("button", "mnode " + cls);
+  b.type = "button";
+  if (extra && extra.star){ const s = el("span", "star", "★"); s.setAttribute("aria-hidden", "true"); b.appendChild(s); }
+  b.appendChild(document.createTextNode(text));
+  b.title = text;
+  if (id){ b.setAttribute("aria-pressed", ME.sel === id ? "true" : "false"); b.addEventListener("click", () => mmSelect(id)); }
+  return b;
+}
+function renderMap(){
+  const box = $("mm"); box.textContent = "";
+  const W = box.clientWidth; if (!W) return;
+  const H = Math.round(Math.min(640, Math.max(440, W * 0.62)));
+  box.style.height = H + "px";
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg"); svg.setAttribute("aria-hidden", "true");
+  box.appendChild(svg);
+  const line = (x1, y1, x2, y2, c, w, dash) => {
+    const l = document.createElementNS(NS, "line");
+    l.setAttribute("x1", x1); l.setAttribute("y1", y1); l.setAttribute("x2", x2); l.setAttribute("y2", y2);
+    l.setAttribute("stroke", c); l.setAttribute("stroke-width", w); l.setAttribute("stroke-linecap", "round");
+    if (dash) l.setAttribute("stroke-dasharray", "3 4");
+    svg.appendChild(l);
+  };
+  const cx = W / 2, cy = H / 2;
+  const clampX = x => Math.max(78, Math.min(W - 78, x)), clampY = y => Math.max(18, Math.min(H - 18, y));
+  const place = (b, x, y) => { b.style.left = x + "px"; b.style.top = y + "px"; box.appendChild(b); };
+  const brs = mmBranches(), nB = brs.length;
+  const r1x = W * 0.25, r1y = H * 0.27, r2x = W * 0.43, r2y = H * 0.43;
+  const span = nB <= 1 ? 2.2 : Math.min(1.5, (2 * Math.PI / nB) * 0.85);
+  const nodes = [];
+  brs.forEach((b, i) => {
+    const a = -Math.PI / 2 + i * 2 * Math.PI / Math.max(nB, 1);
+    const bx = clampX(cx + r1x * Math.cos(a)), by = clampY(cy + r1y * Math.sin(a));
+    const c = mmColor(b);
+    line(cx, cy, bx, by, c, 2);
+    let items = mmItems(b, false);
+    const MAX = 6, more = items.length > MAX ? items.length - (MAX - 1) : 0;
+    if (more) items = items.slice(0, MAX - 1);
+    const n = items.length + (more ? 1 : 0);
+    const step = n > 1 ? Math.min(0.36, span / (n - 1)) : 0;
+    const placeItem = (k, btn) => {
+      const ia = a + (k - (n - 1) / 2) * step;
+      const ix = clampX(cx + r2x * Math.cos(ia)), iy = clampY(cy + r2y * Math.sin(ia));
+      line(bx, by, ix, iy, "#3b4652", 1.2, btn.classList.contains("td"));
+      nodes.push([btn, ix, iy]);
+    };
+    items.forEach((it, k) => {
+      const btn = mmNodeBtn("it" + (it.done ? " done" : "") + (it.virtual ? " td" : ""), it.label, it.id);
+      if (it.virtual){ const di = dueInfo(it.todo); if (di) btn.title = it.label + " · " + di.text; }
+      placeItem(k, btn);
+    });
+    if (more){
+      const m = mmNodeBtn("it more", "+" + more + " more", null);
+      m.addEventListener("click", () => { ME.sel = b.id; renderMind(); });
+      placeItem(n - 1, m);
+    }
+    const bb = mmNodeBtn("br" + (b.done ? " done" : ""), b.label, b.id, {star: b.activity});
+    bb.style.setProperty("--c", c);
+    nodes.push([bb, bx, by]);
+  });
+  for (const [btn, x, y] of nodes) place(btn, x, y);
+  const me = mmNodeBtn("center", ME_NAME, "me");
+  place(me, cx, cy);
+  if (!nB){
+    const e = el("div", "mm-empty", "Add your first branch on the right, like 과제, 대외활동 or 프로젝트.");
+    box.appendChild(e);
+  }
+}
+function renderMindList(){
+  const box = $("mm-list"); box.textContent = "";
+  const brs = mmBranches();
+  if (!brs.length){ box.appendChild(el("div", "empty", "No branches yet. Add one, like 과제, 대외활동 or 프로젝트.")); return; }
+  for (const b of brs){
+    const g = el("div", "ml-b"); g.style.setProperty("--c", mmColor(b));
+    const h = el("button"); h.type = "button";
+    if (b.activity){ const s = el("span", "star", "★"); s.setAttribute("aria-hidden", "true"); h.appendChild(s); }
+    h.appendChild(document.createTextNode(b.label + (b.done ? " ✓" : "")));
+    h.setAttribute("aria-pressed", ME.sel === b.id ? "true" : "false");
+    h.addEventListener("click", () => mmSelect(b.id));
+    g.appendChild(h);
+    for (const it of mmItems(b, false)){
+      const r = el("button", "ml-i" + (it.done ? " done" : ""), (it.virtual ? "◦ " : "· ") + it.label);
+      r.type = "button"; r.setAttribute("aria-pressed", ME.sel === it.id ? "true" : "false");
+      r.addEventListener("click", () => mmSelect(it.id));
+      g.appendChild(r);
+    }
+    box.appendChild(g);
+  }
+}
+function mmInputRow(placeholder, btnText, onAdd, value){
+  const f = el("form", "mp-row"); f.autocomplete = "off";
+  const i = el("input", "inp"); i.type = "text"; i.maxLength = 120; i.placeholder = placeholder; i.setAttribute("aria-label", placeholder);
+  if (value != null) i.value = value;
+  const b = el("button", "btn", btnText); b.type = "submit";
+  f.append(i, b);
+  f.addEventListener("submit", e => { e.preventDefault(); const v = i.value.trim(); if (!v) { i.focus(); return; } onAdd(v); i.value = ""; });
+  return f;
+}
+function renderPanel(){
+  const P = $("mm-panel"); P.textContent = "";
+  if (ME.off){ P.appendChild(el("div", "mp-hint", "The mindmap works when the dashboard is open in Claude.")); return; }
+  if (!ME.mindReady){ P.appendChild(el("div", "mp-hint", ME.err ? "Couldn't load your mindmap. Reopen the page." : "Loading your mindmap…")); return; }
+  const n = mmFind(ME.sel);
+  if (!n || n.center){
+    P.appendChild(el("div", "mp-k", "Add a branch"));
+    P.appendChild(mmInputRow("Branch name, e.g. 대외활동", "Add", v => mmAddBranch(v)));
+    P.appendChild(el("p", "mp-hint", "Click a branch or item to edit it. Branches marked ★ Activity belong on your resume: when you complete one of them, or an item on it, you're asked to add it to the resume below."));
+    return;
+  }
+  if (!n.parent){
+    const b = n, items = mmItems(b, true);
+    P.appendChild(el("div", "mp-k", "Branch"));
+    const name = mmInputRow("Branch name", "Rename", v => mmUpdate(b, {label: v}), b.label);
+    P.appendChild(name);
+    const act = el("label", "sw-row"); const cb = el("input"); cb.type = "checkbox"; cb.checked = !!b.activity;
+    cb.addEventListener("change", () => mmUpdate(b, {activity: cb.checked}));
+    const t = el("span"); t.appendChild(document.createTextNode("★ Activity")); t.appendChild(el("small", null, "Completed items go to your resume"));
+    act.append(cb, t); P.appendChild(act);
+    if (b.activity){
+      const r = el("label", "fld"); r.appendChild(document.createTextNode("Resume category"));
+      const sel = el("select");
+      for (const [k, ko, en] of RS_CATS){ const o = el("option", null, ko + " · " + en); o.value = k; if ((b.cat || "act") === k) o.selected = true; sel.appendChild(o); }
+      sel.addEventListener("change", () => mmUpdate(b, {cat: sel.value}));
+      r.appendChild(sel); P.appendChild(r);
+    }
+    const lk = el("label", "sw-row"); const lc = el("input"); lc.type = "checkbox"; lc.checked = b.link === TODO_LINK;
+    lc.addEventListener("change", () => mmUpdate(b, {link: lc.checked ? TODO_LINK : null}));
+    const lt = el("span"); lt.appendChild(document.createTextNode("Show my 과제 to-dos")); lt.appendChild(el("small", null, "Unfinished 과제 tasks from the To-Do list appear here"));
+    lk.append(lc, lt); P.appendChild(lk);
+    P.appendChild(el("div", "mp-k", "Items (" + items.length + ")"));
+    const ul = el("div", "mp-items");
+    if (!items.length) ul.appendChild(el("div", "mp-note", "No items yet."));
+    for (const it of items){
+      const r = el("div", "mp-it" + (it.done ? " done" : ""));
+      const s = el("span", null, (it.virtual ? "◦ " : "") + it.label); r.appendChild(s);
+      const go = el("button", "linkbtn", "Open"); go.type = "button"; go.addEventListener("click", () => { ME.sel = it.id; renderMind(); });
+      r.appendChild(go); ul.appendChild(r);
+    }
+    P.appendChild(ul);
+    P.appendChild(mmInputRow("New item", "Add", v => mmAddItem(b, v)));
+    P.appendChild(nodeActions(b));
+    return;
+  }
+  const b = mmBranchOf(n);
+  P.appendChild(el("div", "mp-k", "Item on " + (b ? b.label : "a branch")));
+  if (n.virtual){
+    P.appendChild(el("div", null, n.label));
+    const di = dueInfo(n.todo);
+    P.appendChild(el("div", "mp-note", "From your To-Do list" + (di ? " · " + di.text : "") + ". Marking it done here also checks it off there."));
+  } else {
+    P.appendChild(mmInputRow("Item name", "Rename", v => mmUpdate(n, {label: v}), n.label));
+  }
+  P.appendChild(nodeActions(n));
+}
+function nodeActions(n){
+  const wrap = el("div", "mp-acts");
+  const act = mmIsAct(n);
+  if (!n.done){
+    const c = el("button", "btn pri", n.virtual ? "Mark done" : (act ? "Complete → resume" : "Mark complete")); c.type = "button";
+    c.addEventListener("click", () => mmComplete(n)); wrap.appendChild(c);
+  } else {
+    const u = el("button", "btn", "Undo complete"); u.type = "button"; u.addEventListener("click", () => mmUndo(n)); wrap.appendChild(u);
+    if (act && !(n.resumeId && ME.rs.some(r => r.id === n.resumeId))){
+      const r = el("button", "btn pri", "Add to resume"); r.type = "button"; r.addEventListener("click", () => openResumeFromNode(n)); wrap.appendChild(r);
+    }
+  }
+  if (!n.virtual){
+    const d = el("button", "linkbtn danger", ME.armed === n.id ? (n.parent ? "Click again to delete" : "Click again: deletes the branch and its items") : "Delete"); d.type = "button";
+    d.addEventListener("click", () => mmArm(n)); wrap.appendChild(d);
+  }
+  const box = el("div"); box.style.display = "flex"; box.style.flexDirection = "column"; box.style.gap = "8px";
+  box.appendChild(wrap);
+  if (n.resumeId && ME.rs.some(r => r.id === n.resumeId)){
+    const ok = el("div", "mp-note ok", "On your resume. ");
+    const o = el("button", "linkbtn", "Open entry"); o.type = "button";
+    o.addEventListener("click", () => { const r = ME.rs.find(x => x.id === n.resumeId); if (r) openResume(r); });
+    ok.appendChild(o); box.appendChild(ok);
+  }
+  return box;
+}
+
+/* ----- resume ----- */
+const ymText = v => v ? v.replace("-", ".") : "";
+function parseYm(v){
+  v = (v || "").trim(); if (!v) return "";
+  const m = /^(\d{4})[.\-\/ ]?(\d{1,2})$/.exec(v);
+  if (!m || +m[2] < 1 || +m[2] > 12) return false;
+  return m[1] + "-" + pad(+m[2]);
+}
+function rsWhen(r, lang){
+  const now = lang === "en" ? "Present" : "현재";
+  const s = ymText(r.start), e = r.ongoing ? now : ymText(r.end);
+  if (!s && !e) return "";
+  if (!s) return e; if (!e || e === s) return s;
+  return s + " – " + e;
+}
+function rsField(r, lang, f){
+  const a = (r[lang] || {})[f], o = (r[lang === "en" ? "ko" : "en"] || {})[f];
+  return a ? {t: a, fb: false} : (o ? {t: o, fb: true} : {t: "", fb: false});
+}
+function rsSorted(list){
+  return list.slice().sort((a, b) => (b.ongoing ? 1 : 0) - (a.ongoing ? 1 : 0)
+    || (b.end || b.start || "").localeCompare(a.end || a.start || "") || (b.start || "").localeCompare(a.start || "") || (b.createdAt || 0) - (a.createdAt || 0));
+}
+function renderResume(){
+  if (!$("rs-box")) return;
+  const L = ME.lang;
+  $("rs-ko").setAttribute("aria-pressed", L === "ko" ? "true" : "false");
+  $("rs-en").setAttribute("aria-pressed", L === "en" ? "true" : "false");
+  $("rs-print-name").textContent = ME_NAME + (L === "en" ? " · Activities" : " · 활동 이력");
+  const box = $("rs-box"); box.textContent = "";
+  if (ME.off){ box.appendChild(el("div", "empty", "The resume works when the dashboard is open in Claude.")); return; }
+  if (!ME.rsReady){ box.appendChild(el("div", "empty", ME.err ? "Couldn't load your resume. Reopen the page." : "Loading your resume…")); return; }
+  const drafts = ME.rs.filter(r => r.status === "draft").length;
+  $("rs-n").textContent = ME.rs.length ? ME.rs.length + (ME.rs.length === 1 ? " entry" : " entries") + (drafts ? " · " + drafts + " to review" : "") : "";
+  const grid = el("div", "rs-cats");
+  for (const [k, ko, en] of RS_CATS){
+    const sec = el("section", "rs-cat");
+    const h = el("h3", null, L === "en" ? en : ko);
+    const items = rsSorted(ME.rs.filter(r => (r.cat || "act") === k));
+    h.appendChild(el("span", "n", String(items.length)));
+    sec.appendChild(h);
+    const ul = el("ul");
+    if (!items.length) ul.appendChild(el("li", "empty", L === "en" ? "Nothing here yet." : "아직 없습니다."));
+    for (const r of items){
+      const li = el("li", "rs-e");
+      const left = el("div");
+      const t = rsField(r, L, "title");
+      const tt = el("div", "rs-t", t.t || "(untitled)");
+      if (t.fb) tt.appendChild(el("span", "fb", L === "en" ? "(KO)" : "(EN)"));
+      left.appendChild(tt);
+      const org = rsField(r, L, "org").t, role = rsField(r, L, "role").t;
+      if (org || role) left.appendChild(el("div", "rs-m", [role, org].filter(Boolean).join(" · ")));
+      li.appendChild(left);
+      li.appendChild(el("div", "rs-when", rsWhen(r, L)));
+      const d = rsField(r, L, "desc").t;
+      if (d) li.appendChild(el("div", "rs-d", d));
+      if (/^https?:\/\//i.test(r.link || "")){
+        const a = el("a", "rs-link", r.link); a.href = r.link; a.target = "_blank"; a.rel = "noopener noreferrer"; li.appendChild(a);
+      }
+      const tools = el("div", "rs-tools-e");
+      if (r.status === "draft"){
+        tools.appendChild(el("span", "badge", "Draft"));
+        const c = el("button", "linkbtn", "Confirm"); c.type = "button";
+        c.addEventListener("click", () => rsWrite(() => ME.rsCol.doc(r.id).update({status: "ok", updatedAt: Date.now()})));
+        tools.appendChild(c);
+      }
+      const e = el("button", "linkbtn", "Edit"); e.type = "button"; e.addEventListener("click", () => openResume(r));
+      tools.appendChild(e);
+      li.appendChild(tools);
+      ul.appendChild(li);
+    }
+    sec.appendChild(ul);
+    grid.appendChild(sec);
+  }
+  box.appendChild(grid);
+}
+async function rsWrite(fn){
+  if (!ME.rsCol){ rsMsg("The resume works when the dashboard is open in Claude."); return null; }
+  try { const r = await fn(); return r; } catch (e){ rsMsg("Couldn't save that change. Try again."); return null; }
+}
+function rsText(){
+  const L = ME.lang, out = [];
+  for (const [k, ko, en] of RS_CATS){
+    const items = rsSorted(ME.rs.filter(r => (r.cat || "act") === k));
+    if (!items.length) continue;
+    out.push("[" + (L === "en" ? en : ko) + "]");
+    for (const r of items){
+      const t = rsField(r, L, "title").t, org = rsField(r, L, "org").t, role = rsField(r, L, "role").t, d = rsField(r, L, "desc").t, w = rsWhen(r, L);
+      out.push("- " + t + ([role, org].filter(Boolean).length ? " | " + [role, org].filter(Boolean).join(", ") : "") + (w ? " (" + w + ")" : ""));
+      if (d) out.push("  " + d);
+      if (r.link) out.push("  " + r.link);
+    }
+    out.push("");
+  }
+  return out.join("\n").trim();
+}
+async function rsCopy(){
+  const text = rsText();
+  if (!text){ rsMsg("Nothing to copy yet."); return; }
+  let ok = false;
+  try { await navigator.clipboard.writeText(text); ok = true; } catch (e){}
+  if (!ok){
+    const ta = el("textarea"); ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.appendChild(ta); ta.select();
+    try { ok = document.execCommand("copy"); } catch (e){}
+    ta.remove();
+  }
+  if (ok){ rsMsg("Copied " + (ME.lang === "en" ? "the English" : "the Korean") + " list."); setTimeout(() => rsMsg(""), 4000); return; }
+  const ta = el("textarea", "inp"); ta.value = text; ta.rows = 8; ta.style.width = "100%"; ta.readOnly = true;
+  rsMsg("Your browser blocked copying. Select the text below and copy it.", [ta]);
+  ta.focus(); ta.select();
+}
+function rsPrintHtml(){
+  const L = ME.lang, esc = t => String(t).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;"}[c]));
+  let body = "<h1>" + esc(ME_NAME) + "</h1>";
+  for (const [k, ko, en] of RS_CATS){
+    const items = rsSorted(ME.rs.filter(r => (r.cat || "act") === k));
+    if (!items.length) continue;
+    body += "<h2>" + esc(L === "en" ? en : ko) + "</h2>";
+    for (const r of items){
+      const t = rsField(r, L, "title").t, org = rsField(r, L, "org").t, role = rsField(r, L, "role").t, d = rsField(r, L, "desc").t, w = rsWhen(r, L);
+      body += "<div class=e><div class=r><b>" + esc(t) + "</b><span>" + esc(w) + "</span></div>"
+        + ((role || org) ? "<div class=m>" + esc([role, org].filter(Boolean).join(" · ")) + "</div>" : "")
+        + (d ? "<div class=d>" + esc(d) + "</div>" : "") + (r.link ? "<div class=m>" + esc(r.link) + "</div>" : "") + "</div>";
+    }
+  }
+  return "<!doctype html><html lang=\"" + L + "\"><head><meta charset=\"utf-8\"><title>" + esc(ME_NAME) + " resume</title><style>"
+    + "body{font-family:'Malgun Gothic','Apple SD Gothic Neo',system-ui,sans-serif;color:#111;max-width:760px;margin:32px auto;padding:0 24px;line-height:1.5;font-size:13px}"
+    + "h1{font-size:22px;margin:0 0 18px}h2{font-size:14px;border-bottom:1px solid #999;padding-bottom:3px;margin:22px 0 8px}"
+    + ".e{margin:0 0 9px;break-inside:avoid}.r{display:flex;justify-content:space-between;gap:12px}.r span{color:#444;white-space:nowrap}.m{color:#444}.d{margin-top:2px}"
+    + "</style></head><body>" + body + "<script>window.onload=function(){window.print()}<\/script></body></html>";
+}
+async function rsDownload(){
+  try {
+    const dl = window.claude && window.claude.use ? await window.claude.use("downloads") : null;
+    if (!dl){ rsMsg("Downloads aren't available here."); return; }
+    await dl.save({filename: "resume-" + ME.lang + ".html", data: rsPrintHtml()});
+    rsMsg("Saved. Open the file in your browser; it opens the print window, where you can choose Save as PDF.");
+  } catch (e){ if (!(e && e.code === "declined")) rsMsg("Couldn't save the file."); }
+}
+function rsPrint(){
+  if (!ME.rs.length){ rsMsg("Nothing to print yet."); return; }
+  document.body.classList.add("print-rs");
+  const done = () => { document.body.classList.remove("print-rs"); window.removeEventListener("afterprint", done); };
+  window.addEventListener("afterprint", done);
+  try { window.print(); } catch (e){}
+  setTimeout(done, 60000);
+  const b = el("button", "linkbtn", "Download a printable page"); b.type = "button"; b.addEventListener("click", rsDownload);
+  rsMsg("No print window? ", [b]);
+}
+
+/* ----- resume dialog ----- */
+const FD = id => $("f-" + id);
+const F_LANG = ["title", "org", "role", "desc"];
+function fMsg(t){ const m = FD("msg"); m.hidden = !t; m.textContent = t || ""; }
+function fillDialog(r){
+  const sel = FD("cat"); sel.textContent = "";
+  for (const [k, ko, en] of RS_CATS){ const o = el("option", null, ko + " · " + en); o.value = k; sel.appendChild(o); }
+  sel.value = r.cat || "act";
+  FD("start").value = ymText(r.start || ""); FD("end").value = ymText(r.end || ""); FD("on").checked = !!r.ongoing;
+  FD("end").disabled = !!r.ongoing;
+  for (const L of ["ko", "en"]) for (const f of F_LANG) FD(L + "-" + f).value = (r[L] || {})[f] || "";
+  FD("link").value = r.link || "";
+  for (const id of ["start", "end", "link"]) FD(id).removeAttribute("aria-invalid");
+  fMsg("");
+}
+function readDialog(){
+  const start = parseYm(FD("start").value), end = FD("on").checked ? "" : parseYm(FD("end").value);
+  let bad = false;
+  FD("start").toggleAttribute("aria-invalid", start === false); FD("end").toggleAttribute("aria-invalid", end === false);
+  if (start === false || end === false){ fMsg("Write dates as YYYY.MM, like 2026.03, or leave them empty."); bad = true; }
+  const link = FD("link").value.trim();
+  if (link && !/^https?:\/\/\S+$/i.test(link)){ FD("link").setAttribute("aria-invalid", "true"); fMsg("Links must start with http:// or https://."); bad = true; }
+  const r = {cat: FD("cat").value, start: start || "", end: end || "", ongoing: FD("on").checked, link, ko: {}, en: {}};
+  for (const L of ["ko", "en"]) for (const f of F_LANG) r[L][f] = FD(L + "-" + f).value.trim();
+  if (!r.ko.title && !r.en.title){ fMsg("Add a title in Korean or English."); FD("ko-title").focus(); bad = true; }
+  return bad ? null : r;
+}
+function openDialog(title, sub, r){
+  $("rs-dt").textContent = title; $("rs-dsub").textContent = sub || "";
+  fillDialog(r);
+  FD("del").hidden = !ME.editing;
+  FD("del").textContent = "Delete entry"; FD("del").dataset.armed = "";
+  const d = $("rs-dlg");
+  try { d.showModal(); } catch (e){ d.setAttribute("open", ""); }
+  setTimeout(() => FD(r.ko && r.ko.title ? "ko-role" : "ko-title").focus(), 30);
+}
+function closeDialog(){ const d = $("rs-dlg"); try { d.close(); } catch (e){ d.removeAttribute("open"); } ME.editing = null; ME.fromNode = null; }
+function openResume(r){ ME.editing = r; ME.fromNode = null; openDialog("Edit resume entry", r.status === "draft" ? "Draft · saving confirms it" : "", r); }
+function openNewResume(prefill, sub){ ME.editing = null; ME.fromNode = null; openDialog("Add to resume", sub || "", prefill || {cat: "act"}); }
+function openResumeFromNode(n){
+  const b = mmBranchOf(n), isItem = !!n.parent;
+  const ym = d => { const x = new Date(d); return x.getFullYear() + "-" + pad(x.getMonth() + 1); };
+  const pre = {cat: (b && b.cat) || "act", start: n.createdAt ? ym(n.createdAt) : "", end: ym(n.doneAt || Date.now()), ongoing: false,
+    ko: {title: n.label, org: "", role: "", desc: ""}, en: {}};
+  ME.editing = null; ME.fromNode = n;
+  openDialog("Add to your resume", "Completed: " + n.label + (isItem && b ? " (" + b.label + ")" : "") + ". Add the organization, your role and a one-line result, then save.", pre);
+}
+function openResumeEnd(r, n){
+  const d = new Date(), cur = Object.assign({}, r, {ongoing: false, end: d.getFullYear() + "-" + pad(d.getMonth() + 1)});
+  ME.editing = r; ME.fromNode = null;
+  openDialog("Update your resume entry", "Completed: " + n.label + ". Check the end date and add your result, then save.", cur);
+}
+async function saveDialog(){
+  const r = readDialog(); if (!r) return;
+  const now = Date.now();
+  FD("save").disabled = true;
+  try {
+    if (ME.editing){
+      await ME.rsCol.doc(ME.editing.id).update(Object.assign(r, {status: "ok", updatedAt: now}));
+    } else {
+      const ref = await ME.rsCol.add(Object.assign(r, {status: "ok", source: ME.fromNode ? "mind:" + ME.fromNode.id : "manual", createdAt: now, updatedAt: now}));
+      if (ME.fromNode && ref && ref.id && ME.mindCol) await ME.mindCol.doc(ME.fromNode.id).update({resumeId: ref.id});
+    }
+    closeDialog();
+  } catch (e){ fMsg("Couldn't save. Try again."); }
+  finally { FD("save").disabled = false; }
+}
+async function deleteFromDialog(){
+  const btn = FD("del");
+  if (!btn.dataset.armed){ btn.dataset.armed = "1"; btn.textContent = "Click again to delete"; setTimeout(() => { btn.dataset.armed = ""; btn.textContent = "Delete entry"; }, 4000); return; }
+  const r = ME.editing; if (!r) return;
+  try {
+    await ME.rsCol.doc(r.id).delete();
+    for (const n of ME.nodes.filter(x => x.resumeId === r.id)) await ME.mindCol.doc(n.id).update({resumeId: null});
+    closeDialog();
+  } catch (e){ fMsg("Couldn't delete. Try again."); }
+}
+async function translateDialog(){
+  const s = await getSample();
+  if (!s){ fMsg("Claude isn't available here. Fill the other language yourself."); return; }
+  const cur = {ko: {}, en: {}};
+  for (const L of ["ko", "en"]) for (const f of F_LANG) cur[L][f] = FD(L + "-" + f).value.trim();
+  const has = L => F_LANG.some(f => cur[L][f]);
+  if (!has("ko") && !has("en")){ fMsg("Write the entry in one language first."); return; }
+  const btn = FD("tr"); btn.disabled = true; btn.textContent = "Translating…"; fMsg("");
+  try {
+    const out = await s.json(
+      "Translate a university student's resume entry so both languages are complete. Keep proper names, organization names and numbers as they are (use the official English or Korean name when one is well known). "
+      + "Fill only fields that are empty in one language and filled in the other; never add facts. Resume style: short, no full stops in titles.\n\n"
+      + "Current entry as JSON:\n" + JSON.stringify(cur) + "\n\nReply with only JSON of the same shape: {\"ko\":{\"title\",\"org\",\"role\",\"desc\"},\"en\":{\"title\",\"org\",\"role\",\"desc\"}}.",
+      {modelTier: "quick"});
+    for (const L of ["ko", "en"]) for (const f of F_LANG){
+      const box = FD(L + "-" + f), v = out && out[L] && typeof out[L][f] === "string" ? out[L][f].trim() : "";
+      if (!box.value.trim() && v) box.value = v;
+    }
+  } catch (e){ const m = sampleErr(e); if (m) fMsg(m.replace("sort", "translate")); }
+  finally { btn.disabled = false; btn.textContent = "Fill the other language with Claude"; }
+}
+async function quickAdd(text){
+  const s = await getSample();
+  if (!s){ rsMsg("Claude isn't available here. Use + Form instead."); return; }
+  const btn = $("rs-qbtn"); btn.disabled = true; btn.textContent = "Sorting…"; rsMsg("");
+  try {
+    const out = await s.json(
+      "Sort one resume entry for a Korean university student (computer science). Today is " + ymd(new Date()) + ".\n"
+      + "Categories: act = 대외활동·동아리 (clubs, MUN conferences, student organizations, programs, hackathons or competitions joined without a prize); "
+      + "award = 수상·장학금 (awards, prizes, competition results, scholarships); proj = 프로젝트 (things they built: apps, games, websites, research); "
+      + "exp = 경력·봉사·자격증 (jobs, tutoring, internships, volunteering, certificates, language test scores).\n"
+      + "Entry the student typed: \"\"\"" + text.replace(/"""/g, "\"") + "\"\"\"\n\n"
+      + "Reply with only JSON: {\"cat\":\"act|award|proj|exp\",\"ko\":{\"title\":\"\",\"org\":\"\",\"role\":\"\",\"desc\":\"\"},\"en\":{\"title\":\"\",\"org\":\"\",\"role\":\"\",\"desc\":\"\"},\"start\":\"YYYY-MM or empty\",\"end\":\"YYYY-MM or empty\",\"ongoing\":false,\"link\":\"\"}. "
+      + "Fill both languages (translate naturally, keep proper names). Leave a field empty when the entry doesn't say it; never invent roles, results or dates. "
+      + "Dates without a year are in the current school year. desc is one short line, or empty.",
+      {modelTier: "quick", cache: false});
+    const pick = (o, f) => (o && typeof o[f] === "string") ? o[f].trim() : "";
+    const ym = v => { const x = parseYm(String(v || "").replace(/^(\d{4})-(\d{1,2}).*$/, "$1.$2")); return x || ""; };
+    const pre = {cat: RS_CATS.some(c => c[0] === out.cat) ? out.cat : "act", start: ym(out.start), end: ym(out.end), ongoing: !!out.ongoing, link: /^https?:\/\//i.test(out.link || "") ? out.link : "", ko: {}, en: {}};
+    for (const L of ["ko", "en"]) for (const f of F_LANG) pre[L][f] = pick(out[L], f);
+    if (!pre.ko.title && !pre.en.title) pre.ko.title = text.slice(0, 160);
+    $("rs-q").value = "";
+    openNewResume(pre, "Claude sorted this into " + rsCat(pre.cat)[1] + ". Check it, then save.");
+  } catch (e){ const m = sampleErr(e); if (m) rsMsg(m); }
+  finally { btn.disabled = false; btn.textContent = "Sort with Claude"; }
+}
+
+/* ----- view switch + boot ----- */
+function setTab(t, focus){
+  ME.tab = t;
+  try { localStorage.setItem("ld-view", t); } catch (e){}
+  $("view-dash").hidden = t !== "dash"; $("view-me").hidden = t !== "me";
+  for (const [id, v] of [["tab-dash", "dash"], ["tab-me", "me"]]){
+    const b = $(id); b.setAttribute("aria-selected", t === v ? "true" : "false"); b.tabIndex = t === v ? 0 : -1;
+    if (focus && t === v) b.focus();
+  }
+  if (t === "me"){ renderMind(); renderResume(); }
+}
+function meBoot(db, uid){
+  ME.mindCol = db.doc("data/users/" + uid + "/mind").collection("nodes");
+  ME.rsCol = db.doc("data/users/" + uid + "/resume").collection("items");
+  const slow = setTimeout(() => { if (!ME.mindReady || !ME.rsReady){ ME.err = true; renderMind(); renderResume(); } }, 10000);
+  ME.mindCol.onSnapshot(snap => {
+    ME.nodes = snap.docs.map(d => Object.assign({id: d.id}, d.data())); ME.mindReady = true; ME.err = false;
+    if (ME.rsReady) clearTimeout(slow); renderMind();
+  }, () => { ME.err = true; meMsg("Mindmap sync stopped. Reopen the page."); renderMind(); });
+  ME.rsCol.onSnapshot(snap => {
+    ME.rs = snap.docs.map(d => Object.assign({id: d.id}, d.data())); ME.rsReady = true; ME.err = false;
+    if (ME.mindReady) clearTimeout(slow); renderResume(); renderPanel();
+  }, () => { ME.err = true; rsMsg("Resume sync stopped. Reopen the page."); renderResume(); });
+}
+function initMe(){
+  $("tab-dash").addEventListener("click", () => setTab("dash"));
+  $("tab-me").addEventListener("click", () => setTab("me"));
+  $("tab-dash").parentElement.addEventListener("keydown", e => {
+    if (e.key === "ArrowRight" || e.key === "ArrowLeft"){ e.preventDefault(); setTab(ME.tab === "dash" ? "me" : "dash", true); }
+  });
+  $("mm-v-map").addEventListener("click", () => { ME.view = "map"; try { localStorage.setItem("ld-mm-view", "map"); } catch (e){} renderMind(); });
+  $("mm-v-list").addEventListener("click", () => { ME.view = "list"; try { localStorage.setItem("ld-mm-view", "list"); } catch (e){} renderMind(); });
+  $("mm-donetog").addEventListener("click", () => { ME.hideDone = !ME.hideDone; try { localStorage.setItem("ld-mm-hide", ME.hideDone ? "1" : "0"); } catch (e){} renderMind(); });
+  $("rs-ko").addEventListener("click", () => { ME.lang = "ko"; try { localStorage.setItem("ld-rs-lang", "ko"); } catch (e){} renderResume(); });
+  $("rs-en").addEventListener("click", () => { ME.lang = "en"; try { localStorage.setItem("ld-rs-lang", "en"); } catch (e){} renderResume(); });
+  $("rs-copy").addEventListener("click", rsCopy);
+  $("rs-print").addEventListener("click", rsPrint);
+  $("rs-form").addEventListener("click", () => openNewResume({cat: "act"}));
+  $("rs-quick").addEventListener("submit", e => {
+    e.preventDefault();
+    const v = $("rs-q").value.trim(); if (!v){ $("rs-q").focus(); return; }
+    if (!ME.rsCol){ rsMsg("The resume works when the dashboard is open in Claude."); return; }
+    quickAdd(v);
+  });
+  $("rs-fm").addEventListener("submit", e => { e.preventDefault(); saveDialog(); });
+  FD("cancel").addEventListener("click", closeDialog);
+  FD("del").addEventListener("click", deleteFromDialog);
+  FD("tr").addEventListener("click", translateDialog);
+  FD("on").addEventListener("change", () => { FD("end").disabled = FD("on").checked; if (FD("on").checked) FD("end").value = ""; });
+  $("rs-dlg").addEventListener("close", () => { ME.editing = null; ME.fromNode = null; });
+  $("rs-q").className = "inp";
+  let rT = null;
+  if (window.ResizeObserver) new ResizeObserver(() => { clearTimeout(rT); rT = setTimeout(() => { if (ME.tab === "me") renderMind(); }, 80); }).observe($("mm").parentElement);
+  setTab(ME.tab);
+}
+
 /* ---------- to-do ---------- */
 /* A crossed-out task stays visible until midnight, is then stored (hidden but restorable),
    and is deleted 24 hours after that, i.e. at the second midnight after it was crossed out.
@@ -1700,6 +2517,7 @@ function localFallback(){
   noteLocal = true;
   DROP.off = true; renderDrop();
   HK.off = true; renderHack();
+  ME.off = true; renderMind(); renderResume();
   TODO.local = true;
   try { TODO.items = JSON.parse(localStorage.getItem("ld-todo") || "[]"); } catch (e){ TODO.items = []; }
   TODO.ready = true; renderTodo(); renderHeadsUp(); todoCleanup();
@@ -1725,9 +2543,10 @@ async function bootStore(){
   db.doc("data/users/" + uid + "/hackathons").collection("items").onSnapshot(snap => {
     HK.items = snap.docs.map(d => Object.assign({id: d.id}, d.data())); HK.ready = true; renderHack();
   }, () => { HK.err = true; renderHack(); });
+  meBoot(db, uid);
   TODO.col = db.doc("data/users/" + uid + "/todo").collection("items");
   TODO.col.orderBy("createdAt", "asc").onSnapshot(snap => {
-    TODO.items = snap.docs.map(d => Object.assign({id: d.id}, d.data())); TODO.ready = true; renderTodo(); renderHeadsUp(); todoCleanup();
+    TODO.items = snap.docs.map(d => Object.assign({id: d.id}, d.data())); TODO.ready = true; renderTodo(); renderHeadsUp(); todoCleanup(); renderMind();
   }, () => { todoMsg("To-do sync stopped. Reopen the page."); });
   noteRef = col.doc("note"); doneRef = col.doc("done"); hiddenRef = col.doc("hidden");
   hiddenRef.onSnapshot(s => { const d = s.data(); S.hidden = (d && d.items) || {}; renderHeadsUp(); renderMail(); }, () => {});
@@ -1802,6 +2621,7 @@ setInterval(() => {
 }, 30000);
 
 renderAll();
+initMe();
 bootMcp();
 bootStore();
 })();

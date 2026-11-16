@@ -12,7 +12,7 @@ A personal dashboard that pulls my Google Calendar and Gmail into one dark, quie
 
 | Part | What it is | Where it runs |
 |---|---|---|
-| **Dashboard** | One page with today's events as a to-do list (time, color, details), the next 7 days, key emails, a heads-up list, a to-do list, a free-time finder, a hackathon list, a drop box and a sticky note | Claude artifact, reading Calendar and Gmail live each time it opens |
+| **Dashboard** | One page with today's events as a to-do list (time, color, details), the next 7 days, key emails, a heads-up list, a to-do list, a free-time finder, a hackathon list, a drop box, a sticky note, and a "Me" tab with a mindmap and resume tracker | Claude artifact, reading Calendar and Gmail live each time it opens |
 | **Laptop launcher** | Opens the dashboard as an app window about 5–10 seconds after Windows sign-in | Windows Startup folder |
 | **Morning brief** | Push at 05:47 with today's events only | Claude scheduled task (cloud) |
 | **Tomorrow preview** | Push at 21:44 with tomorrow's events, flagging early starts | Claude scheduled task (cloud) |
@@ -54,6 +54,7 @@ I built this over two days by describing what I wanted to Claude, testing the re
 13. **Fix and limit: notifications.** I asked for a second evening push for to-dos due in 2 days. Testing showed two problems: the evening brief arrived twice (it was sent through two routes). My first fix kept the wrong route, and the next night's pushes never arrived, so the runs now send their own push exactly once, and the scheduled runs can't read the dashboard's storage, so they never saw my to-dos. Instead of copying tasks into my Google Calendar, I chose to show D-2 tasks in the dashboard's Heads up, with no push.
 14. **Feature: a hackathon list.** I wanted the hackathons open for applications in Seoul and Gyeonggi (ones farther away only if they have a very high prize, are entry level, take a single day or have an interesting twist), with name, dates, host and topic, each linking to its recruitment notice (모집공고). A Claude page can't browse the web on its own, so Claude reads the notices on sites like Linkareer and Event-us when I ask and saves the list in the dashboard's private storage. The page shows open ones first, sorted by deadline, warns when a deadline is three days or less away, hides closed ones behind a toggle, and says when the list was last checked.
 15. **Fix: pushes stopped arriving.** Two runs in a row showed "Push failed" instead of my schedule: the runs could read my calendar, but the push tool they used was no longer there. The "run finished" notification, though, reached my phone every time. So the runs now put the brief itself in that notification and use no separate push at all. If Google Calendar can't be read, the message says Claude's connectors are failing and tells me to double-check my schedule, instead of telling me to reconnect.
+16. **Feature: a "Me" tab with a mindmap and a resume tracker.** I wanted one place that shows what's going on in my life right now, and a running list of my activities so I never have to dig for them when filling out an application. The mindmap puts me in the center with a branch for each area (과제, 대외활동, 프로젝트…), and the 과제 branch pulls in my unfinished to-dos. Branches I mark as "Activity" feed the resume: when I complete one, a confirm card opens pre-filled so I can add my role and result. The resume sorts entries into four categories, keeps each one in Korean and English, can be filled by typing a sentence that Claude sorts into fields, and can be copied as text or printed to PDF.
 
 What I take from this: the AI wrote the code quickly, but every bug above was found by using the thing for real. The AI's tests didn't catch any of them. Most of my work was in deciding what it should do and noticing when it didn't.
 
@@ -80,7 +81,7 @@ This is not a standalone web app. The page uses Claude's artifact runtime (`wind
 
 1. In claude.ai, connect the **Google Calendar** and **Gmail** connectors.
 2. Ask Claude to publish `dashboard/life-dashboard.html` as an artifact with these capabilities:
-   `mcp` (Google Calendar: `list_calendars`, `list_events`; Gmail: `search_threads`), `db`, `user`, `assets` and `downloads`.
+   `mcp` (Google Calendar: `list_calendars`, `list_events`; Gmail: `search_threads`), `db`, `user`, `assets`, `downloads` and `sample`.
    Then replace the placeholder calendar IDs in `CAL_COLORS` with your own and set their colors.
 3. Ask Claude to create the three scheduled tasks from the files in `scheduled-tasks/`. Replace `YOUR_EMAIL@gmail.com` and adjust the time zone if you are not in Seoul.
 4. On Windows, put your artifact link in place of `YOUR_ARTIFACT_ID` in `windows/install.ps1` and `windows/launch.ps1`, keep the folder somewhere permanent and double-click `Install Life Dashboard.cmd`.
