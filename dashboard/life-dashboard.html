@@ -290,6 +290,11 @@ ul{list-style:none;margin:0;padding:0}
 .mp-note.ok{color:var(--ok)}
 
 /* Resume */
+.rs-stages{display:flex;gap:2px;border-bottom:1px solid var(--line)}
+.rs-stages button{background:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;padding:6px 14px;font-size:13px;color:var(--muted);cursor:pointer}
+.rs-stages button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent);font-weight:600}
+.rs-stages .n{margin-left:6px}
+.fr .fld.sm2{flex:0 1 170px}
 .rs-quick{display:flex;gap:8px;flex-wrap:wrap}
 .rs-quick .inp{flex:1 1 280px}
 .rs-cats{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px 22px}
@@ -618,6 +623,10 @@ ul{list-style:none;margin:0;padding:0}
           <button class="btn" id="rs-print" type="button">Print / PDF</button>
         </span>
       </div>
+      <div class="rs-stages" role="tablist" aria-label="Period">
+        <button type="button" role="tab" id="rs-st-uni" aria-selected="true">대학교</button>
+        <button type="button" role="tab" id="rs-st-hs" aria-selected="false" tabindex="-1">고등학교</button>
+      </div>
       <form class="rs-quick" id="rs-quick" autocomplete="off">
         <label for="rs-q" hidden>Describe an activity</label>
         <input id="rs-q" type="text" maxlength="600" placeholder="Type anything, e.g. “Model UN 2026 delegate, 11/21–22, best delegate award”">
@@ -634,6 +643,7 @@ ul{list-style:none;margin:0;padding:0}
   <form id="rs-fm" novalidate>
     <div class="dlg-h"><h3 id="rs-dt">Add to resume</h3><span class="note-s" id="rs-dsub"></span></div>
     <div class="fr">
+      <label class="fld sm2">Period<select id="f-stage"><option value="uni">대학교 · University</option><option value="hs">고등학교 · High school</option></select></label>
       <label class="fld">Category<select id="f-cat"></select></label>
       <label class="fld sm">Start<input id="f-start" type="text" inputmode="numeric" placeholder="2026.03" maxlength="7"></label>
       <label class="fld sm">End<input id="f-end" type="text" inputmode="numeric" placeholder="2026.11" maxlength="7"></label>
@@ -1430,13 +1440,14 @@ const MM_COLORS = ["#86b7c9", "#7fc39b", "#e3b263", "#b39ddb", "#e0796d", "#4db6
 const TODO_LINK = "todo:과제";
 const ME = {
   off: false, err: false, mindReady: false, rsReady: false, nodes: [], rs: [], mindCol: null, rsCol: null,
-  sel: null, armed: null, armT: null, lang: "ko", view: "map", hideDone: false, tab: "dash",
+  sel: null, armed: null, armT: null, lang: "ko", view: "map", hideDone: false, tab: "dash", stage: "uni",
   sampleP: null, editing: null, fromNode: null, busy: false
 };
 try {
   ME.view = localStorage.getItem("ld-mm-view") === "list" ? "list" : "map";
   ME.hideDone = localStorage.getItem("ld-mm-hide") === "1";
   ME.lang = localStorage.getItem("ld-rs-lang") === "en" ? "en" : "ko";
+  ME.stage = localStorage.getItem("ld-rs-stage") === "hs" ? "hs" : "uni";
   ME.tab = localStorage.getItem("ld-view") === "me" ? "me" : "dash";
 } catch (e){}
 
@@ -1742,7 +1753,12 @@ function renderResume(){
   const L = ME.lang;
   $("rs-ko").setAttribute("aria-pressed", L === "ko" ? "true" : "false");
   $("rs-en").setAttribute("aria-pressed", L === "en" ? "true" : "false");
-  $("rs-print-name").textContent = ME_NAME + (L === "en" ? " · Activities" : " · 활동 이력");
+  $("rs-print-name").textContent = ME_NAME + " · " + stageName(ME.stage, L);
+  for (const st of ["uni", "hs"]){
+    const b = $("rs-st-" + st), c = ME.rs.filter(r => rsStage(r) === st).length;
+    b.textContent = stageName(st, L); if (c) b.appendChild(el("span", "n", String(c)));
+    b.setAttribute("aria-selected", ME.stage === st ? "true" : "false"); b.tabIndex = ME.stage === st ? 0 : -1;
+  }
   const box = $("rs-box"); box.textContent = "";
   if (ME.off){ box.appendChild(el("div", "empty", "The resume works when the dashboard is open in Claude.")); return; }
   if (!ME.rsReady){ box.appendChild(el("div", "empty", ME.err ? "Couldn't load your resume. Reopen the page." : "Loading your resume…")); return; }
@@ -1752,7 +1768,7 @@ function renderResume(){
   for (const [k, ko, en] of RS_CATS){
     const sec = el("section", "rs-cat");
     const h = el("h3", null, L === "en" ? en : ko);
-    const items = rsSorted(ME.rs.filter(r => (r.cat || "act") === k));
+    const items = rsSorted(rsInStage().filter(r => (r.cat || "act") === k));
     h.appendChild(el("span", "n", String(items.length)));
     sec.appendChild(h);
     const ul = el("ul");
@@ -1794,10 +1810,13 @@ async function rsWrite(fn){
   if (!ME.rsCol){ rsMsg("The resume works when the dashboard is open in Claude."); return null; }
   try { const r = await fn(); return r; } catch (e){ rsMsg("Couldn't save that change. Try again."); return null; }
 }
+function rsStage(r){ return r.stage === "hs" ? "hs" : "uni"; }
+function rsInStage(){ return ME.rs.filter(r => rsStage(r) === ME.stage); }
+function stageName(st, L){ return st === "hs" ? (L === "en" ? "High School" : "고등학교") : (L === "en" ? "University" : "대학교"); }
 function rsText(){
   const L = ME.lang, out = [];
   for (const [k, ko, en] of RS_CATS){
-    const items = rsSorted(ME.rs.filter(r => (r.cat || "act") === k));
+    const items = rsSorted(rsInStage().filter(r => (r.cat || "act") === k));
     if (!items.length) continue;
     out.push("[" + (L === "en" ? en : ko) + "]");
     for (const r of items){
@@ -1812,7 +1831,7 @@ function rsText(){
 }
 async function rsCopy(){
   const text = rsText();
-  if (!text){ rsMsg("Nothing to copy yet."); return; }
+  if (!text){ rsMsg("Nothing to copy in this tab yet."); return; }
   let ok = false;
   try { await navigator.clipboard.writeText(text); ok = true; } catch (e){}
   if (!ok){
@@ -1820,16 +1839,16 @@ async function rsCopy(){
     try { ok = document.execCommand("copy"); } catch (e){}
     ta.remove();
   }
-  if (ok){ rsMsg("Copied " + (ME.lang === "en" ? "the English" : "the Korean") + " list."); setTimeout(() => rsMsg(""), 4000); return; }
+  if (ok){ rsMsg("Copied the " + (ME.lang === "en" ? "English" : "Korean") + " " + stageName(ME.stage, "en").toLowerCase() + " list."); setTimeout(() => rsMsg(""), 4000); return; }
   const ta = el("textarea", "inp"); ta.value = text; ta.rows = 8; ta.style.width = "100%"; ta.readOnly = true;
   rsMsg("Your browser blocked copying. Select the text below and copy it.", [ta]);
   ta.focus(); ta.select();
 }
 function rsPrintHtml(){
   const L = ME.lang, esc = t => String(t).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;"}[c]));
-  let body = "<h1>" + esc(ME_NAME) + "</h1>";
+  let body = "<h1>" + esc(ME_NAME) + " · " + esc(stageName(ME.stage, L)) + "</h1>";
   for (const [k, ko, en] of RS_CATS){
-    const items = rsSorted(ME.rs.filter(r => (r.cat || "act") === k));
+    const items = rsSorted(rsInStage().filter(r => (r.cat || "act") === k));
     if (!items.length) continue;
     body += "<h2>" + esc(L === "en" ? en : ko) + "</h2>";
     for (const r of items){
@@ -1849,12 +1868,12 @@ async function rsDownload(){
   try {
     const dl = window.claude && window.claude.use ? await window.claude.use("downloads") : null;
     if (!dl){ rsMsg("Downloads aren't available here."); return; }
-    await dl.save({filename: "resume-" + ME.lang + ".html", data: rsPrintHtml()});
+    await dl.save({filename: "resume-" + ME.stage + "-" + ME.lang + ".html", data: rsPrintHtml()});
     rsMsg("Saved. Open the file in your browser; it opens the print window, where you can choose Save as PDF.");
   } catch (e){ if (!(e && e.code === "declined")) rsMsg("Couldn't save the file."); }
 }
 function rsPrint(){
-  if (!ME.rs.length){ rsMsg("Nothing to print yet."); return; }
+  if (!rsInStage().length){ rsMsg("Nothing to print in this tab yet."); return; }
   document.body.classList.add("print-rs");
   const done = () => { document.body.classList.remove("print-rs"); window.removeEventListener("afterprint", done); };
   window.addEventListener("afterprint", done);
@@ -1872,6 +1891,7 @@ function fillDialog(r){
   const sel = FD("cat"); sel.textContent = "";
   for (const [k, ko, en] of RS_CATS){ const o = el("option", null, ko + " · " + en); o.value = k; sel.appendChild(o); }
   sel.value = r.cat || "act";
+  FD("stage").value = r.stage === "hs" ? "hs" : (r.stage === "uni" ? "uni" : ME.stage);
   FD("start").value = ymText(r.start || ""); FD("end").value = ymText(r.end || ""); FD("on").checked = !!r.ongoing;
   FD("end").disabled = !!r.ongoing;
   for (const L of ["ko", "en"]) for (const f of F_LANG) FD(L + "-" + f).value = (r[L] || {})[f] || "";
@@ -1886,7 +1906,7 @@ function readDialog(){
   if (start === false || end === false){ fMsg("Write dates as YYYY.MM, like 2026.03, or leave them empty."); bad = true; }
   const link = FD("link").value.trim();
   if (link && !/^https?:\/\/\S+$/i.test(link)){ FD("link").setAttribute("aria-invalid", "true"); fMsg("Links must start with http:// or https://."); bad = true; }
-  const r = {cat: FD("cat").value, start: start || "", end: end || "", ongoing: FD("on").checked, link, ko: {}, en: {}};
+  const r = {stage: FD("stage").value === "hs" ? "hs" : "uni", cat: FD("cat").value, start: start || "", end: end || "", ongoing: FD("on").checked, link, ko: {}, en: {}};
   for (const L of ["ko", "en"]) for (const f of F_LANG) r[L][f] = FD(L + "-" + f).value.trim();
   if (!r.ko.title && !r.en.title){ fMsg("Add a title in Korean or English."); FD("ko-title").focus(); bad = true; }
   return bad ? null : r;
@@ -1906,7 +1926,7 @@ function openNewResume(prefill, sub){ ME.editing = null; ME.fromNode = null; ope
 function openResumeFromNode(n){
   const b = mmBranchOf(n), isItem = !!n.parent;
   const ym = d => { const x = new Date(d); return x.getFullYear() + "-" + pad(x.getMonth() + 1); };
-  const pre = {cat: (b && b.cat) || "act", start: n.createdAt ? ym(n.createdAt) : "", end: ym(n.doneAt || Date.now()), ongoing: false,
+  const pre = {stage: "uni", cat: (b && b.cat) || "act", start: n.createdAt ? ym(n.createdAt) : "", end: ym(n.doneAt || Date.now()), ongoing: false,
     ko: {title: n.label, org: "", role: "", desc: ""}, en: {}};
   ME.editing = null; ME.fromNode = n;
   openDialog("Add to your resume", "Completed: " + n.label + (isItem && b ? " (" + b.label + ")" : "") + ". Add the organization, your role and a one-line result, then save.", pre);
@@ -1968,22 +1988,23 @@ async function quickAdd(text){
   const btn = $("rs-qbtn"); btn.disabled = true; btn.textContent = "Sorting…"; rsMsg("");
   try {
     const out = await s.json(
-      "Sort one resume entry for a Korean university student (computer science). Today is " + ymd(new Date()) + ".\n"
+      "Sort one resume entry for a Korean university student (computer science, started university in 2025). Today is " + ymd(new Date()) + ".\n"
+      + "Period: hs if the entry is clearly from high school, uni if it is clearly from university, otherwise \"" + ME.stage + "\".\n"
       + "Categories: act = 대외활동·동아리 (clubs, MUN conferences, student organizations, programs, hackathons or competitions joined without a prize); "
       + "award = 수상·장학금 (awards, prizes, competition results, scholarships); proj = 프로젝트 (things they built: apps, games, websites, research); "
       + "exp = 경력·봉사·자격증 (jobs, tutoring, internships, volunteering, certificates, language test scores).\n"
       + "Entry the student typed: \"\"\"" + text.replace(/"""/g, "\"") + "\"\"\"\n\n"
-      + "Reply with only JSON: {\"cat\":\"act|award|proj|exp\",\"ko\":{\"title\":\"\",\"org\":\"\",\"role\":\"\",\"desc\":\"\"},\"en\":{\"title\":\"\",\"org\":\"\",\"role\":\"\",\"desc\":\"\"},\"start\":\"YYYY-MM or empty\",\"end\":\"YYYY-MM or empty\",\"ongoing\":false,\"link\":\"\"}. "
+      + "Reply with only JSON: {\"stage\":\"uni|hs\",\"cat\":\"act|award|proj|exp\",\"ko\":{\"title\":\"\",\"org\":\"\",\"role\":\"\",\"desc\":\"\"},\"en\":{\"title\":\"\",\"org\":\"\",\"role\":\"\",\"desc\":\"\"},\"start\":\"YYYY-MM or empty\",\"end\":\"YYYY-MM or empty\",\"ongoing\":false,\"link\":\"\"}. "
       + "Fill both languages (translate naturally, keep proper names). Leave a field empty when the entry doesn't say it; never invent roles, results or dates. "
       + "Dates without a year are in the current school year. desc is one short line, or empty.",
       {modelTier: "quick", cache: false});
     const pick = (o, f) => (o && typeof o[f] === "string") ? o[f].trim() : "";
     const ym = v => { const x = parseYm(String(v || "").replace(/^(\d{4})-(\d{1,2}).*$/, "$1.$2")); return x || ""; };
-    const pre = {cat: RS_CATS.some(c => c[0] === out.cat) ? out.cat : "act", start: ym(out.start), end: ym(out.end), ongoing: !!out.ongoing, link: /^https?:\/\//i.test(out.link || "") ? out.link : "", ko: {}, en: {}};
+    const pre = {stage: out.stage === "hs" || out.stage === "uni" ? out.stage : ME.stage, cat: RS_CATS.some(c => c[0] === out.cat) ? out.cat : "act", start: ym(out.start), end: ym(out.end), ongoing: !!out.ongoing, link: /^https?:\/\//i.test(out.link || "") ? out.link : "", ko: {}, en: {}};
     for (const L of ["ko", "en"]) for (const f of F_LANG) pre[L][f] = pick(out[L], f);
     if (!pre.ko.title && !pre.en.title) pre.ko.title = text.slice(0, 160);
     $("rs-q").value = "";
-    openNewResume(pre, "Claude sorted this into " + rsCat(pre.cat)[1] + ". Check it, then save.");
+    openNewResume(pre, "Claude sorted this into " + stageName(pre.stage, "ko") + " · " + rsCat(pre.cat)[1] + ". Check it, then save.");
   } catch (e){ const m = sampleErr(e); if (m) rsMsg(m); }
   finally { btn.disabled = false; btn.textContent = "Sort with Claude"; }
 }
@@ -2025,7 +2046,11 @@ function initMe(){
   $("rs-en").addEventListener("click", () => { ME.lang = "en"; try { localStorage.setItem("ld-rs-lang", "en"); } catch (e){} renderResume(); });
   $("rs-copy").addEventListener("click", rsCopy);
   $("rs-print").addEventListener("click", rsPrint);
-  $("rs-form").addEventListener("click", () => openNewResume({cat: "act"}));
+  $("rs-form").addEventListener("click", () => openNewResume({cat: "act", stage: ME.stage}));
+  for (const st of ["uni", "hs"]) $("rs-st-" + st).addEventListener("click", () => { ME.stage = st; try { localStorage.setItem("ld-rs-stage", st); } catch (e){} renderResume(); });
+  $("rs-st-uni").parentElement.addEventListener("keydown", e => {
+    if (e.key === "ArrowRight" || e.key === "ArrowLeft"){ e.preventDefault(); ME.stage = ME.stage === "uni" ? "hs" : "uni"; try { localStorage.setItem("ld-rs-stage", ME.stage); } catch (x){} renderResume(); $("rs-st-" + ME.stage).focus(); }
+  });
   $("rs-quick").addEventListener("submit", e => {
     e.preventDefault();
     const v = $("rs-q").value.trim(); if (!v){ $("rs-q").focus(); return; }
