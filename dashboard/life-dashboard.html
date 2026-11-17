@@ -255,6 +255,9 @@ ul{list-style:none;margin:0;padding:0}
 .mm svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .mm{touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
 .mm.spinning,.mm.spinning .mnode{cursor:grabbing}
+.mnode.back{background:var(--c);color:#0f1215;border:0;font-weight:600;font-size:12.5px;padding:5px 12px 5px 10px;box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 25%,transparent)}
+.mnode.back:hover{color:#0f1215;filter:brightness(1.1)}
+.mnode.back .bk-ar{margin-right:6px;font-weight:700}
 .mm-hint{position:absolute;right:12px;bottom:10px;font-size:11px;color:var(--dim);pointer-events:none;letter-spacing:.04em}
 .mnode{position:absolute;left:0;top:0;transform:translate(-50%,-50%);max-width:150px;padding:4px 10px;border-radius:999px;border:1px solid var(--line-strong);background:var(--raise);font-size:12px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;color:var(--muted)}
 .mnode:hover{border-color:var(--dim);color:var(--fg)}
@@ -1598,10 +1601,11 @@ function renderMap(){
   box.style.height = H + "px";
   const NS = "http://www.w3.org/2000/svg";
   const svg = document.createElementNS(NS, "svg"); svg.setAttribute("aria-hidden", "true"); box.appendChild(svg);
-  const mkLine = (c, w, op) => {
+  const mkLine = (c, w, op, dash) => {
     const l = document.createElementNS(NS, "line");
     l.setAttribute("stroke", c); l.setAttribute("stroke-width", w); l.setAttribute("stroke-linecap", "round");
     if (op) l.setAttribute("stroke-opacity", op);
+    if (dash) l.setAttribute("stroke-dasharray", "4 5");
     svg.appendChild(l); return l;
   };
   const setLine = (l, x1, y1, x2, y2) => { l.setAttribute("x1", x1); l.setAttribute("y1", y1); l.setAttribute("x2", x2); l.setAttribute("y2", y2); };
@@ -1610,12 +1614,15 @@ function renderMap(){
   const clampX = x => Math.max(80, Math.min(W - 80, x)), clampY = y => Math.max(18, Math.min(H - 18, y));
   const focus = mmNode(ME.focus);
   const kids = mmVisibleKids(focus ? focus.id : null), nK = kids.length;
+  /* inside a branch, one extra spoke on the ring leads back up a level */
+  const nRing = nK + (focus ? 1 : 0);
   const r1x = W * 0.26, r1y = H * 0.28, r2x = W * 0.43, r2y = H * 0.43;
-  const span = nK <= 1 ? 2.2 : Math.min(1.5, (2 * Math.PI / nK) * 0.85);
+  const span = nRing <= 1 ? 2.2 : Math.min(1.5, (2 * Math.PI / nRing) * 0.85);
+  const slot = i => -Math.PI / 2 + i * 2 * Math.PI / Math.max(nRing, 1);
   const rec = [], front = [];
   kids.forEach((k, i) => {
     const c = mmColor(k);
-    const p = {a0: -Math.PI / 2 + i * 2 * Math.PI / Math.max(nK, 1), line: mkLine(c, 2), kids: []};
+    const p = {a0: slot(i), line: mkLine(c, 2), kids: []};
     let g = mmVisibleKids(k.id);
     const MAX = 5, more = g.length > MAX ? g.length - (MAX - 1) : 0;
     if (more) g = g.slice(0, MAX - 1);
@@ -1632,6 +1639,16 @@ function renderMap(){
     p.b = mmNodeBtn("br" + (k.done ? " done" : ""), k, {count: true});
     front.push(p.b); rec.push(p);
   });
+  if (focus){
+    const up = mmNode(focus.parent), c = up ? mmColor(up) : "#86b7c9";
+    const b = el("button", "mnode back"); b.type = "button";
+    const ar = el("span", "bk-ar", "↩"); ar.setAttribute("aria-hidden", "true"); b.appendChild(ar);
+    b.appendChild(document.createTextNode(up ? up.label : ME_NAME));
+    b.title = "Back to " + (up ? up.label : ME_NAME); b.setAttribute("aria-label", "Back to " + (up ? up.label : ME_NAME));
+    b.style.setProperty("--c", c);
+    b.addEventListener("click", () => mmFocus(focus.parent || null));
+    front.push(b); rec.push({a0: slot(nK), line: mkLine(c, 1.6, 0.7, true), kids: [], b});
+  }
   for (const b of front) box.appendChild(b);
   const apply = rot => {
     for (const p of rec){
@@ -1651,13 +1668,9 @@ function renderMap(){
     b.addEventListener("click", () => mmSelect("me")); return b; })();
   if (focus) center.style.setProperty("--c", mmColor(focus));
   pos(center, cx, cy); box.appendChild(center);
-  if (focus){
-    const up = el("button", "linkbtn mm-up", "↑ Up to " + (focus.parent ? mmNode(focus.parent).label : ME_NAME)); up.type = "button";
-    up.addEventListener("click", () => mmFocus(focus.parent || null)); box.appendChild(up);
-  }
   if (!nK) box.appendChild(el("div", "mm-empty", focus ? "Nothing inside yet. Add a milestone on the right." : "Add your first life domain on the right."));
-  else if (nK > 1){ const h = el("div", "mm-hint", "Drag to spin"); h.setAttribute("aria-hidden", "true"); box.appendChild(h); }
-  ME.mapApply = nK > 1 ? apply : null; ME.mapGeom = {cx, cy};
+  if (nRing > 1){ const h = el("div", "mm-hint", "Drag to spin"); h.setAttribute("aria-hidden", "true"); box.appendChild(h); }
+  ME.mapApply = nRing > 1 ? apply : null; ME.mapGeom = {cx, cy};
 }
 /* Hold and drag anywhere on the map to spin the ring around the center; let go and it coasts. */
 function initSpin(){
