@@ -253,6 +253,9 @@ ul{list-style:none;margin:0;padding:0}
 .mm-stage{min-width:0}
 .mm{position:relative;height:520px;border:1px solid var(--line);border-radius:8px;background:radial-gradient(ellipse at center,#141a21 0%,var(--panel) 70%);overflow:hidden}
 .mm svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.mm{touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.mm.spinning,.mm.spinning .mnode{cursor:grabbing}
+.mm-hint{position:absolute;right:12px;bottom:10px;font-size:11px;color:var(--dim);pointer-events:none;letter-spacing:.04em}
 .mnode{position:absolute;left:0;top:0;transform:translate(-50%,-50%);max-width:150px;padding:4px 10px;border-radius:999px;border:1px solid var(--line-strong);background:var(--raise);font-size:12px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;color:var(--muted)}
 .mnode:hover{border-color:var(--dim);color:var(--fg)}
 .mnode.center{padding:10px 18px;font-size:15px;font-weight:600;background:var(--accent);color:#0f1215;border:0;cursor:pointer;max-width:180px}
@@ -263,7 +266,23 @@ ul{list-style:none;margin:0;padding:0}
 .mnode[aria-pressed="true"]{outline:2px solid var(--accent);outline-offset:2px;color:var(--fg)}
 .star{color:var(--warn);margin-right:4px;text-decoration:none;display:inline-block}
 .mm-empty{position:absolute;left:50%;top:calc(50% + 46px);transform:translateX(-50%);color:var(--dim);font-size:12.5px;text-align:center;width:min(320px,90%)}
-.mm-list{display:flex;flex-direction:column;gap:10px}
+.mm-crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12.5px;margin-bottom:8px;min-height:20px}
+.mm-crumbs .sep{color:var(--dim)}
+.mm-crumbs .cur{color:var(--fg);font-weight:600}
+.mm-up{position:absolute;left:12px;top:10px;font-size:12px}
+.mnode .kc{font-size:10px;color:var(--dim);margin-left:6px;font-weight:400;font-family:var(--mono)}
+.mnode.center .kc{color:inherit;opacity:.7}
+.mnode.center{background:var(--c,var(--accent))}
+.mnode.br{border-color:var(--c)}
+.mnode.it{border-color:color-mix(in srgb,var(--c) 45%,var(--line-strong))}
+.mm-list{display:flex;flex-direction:column;gap:2px}
+.ml-row{display:flex;align-items:center;gap:4px;padding-left:calc(var(--d) * 18px);border-left:3px solid transparent}
+.ml-row[style*="--d: 0"],.ml-row[style*="--d:0"]{border-left-color:var(--c);margin-top:6px}
+.ml-tg{width:22px;height:24px;background:none;border:0;color:var(--muted);cursor:pointer;font-size:12px;flex:none}
+.ml-n{background:none;border:0;text-align:left;cursor:pointer;color:var(--fg);font-size:13px;padding:3px 4px;border-radius:4px;flex:1;min-width:0;overflow-wrap:anywhere}
+.ml-n[aria-pressed="true"]{background:var(--accent-soft)}
+.ml-n .kc{font-size:10.5px;color:var(--dim);margin-left:6px;font-family:var(--mono)}
+.ml-row.done .ml-n{text-decoration:line-through;opacity:.55}
 .ml-b{border:1px solid var(--line);border-left:3px solid var(--c);border-radius:8px;padding:8px 10px;background:var(--raise)}
 .ml-b > button,.ml-i{background:none;border:0;padding:2px 0;text-align:left;cursor:pointer;color:var(--fg);font-size:13px;display:block;width:100%}
 .ml-b > button{font-weight:600}
@@ -297,14 +316,14 @@ ul{list-style:none;margin:0;padding:0}
 .fr .fld.sm2{flex:0 1 170px}
 .rs-quick{display:flex;gap:8px;flex-wrap:wrap}
 .rs-quick .inp{flex:1 1 280px}
-.rs-cats{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px 22px}
+.rs-cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px 22px}
 .rs-cat h3{margin:0 0 6px;font-size:12px;font-weight:600;color:var(--muted);display:flex;gap:8px;align-items:baseline}
 .rs-cat ul{display:flex;flex-direction:column}
 .rs-e{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;padding:9px 0;border-top:1px solid var(--line)}
 .rs-e:first-child{border-top:0}
 .rs-t{font-weight:600;font-size:13.5px;overflow-wrap:anywhere;word-break:keep-all}
 .rs-m{font-size:12.5px;color:var(--muted);overflow-wrap:anywhere;word-break:keep-all}
-.rs-d{font-size:12.5px;color:var(--muted);overflow-wrap:anywhere;word-break:keep-all;grid-column:1/-1}
+.rs-d{font-size:12.5px;color:var(--muted);overflow-wrap:anywhere;word-break:keep-all;grid-column:1/-1;white-space:pre-line}
 .rs-when{font-family:var(--mono);font-size:11.5px;color:var(--dim);font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
 .rs-link{font-size:12px;color:var(--accent);grid-column:1/-1;overflow-wrap:anywhere}
 .rs-tools-e{grid-column:1/-1;display:flex;gap:12px;align-items:center}
@@ -606,6 +625,7 @@ ul{list-style:none;margin:0;padding:0}
       </div>
       <div class="mm-body">
         <div class="mm-stage">
+          <nav class="mm-crumbs" id="mm-crumbs" aria-label="Mindmap path"></nav>
           <div class="mm" id="mm" aria-label="Mindmap"></div>
           <div class="mm-list" id="mm-list" hidden></div>
         </div>
@@ -1424,24 +1444,26 @@ function renderHack(){
 })();
 
 /* ---------- Me: mindmap + resume ---------- */
-/* Mindmap nodes live in data/users/<uid>/mind/nodes: a branch has parent null, an item has
-   its branch's id as parent. A branch marked "activity" belongs on a resume: completing it,
-   or any item on it, opens a confirm card that adds a resume entry.
+/* Mindmap nodes live in data/users/<uid>/mind/nodes as a tree of any depth (life domain →
+   category → project/organization → milestone). Nodes marked ★ belong on the resume.
    Resume entries live in data/users/<uid>/resume/items, in Korean and English. */
 const ME_NAME = "Me";
 const RS_CATS = [
+  ["edu", "학력", "Education"],
   ["act", "대외활동 · 동아리", "Activities & Clubs"],
   ["award", "수상 · 장학금", "Awards & Scholarships"],
   ["proj", "프로젝트", "Projects"],
-  ["exp", "경력 · 봉사 · 자격증", "Experience, Volunteering & Certificates"]
+  ["exp", "경력 · 봉사 · 자격증", "Experience, Volunteering & Certificates"],
+  ["lang", "어학", "Languages"]
 ];
+/* Languages aren't tied to a school, so they show only in the University tab. */
+const catsFor = st => RS_CATS.filter(c => !(st === "hs" && c[0] === "lang"));
 const rsCat = k => RS_CATS.find(c => c[0] === k) || RS_CATS[0];
 const MM_COLORS = ["#86b7c9", "#7fc39b", "#e3b263", "#b39ddb", "#e0796d", "#4db6ac", "#f48fb1", "#a1887f"];
-const TODO_LINK = "todo:과제";
 const ME = {
   off: false, err: false, mindReady: false, rsReady: false, nodes: [], rs: [], mindCol: null, rsCol: null,
   sel: null, armed: null, armT: null, lang: "ko", view: "map", hideDone: false, tab: "dash", stage: "uni",
-  sampleP: null, editing: null, fromNode: null, busy: false
+  sampleP: null, editing: null, fromNode: null, busy: false, focus: null, openL: null
 };
 try {
   ME.view = localStorage.getItem("ld-mm-view") === "list" ? "list" : "map";
@@ -1473,44 +1495,41 @@ function sampleErr(e){
 }
 
 /* ----- mindmap data ----- */
-function mmBranches(){ return ME.nodes.filter(n => !n.parent).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)); }
-function mmBranchOf(n){ return n && n.parent ? ME.nodes.find(b => b.id === n.parent) || null : n; }
-function mmIsAct(n){ const b = mmBranchOf(n); return !!(b && b.activity); }
-function mmColor(b){ return MM_COLORS[(Number(b && b.color) || 0) % MM_COLORS.length]; }
-function mmItems(b, all){
-  let items = ME.nodes.filter(n => n.parent === b.id).sort((x, y) => (x.createdAt || 0) - (y.createdAt || 0));
-  if (b.link === TODO_LINK && TODO.ready){
-    const td = TODO.items.filter(t => !t.done && (t.group || "그 외") === "과제")
-      .map(t => ({id: "td:" + t.id, label: t.text, parent: b.id, virtual: true, todo: t, done: false, createdAt: t.createdAt}));
-    items = td.concat(items);
+/* A node: {label, parent (id or null for a life domain), star: null | "entry" | "group",
+   cat (resume category for a starred node), done, doneAt, resumeId, color (domains), createdAt}.
+   ★ entry: this node is one resume entry. ★ group: each node directly inside it is its own entry.
+   Finishing anything below an entry adds it to that entry as a result line. */
+const kidsOf = id => ME.nodes.filter(n => (n.parent || null) === (id || null)).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+function mmNode(id){ return id ? ME.nodes.find(n => n.id === id) || null : null; }
+function mmPath(n){ const p = []; let x = n, g = 0; while (x && g++ < 40){ p.push(x); x = mmNode(x.parent); } return p; } /* self → domain */
+function mmDomain(n){ const p = mmPath(n); return p[p.length - 1] || null; }
+function mmColor(n){ const d = mmDomain(n); return MM_COLORS[(Number(d && d.color) || 0) % MM_COLORS.length]; }
+function mmCount(n){ let c = 0; for (const k of kidsOf(n.id)) c += 1 + mmCount(k); return c; }
+function mmVisibleKids(id){ const k = kidsOf(id); return ME.hideDone ? k.filter(n => !n.done) : k; }
+/* Where a finished node goes on the resume: {target, starNode} or null. */
+function mmTarget(n){
+  const p = mmPath(n);
+  for (let i = 0; i < p.length; i++){
+    if (p[i].star === "entry") return {target: p[i], star: p[i]};
+    if (p[i].star === "group") return i > 0 ? {target: p[i - 1], star: p[i]} : null;
   }
-  if (!all && ME.hideDone) items = items.filter(n => !n.done);
-  return items;
+  return null;
 }
-function mmFind(id){
-  if (!id) return null;
-  if (id === "me") return {id: "me", center: true};
-  if (id.startsWith("td:")){
-    for (const b of mmBranches()){ const x = mmItems(b, true).find(n => n.id === id); if (x) return x; }
-    return null;
-  }
-  return ME.nodes.find(n => n.id === id) || null;
-}
-function mmSelect(id){ ME.sel = (ME.sel === id) ? null : id; ME.armed = null; renderMind(); }
-async function mmAddBranch(label){
-  const ref = await mmWrite(() => ME.mindCol.add({label, parent: null, activity: false, cat: "act", link: null,
-    color: mmBranches().length % MM_COLORS.length, done: false, doneAt: null, resumeId: null, createdAt: Date.now()}));
-  if (ref && ref.id){ ME.sel = ref.id; renderMind(); }
-}
-async function mmAddItem(b, label){
-  await mmWrite(() => ME.mindCol.add({label, parent: b.id, done: false, doneAt: null, resumeId: null, createdAt: Date.now()}));
+function mmEntryOf(node){ return node && node.resumeId ? ME.rs.find(r => r.id === node.resumeId) || null : null; }
+function mmSelect(id){ ME.sel = id; ME.armed = null; renderMind(); }
+function mmFocus(id){ ME.focus = id || null; ME.sel = id || null; ME.armed = null; renderMind(); }
+async function mmAdd(parent, label){
+  const doc = {label, parent: parent ? parent.id : null, star: null, cat: "act", done: false, doneAt: null, resumeId: null, createdAt: Date.now()};
+  if (!parent) doc.color = kidsOf(null).length % MM_COLORS.length;
+  await mmWrite(() => ME.mindCol.add(doc));
 }
 function mmUpdate(n, patch){ return mmWrite(() => ME.mindCol.doc(n.id).update(patch)); }
 async function mmDelete(n){
-  if (!n.parent){ for (const c of ME.nodes.filter(x => x.parent === n.id)) await mmWrite(() => ME.mindCol.doc(c.id).delete()); }
-  await mmWrite(() => ME.mindCol.doc(n.id).delete());
-  if (ME.sel === n.id) ME.sel = null;
-  renderMind();
+  const all = []; (function walk(x){ for (const k of kidsOf(x.id)) walk(k); all.push(x); })(n);
+  for (const x of all) await mmWrite(() => ME.mindCol.doc(x.id).delete());
+  const up = n.parent || null;
+  if (ME.focus && !mmNode(ME.focus)) ME.focus = up;
+  ME.sel = up; ME.armed = null; renderMind();
 }
 function mmArm(n){
   if (ME.armed === n.id){ ME.armed = null; mmDelete(n); return; }
@@ -1518,120 +1537,198 @@ function mmArm(n){
   clearTimeout(ME.armT); ME.armT = setTimeout(() => { ME.armed = null; renderMind(); }, 4000);
 }
 async function mmComplete(n){
-  if (n.virtual){ await todoUpdate(n.todo, {done: true, doneAt: Date.now()}); ME.sel = null; renderMind(); return; }
   await mmUpdate(n, {done: true, doneAt: Date.now()});
-  if (!mmIsAct(n)) return;
-  const linked = n.resumeId && ME.rs.find(r => r.id === n.resumeId);
-  if (linked) openResumeEnd(linked, n); else openResumeFromNode(n);
+  const t = mmTarget(n); if (!t) return;
+  openResumeFromNode(n, t);
 }
 function mmUndo(n){ return mmUpdate(n, {done: false, doneAt: null}); }
 
 /* ----- mindmap render ----- */
 function renderMind(){
-  if (typeof $ !== "function" || !$("mm")) return;
+  if (!$("mm")) return;
   const map = $("mm"), list = $("mm-list");
   $("mm-v-map").setAttribute("aria-pressed", ME.view === "map" ? "true" : "false");
   $("mm-v-list").setAttribute("aria-pressed", ME.view === "list" ? "true" : "false");
   $("mm-donetog").textContent = ME.hideDone ? "Show completed" : "Hide completed";
-  const narrow = map.parentElement.clientWidth > 0 && map.parentElement.clientWidth < 520;
+  const stage = map.parentElement;
+  const narrow = stage.clientWidth > 0 && stage.clientWidth < 520;
   const view = narrow ? "list" : ME.view;
-  map.hidden = view !== "map"; list.hidden = view !== "list";
-  const br = mmBranches();
-  const open = br.reduce((k, b) => k + mmItems(b, true).filter(n => !n.done).length, 0);
-  $("mm-n").textContent = br.length ? br.length + (br.length === 1 ? " branch" : " branches") + " · " + open + " open" : "";
-  if (ME.sel && !mmFind(ME.sel)) ME.sel = null;
-  if (ME.tab === "me"){ if (view === "map") renderMap(); else renderMindList(); }
+  map.hidden = view !== "map"; list.hidden = view !== "list"; $("mm-crumbs").hidden = view !== "map";
+  if (ME.focus && !mmNode(ME.focus)) ME.focus = null;
+  if (ME.sel && ME.sel !== "me" && !mmNode(ME.sel)) ME.sel = null;
+  const total = ME.nodes.length, open = ME.nodes.filter(n => !n.done && !kidsOf(n.id).length).length;
+  $("mm-n").textContent = total ? kidsOf(null).length + " domains · " + open + " open milestones" : "";
+  if (ME.tab === "me"){ if (view === "map"){ renderCrumbs(); renderMap(); } else renderMindList(); }
   renderPanel();
 }
-function mmNodeBtn(cls, text, id, extra){
-  const b = el("button", "mnode " + cls);
-  b.type = "button";
-  if (extra && extra.star){ const s = el("span", "star", "★"); s.setAttribute("aria-hidden", "true"); b.appendChild(s); }
-  b.appendChild(document.createTextNode(text));
-  b.title = text;
-  if (id){ b.setAttribute("aria-pressed", ME.sel === id ? "true" : "false"); b.addEventListener("click", () => mmSelect(id)); }
+function renderCrumbs(){
+  const c = $("mm-crumbs"); c.textContent = "";
+  const trail = ME.focus ? mmPath(mmNode(ME.focus)).reverse() : [];
+  const add = (label, id, last) => {
+    if (last){ const s = el("span", "cur", label); s.setAttribute("aria-current", "page"); c.appendChild(s); return; }
+    const b = el("button", "linkbtn", label); b.type = "button"; b.addEventListener("click", () => mmFocus(id)); c.appendChild(b);
+    c.appendChild(el("span", "sep", "›"));
+  };
+  add(ME_NAME, null, !trail.length);
+  trail.forEach((n, i) => add(n.label, n.id, i === trail.length - 1));
+}
+function mmNodeBtn(cls, n, opts){
+  const b = el("button", "mnode " + cls); b.type = "button";
+  if (n.star){ const s = el("span", "star", "★"); s.setAttribute("aria-hidden", "true"); b.appendChild(s); }
+  b.appendChild(document.createTextNode(n.label));
+  const kids = kidsOf(n.id).length;
+  if (opts && opts.count && kids){ const k = el("span", "kc", String(mmCount(n))); k.setAttribute("aria-hidden", "true"); b.appendChild(k); }
+  b.title = n.label + (n.star === "entry" ? " · ★ resume entry" : n.star === "group" ? " · ★ group: each item inside is a resume entry" : "") + (kids ? " · " + mmCount(n) + " inside, click to open" : "");
+  b.setAttribute("aria-pressed", ME.sel === n.id ? "true" : "false");
+  b.style.setProperty("--c", mmColor(n));
+  b.addEventListener("click", () => {
+    if (kidsOf(n.id).length && ME.focus !== n.id) mmFocus(n.id);
+    else if (!kidsOf(n.id).length && n.parent !== (ME.focus || null) && n.parent) { ME.focus = n.parent; mmSelect(n.id); }
+    else mmSelect(n.id);
+  });
   return b;
 }
+/* The ring around the center can be spun like a disc: ME.rots holds each view's angle. */
+const mmRotKey = () => ME.focus || "root";
 function renderMap(){
   const box = $("mm"); box.textContent = "";
+  ME.mapApply = null;
   const W = box.clientWidth; if (!W) return;
-  const H = Math.round(Math.min(640, Math.max(440, W * 0.62)));
+  const H = Math.round(Math.min(620, Math.max(440, W * 0.6)));
   box.style.height = H + "px";
   const NS = "http://www.w3.org/2000/svg";
-  const svg = document.createElementNS(NS, "svg"); svg.setAttribute("aria-hidden", "true");
-  box.appendChild(svg);
-  const line = (x1, y1, x2, y2, c, w, dash) => {
+  const svg = document.createElementNS(NS, "svg"); svg.setAttribute("aria-hidden", "true"); box.appendChild(svg);
+  const mkLine = (c, w, op) => {
     const l = document.createElementNS(NS, "line");
-    l.setAttribute("x1", x1); l.setAttribute("y1", y1); l.setAttribute("x2", x2); l.setAttribute("y2", y2);
     l.setAttribute("stroke", c); l.setAttribute("stroke-width", w); l.setAttribute("stroke-linecap", "round");
-    if (dash) l.setAttribute("stroke-dasharray", "3 4");
-    svg.appendChild(l);
+    if (op) l.setAttribute("stroke-opacity", op);
+    svg.appendChild(l); return l;
   };
+  const setLine = (l, x1, y1, x2, y2) => { l.setAttribute("x1", x1); l.setAttribute("y1", y1); l.setAttribute("x2", x2); l.setAttribute("y2", y2); };
+  const pos = (b, x, y) => { b.style.left = x + "px"; b.style.top = y + "px"; };
   const cx = W / 2, cy = H / 2;
-  const clampX = x => Math.max(78, Math.min(W - 78, x)), clampY = y => Math.max(18, Math.min(H - 18, y));
-  const place = (b, x, y) => { b.style.left = x + "px"; b.style.top = y + "px"; box.appendChild(b); };
-  const brs = mmBranches(), nB = brs.length;
-  const r1x = W * 0.25, r1y = H * 0.27, r2x = W * 0.43, r2y = H * 0.43;
-  const span = nB <= 1 ? 2.2 : Math.min(1.5, (2 * Math.PI / nB) * 0.85);
-  const nodes = [];
-  brs.forEach((b, i) => {
-    const a = -Math.PI / 2 + i * 2 * Math.PI / Math.max(nB, 1);
-    const bx = clampX(cx + r1x * Math.cos(a)), by = clampY(cy + r1y * Math.sin(a));
-    const c = mmColor(b);
-    line(cx, cy, bx, by, c, 2);
-    let items = mmItems(b, false);
-    const MAX = 6, more = items.length > MAX ? items.length - (MAX - 1) : 0;
-    if (more) items = items.slice(0, MAX - 1);
-    const n = items.length + (more ? 1 : 0);
-    const step = n > 1 ? Math.min(0.36, span / (n - 1)) : 0;
-    const placeItem = (k, btn) => {
-      const ia = a + (k - (n - 1) / 2) * step;
-      const ix = clampX(cx + r2x * Math.cos(ia)), iy = clampY(cy + r2y * Math.sin(ia));
-      line(bx, by, ix, iy, "#3b4652", 1.2, btn.classList.contains("td"));
-      nodes.push([btn, ix, iy]);
-    };
-    items.forEach((it, k) => {
-      const btn = mmNodeBtn("it" + (it.done ? " done" : "") + (it.virtual ? " td" : ""), it.label, it.id);
-      if (it.virtual){ const di = dueInfo(it.todo); if (di) btn.title = it.label + " · " + di.text; }
-      placeItem(k, btn);
+  const clampX = x => Math.max(80, Math.min(W - 80, x)), clampY = y => Math.max(18, Math.min(H - 18, y));
+  const focus = mmNode(ME.focus);
+  const kids = mmVisibleKids(focus ? focus.id : null), nK = kids.length;
+  const r1x = W * 0.26, r1y = H * 0.28, r2x = W * 0.43, r2y = H * 0.43;
+  const span = nK <= 1 ? 2.2 : Math.min(1.5, (2 * Math.PI / nK) * 0.85);
+  const rec = [], front = [];
+  kids.forEach((k, i) => {
+    const c = mmColor(k);
+    const p = {a0: -Math.PI / 2 + i * 2 * Math.PI / Math.max(nK, 1), line: mkLine(c, 2), kids: []};
+    let g = mmVisibleKids(k.id);
+    const MAX = 5, more = g.length > MAX ? g.length - (MAX - 1) : 0;
+    if (more) g = g.slice(0, MAX - 1);
+    const n = g.length + (more ? 1 : 0), step = n > 1 ? Math.min(0.36, span / (n - 1)) : 0;
+    g.forEach((gk, j) => {
+      const b = mmNodeBtn("it" + (gk.done ? " done" : ""), gk, {count: true}); box.appendChild(b);
+      p.kids.push({off: (j - (n - 1) / 2) * step, line: mkLine(c, 1.2, 0.45), b});
     });
     if (more){
-      const m = mmNodeBtn("it more", "+" + more + " more", null);
-      m.addEventListener("click", () => { ME.sel = b.id; renderMind(); });
-      placeItem(n - 1, m);
+      const m = el("button", "mnode it more", "+" + more + " more"); m.type = "button";
+      m.addEventListener("click", () => mmFocus(k.id)); box.appendChild(m);
+      p.kids.push({off: (n - 1 - (n - 1) / 2) * step, line: mkLine(c, 1.2, 0.45), b: m});
     }
-    const bb = mmNodeBtn("br" + (b.done ? " done" : ""), b.label, b.id, {star: b.activity});
-    bb.style.setProperty("--c", c);
-    nodes.push([bb, bx, by]);
+    p.b = mmNodeBtn("br" + (k.done ? " done" : ""), k, {count: true});
+    front.push(p.b); rec.push(p);
   });
-  for (const [btn, x, y] of nodes) place(btn, x, y);
-  const me = mmNodeBtn("center", ME_NAME, "me");
-  place(me, cx, cy);
-  if (!nB){
-    const e = el("div", "mm-empty", "Add your first branch on the right, like 과제, 대외활동 or 프로젝트.");
-    box.appendChild(e);
+  for (const b of front) box.appendChild(b);
+  const apply = rot => {
+    for (const p of rec){
+      const a = p.a0 + rot, kx = clampX(cx + r1x * Math.cos(a)), ky = clampY(cy + r1y * Math.sin(a));
+      pos(p.b, kx, ky); setLine(p.line, cx, cy, kx, ky);
+      for (const g of p.kids){
+        const ia = a + g.off, x = clampX(cx + r2x * Math.cos(ia)), y = clampY(cy + r2y * Math.sin(ia));
+        pos(g.b, x, y); setLine(g.line, kx, ky, x, y);
+      }
+    }
+  };
+  ME.rots = ME.rots || {};
+  apply(ME.rots[mmRotKey()] || 0);
+  const center = focus ? mmNodeBtn("center" + (focus.done ? " done" : ""), focus, {}) : (() => {
+    const b = el("button", "mnode center", ME_NAME); b.type = "button";
+    b.setAttribute("aria-pressed", ME.sel === "me" || !ME.sel ? "true" : "false");
+    b.addEventListener("click", () => mmSelect("me")); return b; })();
+  if (focus) center.style.setProperty("--c", mmColor(focus));
+  pos(center, cx, cy); box.appendChild(center);
+  if (focus){
+    const up = el("button", "linkbtn mm-up", "↑ Up to " + (focus.parent ? mmNode(focus.parent).label : ME_NAME)); up.type = "button";
+    up.addEventListener("click", () => mmFocus(focus.parent || null)); box.appendChild(up);
   }
+  if (!nK) box.appendChild(el("div", "mm-empty", focus ? "Nothing inside yet. Add a milestone on the right." : "Add your first life domain on the right."));
+  else if (nK > 1){ const h = el("div", "mm-hint", "Drag to spin"); h.setAttribute("aria-hidden", "true"); box.appendChild(h); }
+  ME.mapApply = nK > 1 ? apply : null; ME.mapGeom = {cx, cy};
+}
+/* Hold and drag anywhere on the map to spin the ring around the center; let go and it coasts. */
+function initSpin(){
+  const box = $("mm");
+  const S = {down: false, drag: false, id: null, x: 0, y: 0, lastA: 0, lastT: 0, v: 0, raf: 0, suppress: false};
+  const reduce = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+  const ang = e => { const r = box.getBoundingClientRect(), g = ME.mapGeom || {cx: r.width / 2, cy: r.height / 2}; return Math.atan2(e.clientY - r.top - g.cy, e.clientX - r.left - g.cx); };
+  const stop = () => { if (S.raf) cancelAnimationFrame(S.raf); S.raf = 0; };
+  const turn = d => { const k = mmRotKey(), r = (ME.rots[k] || 0) + d; ME.rots[k] = r; if (ME.mapApply) ME.mapApply(r); };
+  box.addEventListener("pointerdown", e => {
+    if (e.button !== 0 || !ME.mapApply || e.target.closest(".mm-up")) return;
+    stop(); Object.assign(S, {down: true, drag: false, id: e.pointerId, x: e.clientX, y: e.clientY, lastA: ang(e), lastT: performance.now(), v: 0});
+  });
+  box.addEventListener("pointermove", e => {
+    if (!S.down || e.pointerId !== S.id) return;
+    if (!S.drag){
+      if (Math.hypot(e.clientX - S.x, e.clientY - S.y) < 6) return;
+      S.drag = true; box.classList.add("spinning");
+      try { box.setPointerCapture(e.pointerId); } catch (x){}
+    }
+    e.preventDefault();
+    const a = ang(e); let d = a - S.lastA;
+    if (d > Math.PI) d -= 2 * Math.PI; else if (d < -Math.PI) d += 2 * Math.PI;
+    const now = performance.now(), dt = Math.max(1, now - S.lastT);
+    S.v = 0.7 * (d / dt) + 0.3 * S.v; S.lastA = a; S.lastT = now;
+    turn(d);
+  });
+  const end = e => {
+    if (!S.down || e.pointerId !== S.id) return;
+    S.down = false;
+    if (!S.drag) return;
+    S.drag = false; box.classList.remove("spinning");
+    try { box.releasePointerCapture(e.pointerId); } catch (x){}
+    S.suppress = true; setTimeout(() => { S.suppress = false; }, 350);
+    if (reduce || performance.now() - S.lastT > 90 || Math.abs(S.v) < 0.0004) return;
+    const key = mmRotKey(); let last = performance.now();
+    const step = t => {
+      const dt = Math.min(48, t - last); last = t;
+      S.v *= Math.pow(0.9975, dt);
+      if (Math.abs(S.v) < 0.00004 || !ME.mapApply || mmRotKey() !== key){ S.raf = 0; return; }
+      turn(S.v * dt); S.raf = requestAnimationFrame(step);
+    };
+    S.raf = requestAnimationFrame(step);
+  };
+  box.addEventListener("pointerup", end);
+  box.addEventListener("pointercancel", end);
+  box.addEventListener("click", e => { if (S.suppress){ S.suppress = false; e.stopPropagation(); e.preventDefault(); } }, true);
 }
 function renderMindList(){
   const box = $("mm-list"); box.textContent = "";
-  const brs = mmBranches();
-  if (!brs.length){ box.appendChild(el("div", "empty", "No branches yet. Add one, like 과제, 대외활동 or 프로젝트.")); return; }
-  for (const b of brs){
-    const g = el("div", "ml-b"); g.style.setProperty("--c", mmColor(b));
-    const h = el("button"); h.type = "button";
-    if (b.activity){ const s = el("span", "star", "★"); s.setAttribute("aria-hidden", "true"); h.appendChild(s); }
-    h.appendChild(document.createTextNode(b.label + (b.done ? " ✓" : "")));
-    h.setAttribute("aria-pressed", ME.sel === b.id ? "true" : "false");
-    h.addEventListener("click", () => mmSelect(b.id));
-    g.appendChild(h);
-    for (const it of mmItems(b, false)){
-      const r = el("button", "ml-i" + (it.done ? " done" : ""), (it.virtual ? "◦ " : "· ") + it.label);
-      r.type = "button"; r.setAttribute("aria-pressed", ME.sel === it.id ? "true" : "false");
-      r.addEventListener("click", () => mmSelect(it.id));
-      g.appendChild(r);
+  if (!ME.nodes.length){ box.appendChild(el("div", "empty", "No domains yet. Add one on the right.")); return; }
+  ME.openL = ME.openL || new Set();
+  const walk = (parent, depth, host) => {
+    for (const n of mmVisibleKids(parent)){
+      const row = el("div", "ml-row" + (n.done ? " done" : "")); row.style.setProperty("--d", depth); row.style.setProperty("--c", mmColor(n));
+      const kids = kidsOf(n.id).length, open = ME.openL.has(n.id);
+      const tg = el("button", "ml-tg", kids ? (open ? "▾" : "▸") : ""); tg.type = "button";
+      if (kids){ tg.setAttribute("aria-label", (open ? "Fold " : "Unfold ") + n.label); tg.setAttribute("aria-expanded", open ? "true" : "false");
+        tg.addEventListener("click", () => { open ? ME.openL.delete(n.id) : ME.openL.add(n.id); renderMind(); }); }
+      else { tg.disabled = true; tg.setAttribute("aria-hidden", "true"); }
+      const nb = el("button", "ml-n"); nb.type = "button";
+      if (n.star){ const s = el("span", "star", "★"); s.setAttribute("aria-hidden", "true"); nb.appendChild(s); }
+      nb.appendChild(document.createTextNode(n.label + (n.done ? " ✓" : "")));
+      if (kids) nb.appendChild(el("span", "kc", String(mmCount(n))));
+      nb.setAttribute("aria-pressed", ME.sel === n.id ? "true" : "false");
+      nb.addEventListener("click", () => mmSelect(n.id));
+      row.append(tg, nb); host.appendChild(row);
+      if (kids && open) walk(n.id, depth + 1, host);
     }
-    box.appendChild(g);
-  }
+  };
+  walk(null, 0, box);
 }
 function mmInputRow(placeholder, btnText, onAdd, value){
   const f = el("form", "mp-row"); f.autocomplete = "off";
@@ -1639,87 +1736,79 @@ function mmInputRow(placeholder, btnText, onAdd, value){
   if (value != null) i.value = value;
   const b = el("button", "btn", btnText); b.type = "submit";
   f.append(i, b);
-  f.addEventListener("submit", e => { e.preventDefault(); const v = i.value.trim(); if (!v) { i.focus(); return; } onAdd(v); i.value = ""; });
+  f.addEventListener("submit", e => { e.preventDefault(); const v = i.value.trim(); if (!v){ i.focus(); return; } onAdd(v); if (value == null) i.value = ""; });
   return f;
 }
 function renderPanel(){
   const P = $("mm-panel"); P.textContent = "";
   if (ME.off){ P.appendChild(el("div", "mp-hint", "The mindmap works when the dashboard is open in Claude.")); return; }
   if (!ME.mindReady){ P.appendChild(el("div", "mp-hint", ME.err ? "Couldn't load your mindmap. Reopen the page." : "Loading your mindmap…")); return; }
-  const n = mmFind(ME.sel);
-  if (!n || n.center){
-    P.appendChild(el("div", "mp-k", "Add a branch"));
-    P.appendChild(mmInputRow("Branch name, e.g. 대외활동", "Add", v => mmAddBranch(v)));
-    P.appendChild(el("p", "mp-hint", "Click a branch or item to edit it. Branches marked ★ Activity belong on your resume: when you complete one of them, or an item on it, you're asked to add it to the resume below."));
+  const n = mmNode(ME.sel);
+  if (!n){
+    P.appendChild(el("div", "mp-k", "Add a life domain"));
+    P.appendChild(mmInputRow("Domain name, e.g. 학업 & 행정", "Add", v => mmAdd(null, v)));
+    P.appendChild(el("p", "mp-hint", "Click a node to edit it; click one that has things inside to open it. Put ★ on what belongs on your resume: finishing it, or a milestone inside it, updates its resume entry."));
     return;
   }
-  if (!n.parent){
-    const b = n, items = mmItems(b, true);
-    P.appendChild(el("div", "mp-k", "Branch"));
-    const name = mmInputRow("Branch name", "Rename", v => mmUpdate(b, {label: v}), b.label);
-    P.appendChild(name);
-    const act = el("label", "sw-row"); const cb = el("input"); cb.type = "checkbox"; cb.checked = !!b.activity;
-    cb.addEventListener("change", () => mmUpdate(b, {activity: cb.checked}));
-    const t = el("span"); t.appendChild(document.createTextNode("★ Activity")); t.appendChild(el("small", null, "Completed items go to your resume"));
-    act.append(cb, t); P.appendChild(act);
-    if (b.activity){
-      const r = el("label", "fld"); r.appendChild(document.createTextNode("Resume category"));
-      const sel = el("select");
-      for (const [k, ko, en] of RS_CATS){ const o = el("option", null, ko + " · " + en); o.value = k; if ((b.cat || "act") === k) o.selected = true; sel.appendChild(o); }
-      sel.addEventListener("change", () => mmUpdate(b, {cat: sel.value}));
-      r.appendChild(sel); P.appendChild(r);
-    }
-    const lk = el("label", "sw-row"); const lc = el("input"); lc.type = "checkbox"; lc.checked = b.link === TODO_LINK;
-    lc.addEventListener("change", () => mmUpdate(b, {link: lc.checked ? TODO_LINK : null}));
-    const lt = el("span"); lt.appendChild(document.createTextNode("Show my 과제 to-dos")); lt.appendChild(el("small", null, "Unfinished 과제 tasks from the To-Do list appear here"));
-    lk.append(lc, lt); P.appendChild(lk);
-    P.appendChild(el("div", "mp-k", "Items (" + items.length + ")"));
-    const ul = el("div", "mp-items");
-    if (!items.length) ul.appendChild(el("div", "mp-note", "No items yet."));
-    for (const it of items){
-      const r = el("div", "mp-it" + (it.done ? " done" : ""));
-      const s = el("span", null, (it.virtual ? "◦ " : "") + it.label); r.appendChild(s);
-      const go = el("button", "linkbtn", "Open"); go.type = "button"; go.addEventListener("click", () => { ME.sel = it.id; renderMind(); });
-      r.appendChild(go); ul.appendChild(r);
-    }
-    P.appendChild(ul);
-    P.appendChild(mmInputRow("New item", "Add", v => mmAddItem(b, v)));
-    P.appendChild(nodeActions(b));
-    return;
+  const path = mmPath(n).reverse();
+  P.appendChild(el("div", "mp-k", path.length > 1 ? path.slice(0, -1).map(x => x.label).join(" › ") : "Life domain"));
+  P.appendChild(mmInputRow("Name", "Rename", v => mmUpdate(n, {label: v}), n.label));
+  /* star */
+  const sr = el("label", "fld"); sr.appendChild(document.createTextNode("Resume ★"));
+  const ss = el("select");
+  for (const [v, t] of [["", "No ★"], ["entry", "★ Entry: this is one resume entry"], ["group", "★ Group: each item inside is an entry"]]){
+    const o = el("option", null, t); o.value = v; if ((n.star || "") === v) o.selected = true; ss.appendChild(o);
   }
-  const b = mmBranchOf(n);
-  P.appendChild(el("div", "mp-k", "Item on " + (b ? b.label : "a branch")));
-  if (n.virtual){
-    P.appendChild(el("div", null, n.label));
-    const di = dueInfo(n.todo);
-    P.appendChild(el("div", "mp-note", "From your To-Do list" + (di ? " · " + di.text : "") + ". Marking it done here also checks it off there."));
-  } else {
-    P.appendChild(mmInputRow("Item name", "Rename", v => mmUpdate(n, {label: v}), n.label));
+  ss.addEventListener("change", () => mmUpdate(n, {star: ss.value || null}));
+  sr.appendChild(ss); P.appendChild(sr);
+  if (n.star){
+    const cr = el("label", "fld"); cr.appendChild(document.createTextNode("Resume category"));
+    const cs = el("select");
+    for (const [k, ko, en] of RS_CATS){ const o = el("option", null, ko + " · " + en); o.value = k; if ((n.cat || "act") === k) o.selected = true; cs.appendChild(o); }
+    cs.addEventListener("change", () => mmUpdate(n, {cat: cs.value}));
+    cr.appendChild(cs); P.appendChild(cr);
   }
+  const t = mmTarget(n);
+  if (t && !n.star){
+    P.appendChild(el("div", "mp-note", t.target === n
+      ? "★ via " + t.star.label + ": this is its own resume entry."
+      : "★ via " + t.star.label + ": finishing this adds it to the “" + t.target.label + "” entry."));
+  }
+  /* children */
+  const kids = kidsOf(n.id);
+  P.appendChild(el("div", "mp-k", "Inside (" + kids.length + ")"));
+  const ul = el("div", "mp-items");
+  if (!kids.length) ul.appendChild(el("div", "mp-note", "Nothing inside yet."));
+  for (const k of kids){
+    const r = el("div", "mp-it" + (k.done ? " done" : ""));
+    r.appendChild(el("span", null, (k.star ? "★ " : "") + k.label + (kidsOf(k.id).length ? " (" + mmCount(k) + ")" : "")));
+    const go = el("button", "linkbtn", "Open"); go.type = "button";
+    go.addEventListener("click", () => { if (kidsOf(k.id).length) mmFocus(k.id); else { ME.focus = n.id; mmSelect(k.id); } });
+    r.appendChild(go); ul.appendChild(r);
+  }
+  P.appendChild(ul);
+  P.appendChild(mmInputRow("Add inside, e.g. a milestone", "Add", v => mmAdd(n, v)));
   P.appendChild(nodeActions(n));
 }
 function nodeActions(n){
-  const wrap = el("div", "mp-acts");
-  const act = mmIsAct(n);
+  const box = el("div"); box.style.display = "flex"; box.style.flexDirection = "column"; box.style.gap = "8px";
+  const wrap = el("div", "mp-acts"); box.appendChild(wrap);
+  const t = mmTarget(n);
   if (!n.done){
-    const c = el("button", "btn pri", n.virtual ? "Mark done" : (act ? "Complete → resume" : "Mark complete")); c.type = "button";
+    const c = el("button", "btn pri", t ? "Complete → resume" : "Mark complete"); c.type = "button";
     c.addEventListener("click", () => mmComplete(n)); wrap.appendChild(c);
   } else {
     const u = el("button", "btn", "Undo complete"); u.type = "button"; u.addEventListener("click", () => mmUndo(n)); wrap.appendChild(u);
-    if (act && !(n.resumeId && ME.rs.some(r => r.id === n.resumeId))){
-      const r = el("button", "btn pri", "Add to resume"); r.type = "button"; r.addEventListener("click", () => openResumeFromNode(n)); wrap.appendChild(r);
-    }
+    if (t){ const r = el("button", "btn pri", mmEntryOf(t.target) ? "Add to resume entry" : "Add to resume"); r.type = "button";
+      r.addEventListener("click", () => openResumeFromNode(n, t)); wrap.appendChild(r); }
   }
-  if (!n.virtual){
-    const d = el("button", "linkbtn danger", ME.armed === n.id ? (n.parent ? "Click again to delete" : "Click again: deletes the branch and its items") : "Delete"); d.type = "button";
-    d.addEventListener("click", () => mmArm(n)); wrap.appendChild(d);
-  }
-  const box = el("div"); box.style.display = "flex"; box.style.flexDirection = "column"; box.style.gap = "8px";
-  box.appendChild(wrap);
-  if (n.resumeId && ME.rs.some(r => r.id === n.resumeId)){
-    const ok = el("div", "mp-note ok", "On your resume. ");
-    const o = el("button", "linkbtn", "Open entry"); o.type = "button";
-    o.addEventListener("click", () => { const r = ME.rs.find(x => x.id === n.resumeId); if (r) openResume(r); });
+  const sub = mmCount(n);
+  const d = el("button", "linkbtn danger", ME.armed === n.id ? (sub ? "Click again: deletes it and " + sub + " inside" : "Click again to delete") : "Delete"); d.type = "button";
+  d.addEventListener("click", () => mmArm(n)); wrap.appendChild(d);
+  const entryNode = t ? t.target : (n.resumeId ? n : null), entry = mmEntryOf(entryNode);
+  if (entry){
+    const ok = el("div", "mp-note ok", (entryNode === n ? "On your resume. " : "Part of the “" + entryNode.label + "” resume entry. "));
+    const o = el("button", "linkbtn", "Open entry"); o.type = "button"; o.addEventListener("click", () => openResume(entry));
     ok.appendChild(o); box.appendChild(ok);
   }
   return box;
@@ -1765,7 +1854,7 @@ function renderResume(){
   const drafts = ME.rs.filter(r => r.status === "draft").length;
   $("rs-n").textContent = ME.rs.length ? ME.rs.length + (ME.rs.length === 1 ? " entry" : " entries") + (drafts ? " · " + drafts + " to review" : "") : "";
   const grid = el("div", "rs-cats");
-  for (const [k, ko, en] of RS_CATS){
+  for (const [k, ko, en] of catsFor(ME.stage)){
     const sec = el("section", "rs-cat");
     const h = el("h3", null, L === "en" ? en : ko);
     const items = rsSorted(rsInStage().filter(r => (r.cat || "act") === k));
@@ -1815,14 +1904,14 @@ function rsInStage(){ return ME.rs.filter(r => rsStage(r) === ME.stage); }
 function stageName(st, L){ return st === "hs" ? (L === "en" ? "High School" : "고등학교") : (L === "en" ? "University" : "대학교"); }
 function rsText(){
   const L = ME.lang, out = [];
-  for (const [k, ko, en] of RS_CATS){
+  for (const [k, ko, en] of catsFor(ME.stage)){
     const items = rsSorted(rsInStage().filter(r => (r.cat || "act") === k));
     if (!items.length) continue;
     out.push("[" + (L === "en" ? en : ko) + "]");
     for (const r of items){
       const t = rsField(r, L, "title").t, org = rsField(r, L, "org").t, role = rsField(r, L, "role").t, d = rsField(r, L, "desc").t, w = rsWhen(r, L);
       out.push("- " + t + ([role, org].filter(Boolean).length ? " | " + [role, org].filter(Boolean).join(", ") : "") + (w ? " (" + w + ")" : ""));
-      if (d) out.push("  " + d);
+      if (d) out.push("  " + d.replace(/\n/g, "\n  "));
       if (r.link) out.push("  " + r.link);
     }
     out.push("");
@@ -1847,7 +1936,7 @@ async function rsCopy(){
 function rsPrintHtml(){
   const L = ME.lang, esc = t => String(t).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;"}[c]));
   let body = "<h1>" + esc(ME_NAME) + " · " + esc(stageName(ME.stage, L)) + "</h1>";
-  for (const [k, ko, en] of RS_CATS){
+  for (const [k, ko, en] of catsFor(ME.stage)){
     const items = rsSorted(rsInStage().filter(r => (r.cat || "act") === k));
     if (!items.length) continue;
     body += "<h2>" + esc(L === "en" ? en : ko) + "</h2>";
@@ -1861,7 +1950,7 @@ function rsPrintHtml(){
   return "<!doctype html><html lang=\"" + L + "\"><head><meta charset=\"utf-8\"><title>" + esc(ME_NAME) + " resume</title><style>"
     + "body{font-family:'Malgun Gothic','Apple SD Gothic Neo',system-ui,sans-serif;color:#111;max-width:760px;margin:32px auto;padding:0 24px;line-height:1.5;font-size:13px}"
     + "h1{font-size:22px;margin:0 0 18px}h2{font-size:14px;border-bottom:1px solid #999;padding-bottom:3px;margin:22px 0 8px}"
-    + ".e{margin:0 0 9px;break-inside:avoid}.r{display:flex;justify-content:space-between;gap:12px}.r span{color:#444;white-space:nowrap}.m{color:#444}.d{margin-top:2px}"
+    + ".e{margin:0 0 9px;break-inside:avoid}.r{display:flex;justify-content:space-between;gap:12px}.r span{color:#444;white-space:nowrap}.m{color:#444}.d{margin-top:2px;white-space:pre-line}"
     + "</style></head><body>" + body + "<script>window.onload=function(){window.print()}<\/script></body></html>";
 }
 async function rsDownload(){
@@ -1906,7 +1995,7 @@ function readDialog(){
   if (start === false || end === false){ fMsg("Write dates as YYYY.MM, like 2026.03, or leave them empty."); bad = true; }
   const link = FD("link").value.trim();
   if (link && !/^https?:\/\/\S+$/i.test(link)){ FD("link").setAttribute("aria-invalid", "true"); fMsg("Links must start with http:// or https://."); bad = true; }
-  const r = {stage: FD("stage").value === "hs" ? "hs" : "uni", cat: FD("cat").value, start: start || "", end: end || "", ongoing: FD("on").checked, link, ko: {}, en: {}};
+  const r = {stage: FD("stage").value === "hs" && FD("cat").value !== "lang" ? "hs" : "uni", cat: FD("cat").value, start: start || "", end: end || "", ongoing: FD("on").checked, link, ko: {}, en: {}};
   for (const L of ["ko", "en"]) for (const f of F_LANG) r[L][f] = FD(L + "-" + f).value.trim();
   if (!r.ko.title && !r.en.title){ fMsg("Add a title in Korean or English."); FD("ko-title").focus(); bad = true; }
   return bad ? null : r;
@@ -1923,18 +2012,28 @@ function openDialog(title, sub, r){
 function closeDialog(){ const d = $("rs-dlg"); try { d.close(); } catch (e){ d.removeAttribute("open"); } ME.editing = null; ME.fromNode = null; }
 function openResume(r){ ME.editing = r; ME.fromNode = null; openDialog("Edit resume entry", r.status === "draft" ? "Draft · saving confirms it" : "", r); }
 function openNewResume(prefill, sub){ ME.editing = null; ME.fromNode = null; openDialog("Add to resume", sub || "", prefill || {cat: "act"}); }
-function openResumeFromNode(n){
-  const b = mmBranchOf(n), isItem = !!n.parent;
-  const ym = d => { const x = new Date(d); return x.getFullYear() + "-" + pad(x.getMonth() + 1); };
-  const pre = {stage: "uni", cat: (b && b.cat) || "act", start: n.createdAt ? ym(n.createdAt) : "", end: ym(n.doneAt || Date.now()), ongoing: false,
-    ko: {title: n.label, org: "", role: "", desc: ""}, en: {}};
-  ME.editing = null; ME.fromNode = n;
-  openDialog("Add to your resume", "Completed: " + n.label + (isItem && b ? " (" + b.label + ")" : "") + ". Add the organization, your role and a one-line result, then save.", pre);
-}
-function openResumeEnd(r, n){
-  const d = new Date(), cur = Object.assign({}, r, {ongoing: false, end: d.getFullYear() + "-" + pad(d.getMonth() + 1)});
-  ME.editing = r; ME.fromNode = null;
-  openDialog("Update your resume entry", "Completed: " + n.label + ". Check the end date and add your result, then save.", cur);
+function openResumeFromNode(n, t){
+  t = t || mmTarget(n); if (!t) return;
+  const target = t.target, entry = mmEntryOf(target), milestone = n !== target;
+  const d = new Date(), now = d.getFullYear() + "-" + pad(d.getMonth() + 1), line = "• " + n.label;
+  if (entry){
+    const cur = JSON.parse(JSON.stringify(entry));
+    if (milestone){
+      cur.ko = cur.ko || {};
+      const desc = (cur.ko.desc || "").trim();
+      if (!desc.split("\n").some(l => l.trim() === line)) cur.ko.desc = desc ? desc + "\n" + line : line;
+    } else { cur.ongoing = false; cur.end = now; }
+    ME.editing = entry; ME.fromNode = null;
+    openDialog("Update your resume entry", milestone
+      ? "Milestone done: " + n.label + ". It's added to the Korean description as a result line; edit it, fill the English with Claude if you like, then save."
+      : "Completed: " + n.label + ". Check the end date and add your result, then save.", cur);
+    return;
+  }
+  const pre = {stage: "uni", cat: t.star.cat || "act", start: "", end: milestone ? "" : now, ongoing: milestone,
+    ko: {title: target.label, org: "", role: "", desc: milestone ? line : ""}, en: {}};
+  ME.editing = null; ME.fromNode = target;
+  openDialog("Add to your resume", (milestone ? "Milestone done: " + n.label + ". This starts the “" + target.label + "” entry. " : "Completed: " + target.label + ". ")
+    + "Add the organization, your role and dates, then save.", pre);
 }
 async function saveDialog(){
   const r = readDialog(); if (!r) return;
@@ -1992,15 +2091,16 @@ async function quickAdd(text){
       + "Period: hs if the entry is clearly from high school, uni if it is clearly from university, otherwise \"" + ME.stage + "\".\n"
       + "Categories: act = 대외활동·동아리 (clubs, MUN conferences, student organizations, programs, hackathons or competitions joined without a prize); "
       + "award = 수상·장학금 (awards, prizes, competition results, scholarships); proj = 프로젝트 (things they built: apps, games, websites, research); "
-      + "exp = 경력·봉사·자격증 (jobs, tutoring, internships, volunteering, certificates, language test scores).\n"
+      + "exp = 경력·봉사·자격증 (jobs, tutoring, internships, volunteering, certificates); "
+      + "edu = 학력 (schools and degrees: a school, major, admission year or graduation); lang = 어학 (a language and its level or test score; put the level in role).\n"
       + "Entry the student typed: \"\"\"" + text.replace(/"""/g, "\"") + "\"\"\"\n\n"
-      + "Reply with only JSON: {\"stage\":\"uni|hs\",\"cat\":\"act|award|proj|exp\",\"ko\":{\"title\":\"\",\"org\":\"\",\"role\":\"\",\"desc\":\"\"},\"en\":{\"title\":\"\",\"org\":\"\",\"role\":\"\",\"desc\":\"\"},\"start\":\"YYYY-MM or empty\",\"end\":\"YYYY-MM or empty\",\"ongoing\":false,\"link\":\"\"}. "
+      + "Reply with only JSON: {\"stage\":\"uni|hs\",\"cat\":\"edu|act|award|proj|exp|lang\",\"ko\":{\"title\":\"\",\"org\":\"\",\"role\":\"\",\"desc\":\"\"},\"en\":{\"title\":\"\",\"org\":\"\",\"role\":\"\",\"desc\":\"\"},\"start\":\"YYYY-MM or empty\",\"end\":\"YYYY-MM or empty\",\"ongoing\":false,\"link\":\"\"}. "
       + "Fill both languages (translate naturally, keep proper names). Leave a field empty when the entry doesn't say it; never invent roles, results or dates. "
       + "Dates without a year are in the current school year. desc is one short line, or empty.",
       {modelTier: "quick", cache: false});
     const pick = (o, f) => (o && typeof o[f] === "string") ? o[f].trim() : "";
     const ym = v => { const x = parseYm(String(v || "").replace(/^(\d{4})-(\d{1,2}).*$/, "$1.$2")); return x || ""; };
-    const pre = {stage: out.stage === "hs" || out.stage === "uni" ? out.stage : ME.stage, cat: RS_CATS.some(c => c[0] === out.cat) ? out.cat : "act", start: ym(out.start), end: ym(out.end), ongoing: !!out.ongoing, link: /^https?:\/\//i.test(out.link || "") ? out.link : "", ko: {}, en: {}};
+    const pre = {stage: out.cat === "lang" ? "uni" : (out.stage === "hs" || out.stage === "uni" ? out.stage : ME.stage), cat: RS_CATS.some(c => c[0] === out.cat) ? out.cat : "act", start: ym(out.start), end: ym(out.end), ongoing: !!out.ongoing, link: /^https?:\/\//i.test(out.link || "") ? out.link : "", ko: {}, en: {}};
     for (const L of ["ko", "en"]) for (const f of F_LANG) pre[L][f] = pick(out[L], f);
     if (!pre.ko.title && !pre.en.title) pre.ko.title = text.slice(0, 160);
     $("rs-q").value = "";
@@ -2039,6 +2139,7 @@ function initMe(){
   $("tab-dash").parentElement.addEventListener("keydown", e => {
     if (e.key === "ArrowRight" || e.key === "ArrowLeft"){ e.preventDefault(); setTab(ME.tab === "dash" ? "me" : "dash", true); }
   });
+  initSpin();
   $("mm-v-map").addEventListener("click", () => { ME.view = "map"; try { localStorage.setItem("ld-mm-view", "map"); } catch (e){} renderMind(); });
   $("mm-v-list").addEventListener("click", () => { ME.view = "list"; try { localStorage.setItem("ld-mm-view", "list"); } catch (e){} renderMind(); });
   $("mm-donetog").addEventListener("click", () => { ME.hideDone = !ME.hideDone; try { localStorage.setItem("ld-mm-hide", ME.hideDone ? "1" : "0"); } catch (e){} renderMind(); });
