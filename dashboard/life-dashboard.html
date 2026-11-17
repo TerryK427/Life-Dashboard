@@ -1577,8 +1577,8 @@ function mmNodeBtn(cls, n, opts){
   if (n.star){ const s = el("span", "star", "★"); s.setAttribute("aria-hidden", "true"); b.appendChild(s); }
   b.appendChild(document.createTextNode(n.label));
   const kids = kidsOf(n.id).length;
-  if (opts && opts.count && kids){ const k = el("span", "kc", String(mmCount(n))); k.setAttribute("aria-hidden", "true"); b.appendChild(k); }
-  b.title = n.label + (n.star === "entry" ? " · ★ resume entry" : n.star === "group" ? " · ★ group: each item inside is a resume entry" : "") + (kids ? " · " + mmCount(n) + " inside, click to open" : "");
+  if (opts && opts.count && kids){ const k = el("span", "kc", String(kids)); k.setAttribute("aria-hidden", "true"); b.appendChild(k); }
+  b.title = n.label + (n.star === "entry" ? " · ★ resume entry" : n.star === "group" ? " · ★ group: each item inside is a resume entry" : "") + (kids ? " · " + kids + (kids === 1 ? " branch" : " branches") + " inside, click to open" : "");
   b.setAttribute("aria-pressed", ME.sel === n.id ? "true" : "false");
   b.style.setProperty("--c", mmColor(n));
   b.addEventListener("click", () => {
@@ -1721,7 +1721,7 @@ function renderMindList(){
       const nb = el("button", "ml-n"); nb.type = "button";
       if (n.star){ const s = el("span", "star", "★"); s.setAttribute("aria-hidden", "true"); nb.appendChild(s); }
       nb.appendChild(document.createTextNode(n.label + (n.done ? " ✓" : "")));
-      if (kids) nb.appendChild(el("span", "kc", String(mmCount(n))));
+      if (kids) nb.appendChild(el("span", "kc", String(kids)));
       nb.setAttribute("aria-pressed", ME.sel === n.id ? "true" : "false");
       nb.addEventListener("click", () => mmSelect(n.id));
       row.append(tg, nb); host.appendChild(row);
@@ -1781,7 +1781,7 @@ function renderPanel(){
   if (!kids.length) ul.appendChild(el("div", "mp-note", "Nothing inside yet."));
   for (const k of kids){
     const r = el("div", "mp-it" + (k.done ? " done" : ""));
-    r.appendChild(el("span", null, (k.star ? "★ " : "") + k.label + (kidsOf(k.id).length ? " (" + mmCount(k) + ")" : "")));
+    r.appendChild(el("span", null, (k.star ? "★ " : "") + k.label + (kidsOf(k.id).length ? " (" + kidsOf(k.id).length + ")" : "")));
     const go = el("button", "linkbtn", "Open"); go.type = "button";
     go.addEventListener("click", () => { if (kidsOf(k.id).length) mmFocus(k.id); else { ME.focus = n.id; mmSelect(k.id); } });
     r.appendChild(go); ul.appendChild(r);
