@@ -212,7 +212,7 @@ ul{list-style:none;margin:0;padding:0}
 .todo-sec:first-child h4{margin-top:2px}
 .todo-sec h4 i{width:7px;height:7px;border-radius:50%;background:var(--c)}
 .todo-sec h4 span{font-family:var(--mono);font-weight:400;color:var(--dim)}
-.td{display:grid;grid-template-columns:20px minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:6px 0;border-top:1px solid var(--line)}
+.td{display:grid;grid-template-columns:20px minmax(0,1fr) auto auto auto;gap:10px;align-items:center;padding:6px 0;border-top:1px solid var(--line)}
 .todo-sec ul .td:first-child{border-top:0}
 .td-check{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--dim);background:transparent;padding:0;display:grid;place-items:center;cursor:pointer}
 .td-check:hover{border-color:var(--accent)}
@@ -222,12 +222,20 @@ ul{list-style:none;margin:0;padding:0}
 .td-text{overflow-wrap:anywhere}
 .td.done .td-text{text-decoration:line-through;color:var(--dim)}
 .td-from{font-size:11px;color:var(--warn);white-space:nowrap}
-.td-del{width:24px;height:24px;border-radius:6px;border:1px solid var(--line-strong);background:var(--raise);color:var(--muted);display:grid;place-items:center;cursor:pointer;padding:0;font-size:11px}
-.td-del svg{width:11px;height:11px}
+.td-edit,.td-del{width:24px;height:24px;border-radius:6px;border:1px solid var(--line-strong);background:var(--raise);color:var(--muted);display:grid;place-items:center;cursor:pointer;padding:0;font-size:11px}
+.td-edit svg,.td-del svg{width:11px;height:11px}
+.td-edit:hover{color:var(--accent);border-color:var(--accent)}
 .td-del:hover{color:var(--bad);border-color:var(--bad)}
 .td-del.armed{width:auto;padding:0 8px;color:var(--bad);border-color:var(--bad)}
-@media (hover:hover){.td-del:not(.armed){opacity:0;transition:opacity .15s}.td:hover .td-del,.td-del:focus-visible{opacity:1}}
-@media (hover:none){.td-del:not(.armed){opacity:.55}}
+@media (hover:hover){.td-del:not(.armed),.td-edit{opacity:0;transition:opacity .15s}.td:hover .td-del,.td:hover .td-edit,.td-del:focus-visible,.td-edit:focus-visible{opacity:1}}
+@media (hover:none){.td-del:not(.armed),.td-edit{opacity:.55}}
+.td.editing{grid-template-columns:minmax(0,1fr)}
+.td-form{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.td-form input,.td-form select{background:var(--bg);color:var(--fg);border:1px solid var(--line-strong);border-radius:6px;padding:5px 8px;font:inherit;font-size:13px;box-sizing:border-box;min-width:0}
+.td-form input:focus-visible,.td-form select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.td-form .tf-text{flex:1 1 200px}
+.td-form .tf-due{width:84px;font-family:var(--mono);font-size:12.5px}
+.td-form [aria-invalid="true"]{border-color:var(--bad)}
 .todo-stored{border-top:1px dashed var(--line-strong);padding-top:8px;font-size:12px;color:var(--dim);display:flex;flex-direction:column;gap:4px}
 .todo-stored .ts-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .ts{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:4px 0}
@@ -2121,9 +2129,10 @@ function initMe(){
    and is deleted 24 hours after that, i.e. at the second midnight after it was crossed out.
    This is worked out from timestamps, so it holds even if the dashboard was closed at midnight. */
 const TODO_GROUPS = [["과제", "#009688"], ["시험", "#d50000"], ["알바", "#3f51b5"], ["대외활동", "#f6bf26"], ["그 외", "#8b949f"]];
-const TODO = { items: [], col: null, local: false, ready: false, showStored: false, armed: null, armT: null, deleting: new Set(), group: "과제" };
+const TODO = { items: [], col: null, local: false, ready: false, showStored: false, armed: null, armT: null, deleting: new Set(), group: "과제", editing: null, draft: null };
 try { const g = localStorage.getItem("ld-todo-group"); if (TODO_GROUPS.some(x => x[0] === g)) TODO.group = g; } catch (e){}
 const TD_CHECK = '<svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.3 6.3 4.8 8.7 9.7 3.4" stroke="#0f1215" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const TD_EDIT = '<svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M7.6 2.4l2 2L4.3 9.7 2 10l.3-2.3z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>';
 const TD_X = '<svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
 /* "11/20" (also "1/5") -> "YYYY-MM-DD". The nearest such date: this year, unless it was
    more than 30 days ago, then next year. Returns null for an empty box, false if invalid. */
@@ -2183,6 +2192,50 @@ async function todoCleanup(){
     await todoDelete(it, true);
   }
 }
+/* Editing a task in place: text, group and due date. Enter saves, Esc cancels.
+   The typed draft survives re-renders (other tasks syncing in) until saved or cancelled. */
+function todoEditStart(it){
+  TODO.editing = it.id; TODO.armed = null;
+  TODO.draft = {text: it.text, group: TODO_GROUPS.some(x => x[0] === it.group) ? it.group : "그 외", due: it.due ? it.due.slice(5).replace("-", "/") : ""};
+  renderTodo();
+  const i = document.querySelector(".td-form .tf-text"); if (i){ i.focus(); i.select(); }
+}
+function todoEditEnd(){ TODO.editing = null; TODO.draft = null; todoMsg(""); renderTodo(); }
+function todoEditRow(it){
+  const d = TODO.draft || {text: it.text, group: it.group || "그 외", due: ""};
+  const li = el("li", "td editing");
+  const f = el("form", "td-form"); f.autocomplete = "off";
+  const t = el("input", "tf-text"); t.type = "text"; t.maxLength = 200; t.value = d.text; t.setAttribute("aria-label", "Task");
+  const g = el("select", "tf-group"); g.setAttribute("aria-label", "Group");
+  for (const [name] of TODO_GROUPS){ const o = el("option", null, name); o.value = name; if (name === d.group) o.selected = true; g.appendChild(o); }
+  const du = el("input", "tf-due"); du.type = "text"; du.inputMode = "numeric"; du.maxLength = 5; du.placeholder = "Due MM/DD"; du.value = d.due; du.setAttribute("aria-label", "Due date, optional, as MM/DD");
+  const save = el("button", "btn pri", "Save"); save.type = "submit";
+  const cancel = el("button", "btn", "Cancel"); cancel.type = "button";
+  const keep = () => { TODO.draft = {text: t.value, group: g.value, due: du.value}; };
+  t.addEventListener("input", keep); g.addEventListener("change", keep);
+  du.addEventListener("input", () => {
+    let v = du.value.replace(/[^\d/]/g, "");
+    if (/^\d{3,4}$/.test(v)) v = v.slice(0, 2) + "/" + v.slice(2);
+    v = v.replace(/\/+/g, "/").slice(0, 5);
+    if (v !== du.value) du.value = v;
+    du.removeAttribute("aria-invalid"); keep();
+  });
+  cancel.addEventListener("click", todoEditEnd);
+  f.addEventListener("keydown", e => { if (e.key === "Escape"){ e.preventDefault(); todoEditEnd(); } });
+  f.addEventListener("submit", e => {
+    e.preventDefault();
+    const text = t.value.trim();
+    if (!text){ t.focus(); return; }
+    const due = parseDue(du.value);
+    if (due === false){ du.setAttribute("aria-invalid", "true"); todoMsg("Write the due date as MM/DD, like 11/20, or leave it empty."); du.focus(); return; }
+    TODO.editing = null; TODO.draft = null; todoMsg("");
+    todoUpdate(it, {text, group: g.value, due: due || null});
+    renderTodo();
+  });
+  f.append(t, g, du, save, cancel);
+  li.appendChild(f);
+  return li;
+}
 function todoArm(it){ armTwice(TODO, it.id, () => todoDelete(it), renderTodo); }
 function renderTodoGroups(){
   const box = $("todo-groups"); box.textContent = "";
@@ -2215,6 +2268,7 @@ function renderTodo(){
     sec.appendChild(h);
     const ul = el("ul");
     for (const it of list){
+      if (TODO.editing === it.id){ ul.appendChild(todoEditRow(it)); continue; }
       const li = el("li", "td" + (it.done ? " done" : ""));
       const ck = el("button", "td-check"); ck.type = "button"; ck.innerHTML = TD_CHECK;
       ck.setAttribute("aria-pressed", it.done ? "true" : "false");
@@ -2226,6 +2280,10 @@ function renderTodo(){
       if (due) meta.appendChild(el("span", "td-due" + (due.cls ? " " + due.cls : ""), due.text));
       if (!it.done && it.createdAt < +today) meta.appendChild(el("span", "td-from", "from " + md(new Date(it.createdAt))));
       li.appendChild(meta);
+      const ed = el("button", "td-edit"); ed.type = "button"; ed.innerHTML = TD_EDIT;
+      ed.setAttribute("aria-label", "Edit task: " + it.text); ed.title = "Edit";
+      ed.addEventListener("click", () => todoEditStart(it));
+      li.appendChild(ed);
       const armed = TODO.armed === it.id;
       const del = el("button", "td-del" + (armed ? " armed" : "")); del.type = "button";
       del.setAttribute("aria-label", armed ? "Confirm delete" : "Delete task: " + it.text);
