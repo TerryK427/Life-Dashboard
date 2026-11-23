@@ -241,7 +241,6 @@ ul{list-style:none;margin:0;padding:0}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;padding:2px}
 .seg button{padding:3px 10px;font-size:12px}
 .btn.pri{background:var(--accent-soft);border-color:rgba(134,183,201,.45)}
-.card-tools{display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
 .me{max-width:1280px;width:100%;display:flex;flex-direction:column;gap:16px}
 .me .card-h{flex-wrap:wrap;row-gap:8px}
 .me .card-h h2{white-space:nowrap}
@@ -251,9 +250,8 @@ ul{list-style:none;margin:0;padding:0}
 .mm-body{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:16px;align-items:start}
 @container (max-width:760px){.mm-body{grid-template-columns:minmax(0,1fr)}.mm-panel{border-left:0!important;padding-left:0!important;border-top:1px solid var(--line);padding-top:14px}}
 .mm-stage{min-width:0}
-.mm{position:relative;height:520px;border:1px solid var(--line);border-radius:8px;background:radial-gradient(ellipse at center,#141a21 0%,var(--panel) 70%);overflow:hidden}
+.mm{position:relative;height:520px;border:1px solid var(--line);border-radius:8px;background:radial-gradient(ellipse at center,#141a21 0%,var(--panel) 70%);overflow:hidden;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
 .mm svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.mm{touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
 .mm.spinning,.mm.spinning .mnode{cursor:grabbing}
 .mnode.back{background:var(--c);color:#0f1215;border:0;font-weight:600;font-size:12.5px;padding:5px 12px 5px 10px;box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 25%,transparent)}
 .mnode.back:hover{color:#0f1215;filter:brightness(1.1)}
@@ -261,9 +259,8 @@ ul{list-style:none;margin:0;padding:0}
 .mm-hint{position:absolute;right:12px;bottom:10px;font-size:11px;color:var(--dim);pointer-events:none;letter-spacing:.04em}
 .mnode{position:absolute;left:0;top:0;transform:translate(-50%,-50%);max-width:150px;padding:4px 10px;border-radius:999px;border:1px solid var(--line-strong);background:var(--raise);font-size:12px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;color:var(--muted)}
 .mnode:hover{border-color:var(--dim);color:var(--fg)}
-.mnode.center{padding:10px 18px;font-size:15px;font-weight:600;background:var(--accent);color:#0f1215;border:0;cursor:pointer;max-width:180px}
+.mnode.center{padding:10px 18px;font-size:15px;font-weight:600;background:var(--c,var(--accent));color:#0f1215;border:0;cursor:pointer;max-width:180px}
 .mnode.br{font-weight:600;font-size:13px;color:var(--fg);border:1.5px solid var(--c);padding:5px 12px;max-width:170px}
-.mnode.td{border-style:dashed}
 .mnode.done{text-decoration:line-through;opacity:.5}
 .mnode.more{color:var(--accent);background:var(--panel)}
 .mnode[aria-pressed="true"]{outline:2px solid var(--accent);outline-offset:2px;color:var(--fg)}
@@ -272,11 +269,8 @@ ul{list-style:none;margin:0;padding:0}
 .mm-crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12.5px;margin-bottom:8px;min-height:20px}
 .mm-crumbs .sep{color:var(--dim)}
 .mm-crumbs .cur{color:var(--fg);font-weight:600}
-.mm-up{position:absolute;left:12px;top:10px;font-size:12px}
 .mnode .kc{font-size:10px;color:var(--dim);margin-left:6px;font-weight:400;font-family:var(--mono)}
 .mnode.center .kc{color:inherit;opacity:.7}
-.mnode.center{background:var(--c,var(--accent))}
-.mnode.br{border-color:var(--c)}
 .mnode.it{border-color:color-mix(in srgb,var(--c) 45%,var(--line-strong))}
 .mm-list{display:flex;flex-direction:column;gap:2px}
 .ml-row{display:flex;align-items:center;gap:4px;padding-left:calc(var(--d) * 18px);border-left:3px solid transparent}
@@ -286,12 +280,6 @@ ul{list-style:none;margin:0;padding:0}
 .ml-n[aria-pressed="true"]{background:var(--accent-soft)}
 .ml-n .kc{font-size:10.5px;color:var(--dim);margin-left:6px;font-family:var(--mono)}
 .ml-row.done .ml-n{text-decoration:line-through;opacity:.55}
-.ml-b{border:1px solid var(--line);border-left:3px solid var(--c);border-radius:8px;padding:8px 10px;background:var(--raise)}
-.ml-b > button,.ml-i{background:none;border:0;padding:2px 0;text-align:left;cursor:pointer;color:var(--fg);font-size:13px;display:block;width:100%}
-.ml-b > button{font-weight:600}
-.ml-i{color:var(--muted);font-size:12.5px;padding-left:12px}
-.ml-i.done{text-decoration:line-through;opacity:.55}
-.ml-b [aria-pressed="true"]{color:var(--accent)}
 .mm-panel{border-left:1px solid var(--line);padding-left:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
 .mp-k{font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--dim)}
 .mp-hint{font-size:12.5px;color:var(--muted);line-height:1.55}
@@ -299,9 +287,6 @@ ul{list-style:none;margin:0;padding:0}
 .inp{background:var(--bg);color:var(--fg);border:1px solid var(--line-strong);border-radius:6px;padding:7px 9px;font:inherit;font-size:13px;box-sizing:border-box;min-width:0}
 .inp:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .mp-row .inp{flex:1}
-.sw-row{display:flex;align-items:flex-start;gap:8px;font-size:13px;cursor:pointer}
-.sw-row input{margin-top:3px;accent-color:var(--accent)}
-.sw-row small{display:block;color:var(--dim);font-size:11.5px}
 .mp-items{display:flex;flex-direction:column;gap:2px;max-height:220px;overflow:auto}
 .mp-it{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:3px 0;color:var(--muted)}
 .mp-it.done span{text-decoration:line-through;opacity:.6}
@@ -398,40 +383,6 @@ ul{list-style:none;margin:0;padding:0}
   .hk-lbl{display:inline;margin-right:6px}
 }
 
-/* Drop box */
-.drop-card{container-type:inline-size}
-.drop{display:grid;grid-template-columns:300px minmax(0,1fr);gap:24px;align-items:start}
-@container (max-width:660px){.drop{grid-template-columns:minmax(0,1fr)}}
-.drop-in{display:flex;flex-direction:column;gap:10px;min-width:0}
-.dz{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;min-height:118px;padding:16px;border:1.5px dashed var(--line-strong);border-radius:10px;background:var(--raise);cursor:pointer;color:var(--muted);font-size:12.5px}
-.dz{position:relative}
-.dz b{color:var(--fg);font-size:14px;font-weight:600}
-.dz-note{color:var(--warn);font-size:12px;margin-top:4px}
-.dz-input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:1;font-size:0}
-.dz-input::-webkit-file-upload-button{cursor:pointer}
-.dz:hover,.dz.over{border-color:var(--accent);background:var(--accent-soft)}
-.dt{display:flex;gap:8px;align-items:flex-start}
-#dt-text{flex:1;min-width:0;resize:vertical;min-height:38px;background:var(--bg);color:var(--fg);border:1px solid var(--line-strong);border-radius:6px;padding:8px 10px;font:inherit;font-size:13px;box-sizing:border-box}
-#dt-text:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-.dk{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--dim)}
-.dk select{background:var(--raise);color:var(--fg);border:1px solid var(--line-strong);border-radius:5px;font:inherit;font-size:12px;padding:3px 6px}
-.drop-list{display:flex;flex-direction:column;gap:6px;min-width:0}
-.di{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:12px;align-items:center;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--raise)}
-.di.exp{opacity:.55}
-.di-ic{width:40px;height:40px;border-radius:6px;background:var(--bg);border:1px solid var(--line);display:grid;place-items:center;font-family:var(--mono);font-size:9.5px;letter-spacing:.04em;color:var(--muted);overflow:hidden}
-.di-ic img{width:100%;height:100%;object-fit:cover;display:block}
-.di-main{min-width:0}
-.di-name{font-weight:500;overflow-wrap:anywhere}
-.di-text{white-space:pre-wrap;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;font-size:13px;user-select:text}
-.di-meta{font-size:11.5px;color:var(--dim);margin-top:2px}
-.di-act{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
-.btn.del{width:30px;height:28px;padding:0;display:grid;place-items:center;color:var(--muted)}
-.btn.del svg{width:13px;height:13px}
-.btn.del:hover{color:var(--bad);border-color:var(--bad)}
-.btn.del.armed{width:auto;padding:0 10px;color:var(--bad);border-color:var(--bad)}
-.drop-exp{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;color:var(--dim);padding:8px 2px 2px}
-@media (max-width:480px){.di{grid-template-columns:36px minmax(0,1fr)}.di-ic{width:36px;height:36px}.di-act{grid-column:2;justify-content:flex-start}}
-
 /* Free-time finder */
 .ff-card{container-type:inline-size}
 .ff{display:grid;grid-template-columns:252px minmax(0,1fr);gap:28px;align-items:start}
@@ -473,7 +424,7 @@ ul{list-style:none;margin:0;padding:0}
 .ff-win{font-size:12px;color:var(--dim);display:inline-flex;align-items:center;gap:6px}
 .ff-win select{background:var(--raise);color:var(--fg);border:1px solid var(--line-strong);border-radius:5px;font:inherit;font-size:12px;padding:2px 4px}
 @media (max-width:480px){.ag{grid-template-columns:82px minmax(0,1fr);gap:8px}}
-.card-tools{display:flex;align-items:baseline;gap:12px}
+.card-tools{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;justify-content:flex-end}
 /* Hide-from-dashboard button: appears on hover with a mouse, always shown (dim) on touch screens */
 .dis{flex:none;width:24px;height:24px;border-radius:6px;border:1px solid var(--line-strong);background:var(--raise);color:var(--muted);display:grid;place-items:center;cursor:pointer;padding:0}
 .dis svg{width:12px;height:12px}
@@ -574,7 +525,7 @@ ul{list-style:none;margin:0;padding:0}
         <div class="todo-groups" id="todo-groups" role="radiogroup" aria-label="Group"></div>
         <label for="todo-due" hidden>Due date, optional, as MM/DD</label>
         <input id="todo-due" type="text" inputmode="numeric" maxlength="5" placeholder="Due MM/DD" autocomplete="off">
-        <button class="btn" id="todo-addbtn" type="submit">Add</button>
+        <button class="btn" type="submit">Add</button>
       </form>
       <div class="msg err" id="todo-msg" role="status" hidden></div>
       <div id="todo-box"><div class="empty">Loading your tasks…</div></div>
@@ -592,29 +543,6 @@ ul{list-style:none;margin:0;padding:0}
         <span class="card-tools"><span class="note-s" id="hk-upd"></span><button class="linkbtn" id="hk-toggle" type="button" aria-pressed="false">Show closed</button></span>
       </div>
       <div id="hk-box"><div class="empty">Loading hackathons…</div></div>
-    </section>
-
-    <section class="card span drop-card" aria-labelledby="h-drop">
-      <div class="card-h"><h2 id="h-drop">Drop box <span class="n" id="drop-n"></span></h2><span class="note-s" id="drop-usage"></span></div>
-      <div class="drop">
-        <div class="drop-in">
-          <label class="dz" id="dz" for="dz-file" tabindex="0">
-            <input type="file" id="dz-file" class="dz-input" multiple tabindex="-1" aria-label="Choose files to upload">
-            <b>Drop files here</b>
-            <span>or click to choose · up to 15 MB each (20 MB for photos, PDF, video)</span>
-            <span class="dz-note" id="dz-note" hidden></span>
-          </label>
-          <button class="linkbtn" id="dz-perm" type="button" hidden>Turn on file uploads</button>
-          <div class="dt">
-            <label for="dt-text" hidden>Text or link</label>
-            <textarea id="dt-text" rows="2" placeholder="Or paste text or a link to move it between devices"></textarea>
-            <button class="btn" id="dt-save" type="button">Save</button>
-          </div>
-          <div class="dk"><label for="dk-keep">Delete after</label><select id="dk-keep"></select></div>
-          <div class="msg" id="drop-msg" role="status" hidden></div>
-        </div>
-        <ul class="drop-list" id="drop-list"><li class="empty">Loading your drop box…</li></ul>
-      </div>
     </section>
   </div>
 
@@ -706,7 +634,6 @@ const MAIL_Q = "in:inbox -category:promotions newer_than:7d";
 const IMP_Q  = "in:inbox -category:promotions newer_than:14d (important OR 중요)";
 const IMP_RE = /important|중요/i;
 const KEY_RE = /시험|마감|deadline|due|exam|발표|면접|interview|오디션|audition|제출|submit/i;
-const COLORS = {"1":["Lavender","#7986cb"],"2":["Sage","#33b679"],"3":["Grape","#8e24aa"],"4":["Flamingo","#e67c73"],"5":["Banana","#f6bf26"],"6":["Tangerine","#f4511e"],"7":["Peacock","#039be5"],"8":["Graphite","#616161"],"9":["Blueberry","#3f51b5"],"10":["Basil","#0b8043"],"11":["Tomato","#d50000"]};
 const CAL_FALLBACK = ["#039be5","#b38fd1","#c9787a","#8fb58a","#d6a85c"];
 /* Calendar colors as set in Google Calendar. The Calendar connector reports colors set on single events, but not each calendar's own color, so they are listed here by calendar ID. Replace the IDs with your own (list_calendars shows them). */
 const CAL_COLORS = {
@@ -755,6 +682,18 @@ const addDays = (d,n) => { const x = new Date(d); x.setDate(x.getDate()+n); retu
 const hm = d => pad(d.getHours())+":"+pad(d.getMinutes());
 const wd = d => d.toLocaleDateString("en-US",{weekday:"short"});
 const md = d => (d.getMonth()+1)+"/"+d.getDate();
+/* Two-click delete used across the page: the first click arms an item for 4 seconds, the second confirms. */
+function armTwice(st, id, confirm, redraw){
+  clearTimeout(st.armT);
+  if (st.armed === id){ st.armed = null; confirm(); return; }
+  st.armed = id; redraw();
+  st.armT = setTimeout(() => { st.armed = null; redraw(); }, 4000);
+}
+/* Status line under a widget: empty text hides it; extra elements (a button, a textarea) can follow the text. */
+function showMsg(box, t, extra){
+  box.textContent = ""; box.hidden = !t;
+  if (t){ box.appendChild(el("span", null, t)); for (const k of (extra || [])) box.appendChild(k); }
+}
 
 const S = {
   mcp:null, cals:null, events:{}, calErr:null, calStamp:null,
@@ -1466,7 +1405,7 @@ const MM_COLORS = ["#86b7c9", "#7fc39b", "#e3b263", "#b39ddb", "#e0796d", "#4db6
 const ME = {
   off: false, err: false, mindReady: false, rsReady: false, nodes: [], rs: [], mindCol: null, rsCol: null,
   sel: null, armed: null, armT: null, lang: "ko", view: "map", hideDone: false, tab: "dash", stage: "uni",
-  sampleP: null, editing: null, fromNode: null, busy: false, focus: null, openL: null
+  sampleP: null, editing: null, fromNode: null, focus: null, openL: null
 };
 try {
   ME.view = localStorage.getItem("ld-mm-view") === "list" ? "list" : "map";
@@ -1476,11 +1415,8 @@ try {
   ME.tab = localStorage.getItem("ld-view") === "me" ? "me" : "dash";
 } catch (e){}
 
-function meMsg(t){ const m = $("mm-msg"); m.hidden = !t; m.textContent = t || ""; }
-function rsMsg(t, extra){
-  const m = $("rs-msg"); m.textContent = ""; m.hidden = !t;
-  if (t){ m.appendChild(el("span", null, t)); for (const k of (extra || [])) m.appendChild(k); }
-}
+function meMsg(t){ showMsg($("mm-msg"), t); }
+function rsMsg(t, extra){ showMsg($("rs-msg"), t, extra); }
 async function mmWrite(fn){
   if (!ME.mindCol){ meMsg("The mindmap works when the dashboard is open in Claude."); return null; }
   try { const r = await fn(); meMsg(""); return r; } catch (e){ meMsg("Couldn't save that change. Try again."); return null; }
@@ -1534,11 +1470,7 @@ async function mmDelete(n){
   if (ME.focus && !mmNode(ME.focus)) ME.focus = up;
   ME.sel = up; ME.armed = null; renderMind();
 }
-function mmArm(n){
-  if (ME.armed === n.id){ ME.armed = null; mmDelete(n); return; }
-  ME.armed = n.id; renderMind();
-  clearTimeout(ME.armT); ME.armT = setTimeout(() => { ME.armed = null; renderMind(); }, 4000);
-}
+function mmArm(n){ armTwice(ME, n.id, () => mmDelete(n), renderMind); }
 async function mmComplete(n){
   await mmUpdate(n, {done: true, doneAt: Date.now()});
   const t = mmTarget(n); if (!t) return;
@@ -1681,7 +1613,7 @@ function initSpin(){
   const stop = () => { if (S.raf) cancelAnimationFrame(S.raf); S.raf = 0; };
   const turn = d => { const k = mmRotKey(), r = (ME.rots[k] || 0) + d; ME.rots[k] = r; if (ME.mapApply) ME.mapApply(r); };
   box.addEventListener("pointerdown", e => {
-    if (e.button !== 0 || !ME.mapApply || e.target.closest(".mm-up")) return;
+    if (e.button !== 0 || !ME.mapApply) return;
     stop(); Object.assign(S, {down: true, drag: false, id: e.pointerId, x: e.clientX, y: e.clientY, lastA: ang(e), lastT: performance.now(), v: 0});
   });
   box.addEventListener("pointermove", e => {
@@ -1988,7 +1920,7 @@ function rsPrint(){
 /* ----- resume dialog ----- */
 const FD = id => $("f-" + id);
 const F_LANG = ["title", "org", "role", "desc"];
-function fMsg(t){ const m = FD("msg"); m.hidden = !t; m.textContent = t || ""; }
+function fMsg(t){ showMsg(FD("msg"), t); }
 function fillDialog(r){
   const sel = FD("cat"); sel.textContent = "";
   for (const [k, ko, en] of RS_CATS){ const o = el("option", null, ko + " · " + en); o.value = k; sel.appendChild(o); }
@@ -2017,7 +1949,7 @@ function openDialog(title, sub, r){
   $("rs-dt").textContent = title; $("rs-dsub").textContent = sub || "";
   fillDialog(r);
   FD("del").hidden = !ME.editing;
-  FD("del").textContent = "Delete entry"; FD("del").dataset.armed = "";
+  clearTimeout(DLG.armT); DLG.armed = null; drawDelBtn();
   const d = $("rs-dlg");
   try { d.showModal(); } catch (e){ d.setAttribute("open", ""); }
   setTimeout(() => FD(r.ko && r.ko.title ? "ko-role" : "ko-title").focus(), 30);
@@ -2063,9 +1995,10 @@ async function saveDialog(){
   } catch (e){ fMsg("Couldn't save. Try again."); }
   finally { FD("save").disabled = false; }
 }
-async function deleteFromDialog(){
-  const btn = FD("del");
-  if (!btn.dataset.armed){ btn.dataset.armed = "1"; btn.textContent = "Click again to delete"; setTimeout(() => { btn.dataset.armed = ""; btn.textContent = "Delete entry"; }, 4000); return; }
+const DLG = {armed: null, armT: null};
+function drawDelBtn(){ FD("del").textContent = DLG.armed ? "Click again to delete" : "Delete entry"; }
+function deleteFromDialog(){ armTwice(DLG, "entry", deleteEntryNow, drawDelBtn); }
+async function deleteEntryNow(){
   const r = ME.editing; if (!r) return;
   try {
     await ME.rsCol.doc(r.id).delete();
@@ -2214,12 +2147,14 @@ function dueInfo(it){
   if (days < 0) return {text: "Overdue · " + mmdd, cls: "over"};
   if (days === 0) return {text: "Due today", cls: "soon"};
   if (days === 1) return {text: "Due tomorrow", cls: "soon"};
-  return {text: mmdd + " · D-" + days, cls: days <= 3 ? "soon" : ""};
+  return {text: "Due " + mmdd, cls: days <= 3 ? "soon" : ""};
 }
-function todoColor(g){ const x = TODO_GROUPS.find(x => x[0] === g); return x ? x[1] : MISC_GRAY; }
 function storedNow(it){ return it.done && it.doneAt && it.doneAt < +sod(new Date()); }
 function deleteAt(it){ return +addDays(sod(new Date(it.doneAt)), 2); }
-function todoMsg(t){ const m = $("todo-msg"); m.hidden = !t; m.textContent = t || ""; }
+/* "today 14:30" / "in 23h": used by the stored (finished) to-do list */
+function untilLabel(ms){ const d = ms - Date.now(), h = d / 3600000; if (d <= 0) return "now"; if (h < 1) return "in " + Math.max(1, Math.round(d / 60000)) + "m"; if (h < 24) return "in " + Math.round(h) + "h"; const n = Math.round(h / 24); return "in " + n + (n === 1 ? " day" : " days"); }
+function whenLabel(ms){ const d = new Date(ms), t = sod(new Date()); return (+sod(d) === +t ? "today " : +sod(d) === +addDays(t, -1) ? "yesterday " : md(d) + " ") + hm(d); }
+function todoMsg(t){ showMsg($("todo-msg"), t); }
 function todoSaveLocal(){ try { localStorage.setItem("ld-todo", JSON.stringify(TODO.items)); } catch (e){} }
 async function todoWrite(fn, fail){
   try { await fn(); todoMsg(""); } catch (e){ todoMsg(fail); }
@@ -2248,11 +2183,7 @@ async function todoCleanup(){
     await todoDelete(it, true);
   }
 }
-function todoArm(it){
-  if (TODO.armed === it.id){ TODO.armed = null; todoDelete(it); return; }
-  TODO.armed = it.id; renderTodo();
-  clearTimeout(TODO.armT); TODO.armT = setTimeout(() => { TODO.armed = null; renderTodo(); }, 4000);
-}
+function todoArm(it){ armTwice(TODO, it.id, () => todoDelete(it), renderTodo); }
 function renderTodoGroups(){
   const box = $("todo-groups"); box.textContent = "";
   for (const [g, c] of TODO_GROUPS){
@@ -2349,254 +2280,6 @@ function renderTodo(){
   renderTodo();
 })();
 
-/* ---------- drop box: files and text between devices ---------- */
-const DROP = { items: [], col: null, assets: null, dl: null, busy: [], usage: null, ready: false, off: false, armed: null, armT: null };
-const KEEP_OPTS = [["1","1 day"],["3","3 days"],["7","7 days"],["30","30 days"],["0","Never (keep it)"]];
-/* Types the page can store as they are; anything else is stored as base64 text and rebuilt on download. */
-const NATIVE = {png:"image/png", jpg:"image/jpeg", jpeg:"image/jpeg", gif:"image/gif", webp:"image/webp", mp4:"video/mp4", webm:"video/webm",
-                pdf:"application/pdf", csv:"text/csv", md:"text/markdown", json:"application/json", txt:"text/plain"};
-/* Extensions the download prompt accepts; other files are handed back inside a .zip. */
-const SAVE_OK = new Set("gif png jpg jpeg webp mp4 webm mov txt json md docx pptx epub csv ttf html svg pdf xlsx zip fig".split(" "));
-const MB = 1048576, NATIVE_MAX = 20 * MB, WRAP_MAX = 15 * MB, TEXT_MAX = 100000;
-const TRASH_SVG = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 4h11M6 4V2.6h4V4M4 4l.7 9.4h6.6L12 4M6.6 6.5v4.6M9.4 6.5v4.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-
-function extOf(n){ const m = /\.([A-Za-z0-9]+)$/.exec(n || ""); return m ? m[1].toLowerCase() : ""; }
-function fmtSize(b){ return b >= 1024 * MB ? +(b / 1024 / MB).toFixed(1) + " GB" : b >= MB ? (b / MB).toFixed(b >= 10 * MB ? 0 : 1) + " MB" : b >= 1024 ? Math.round(b / 1024) + " KB" : b + " B"; }
-function deviceLabel(){ const u = navigator.userAgent; return /iPhone/.test(u) ? "iPhone" : /iPad/.test(u) ? "iPad" : /Android/.test(u) ? "Android" : /Windows/.test(u) ? "Windows" : /Mac/.test(u) ? "Mac" : "another device"; }
-function untilLabel(ms){ const d = ms - Date.now(), h = d / 3600000; if (d <= 0) return "now"; if (h < 1) return "in " + Math.max(1, Math.round(d / 60000)) + "m"; if (h < 24) return "in " + Math.round(h) + "h"; const n = Math.round(h / 24); return "in " + n + (n === 1 ? " day" : " days"); }
-function whenLabel(ms){ const d = new Date(ms), t = sod(new Date()); return (+sod(d) === +t ? "today " : +sod(d) === +addDays(t, -1) ? "yesterday " : md(d) + " ") + hm(d); }
-function dropMsg(t, bad){ const m = $("drop-msg"); m.hidden = !t; m.textContent = t || ""; m.classList.toggle("err", !!bad); }
-function keepMs(){ const n = Number($("dk-keep").value); return n ? Date.now() + n * 86400000 : null; }
-function toBase64(file){ return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(",")[1] || ""); r.onerror = () => rej({code: "read"}); r.readAsDataURL(file); }); }
-function uploadErr(e, name){
-  switch (e && e.code){
-    case "too_large": return name + " is over the size limit.";
-    case "quota_or_state": return "Your drop box storage is full. Delete some files and try again.";
-    case "rate_limited": return "Too many uploads at once. Wait a moment and try again.";
-    case "upstream_auth": return "Your sign-in expired. Reload the page and try again.";
-    case "read": return "Couldn't read " + name + " from your device.";
-    case "store_unavailable": return "Couldn't upload " + name + " just now. Try again.";
-    case "unsupported_type": return "Couldn't upload " + name + ": this file type was refused.";
-    default: return "Couldn't upload " + name + ". Try again." + (e && e.code ? " (" + e.code + ")" : "");
-  }
-}
-function refreshUsage(){
-  if (!DROP.assets) return;
-  DROP.assets.list().then(r => { DROP.usage = r.usage; renderDropUsage(); }).catch(() => {});
-}
-function renderDropUsage(){
-  const u = DROP.usage;
-  $("drop-usage").textContent = u ? fmtSize(u.bytes) + " of " + fmtSize(u.maxBytes) + " used" : "";
-}
-
-async function addFiles(files){
-  files = Array.from(files);              // copy now: the picker is cleared right after this call starts
-  if (DROP.capsP) await DROP.capsP;
-  if (DROP.off || !DROP.col){ dropMsg("The drop box works when the dashboard is open in Claude.", true); return; }
-  if (!DROP.assets){ dropMsg(DROP.why || "File uploads aren't available here. Text still works.", true); return; }
-  dropMsg("");
-  for (const f of files){
-    const type = NATIVE[extOf(f.name)], max = type ? NATIVE_MAX : WRAP_MAX;
-    if (!f.size){ dropMsg(f.name + " is empty.", true); continue; }
-    if (f.size > max){ dropMsg(f.name + " is " + fmtSize(f.size) + ". Files like this can be up to " + fmtSize(max) + ".", true); continue; }
-    const tmp = {name: f.name, size: f.size}; DROP.busy.push(tmp); renderDrop();
-    let res = null, wrap = false;
-    try {
-      if (type){
-        try { res = await DROP.assets.upload(f, {type}); }
-        catch (e){ if (!(e && (e.code === "invalid_request" || e.code === "unsupported_type")) || f.size > WRAP_MAX) throw e; }
-      }
-      if (!res){ wrap = true; res = await DROP.assets.upload(new Blob([await toBase64(f)], {type: "text/plain"}), {type: "text/plain"}); }
-      try {
-        await DROP.col.add({kind: "file", name: f.name, size: f.size, type: wrap ? (f.type || "") : type, assetId: res.id, wrap,
-                            from: deviceLabel(), addedAt: Date.now(), expiresAt: keepMs()});
-      } catch (e){ DROP.assets.delete(res.id).catch(() => {}); throw e; }
-    } catch (e){ dropMsg(uploadErr(e, f.name), true); }
-    finally { DROP.busy = DROP.busy.filter(x => x !== tmp); renderDrop(); }
-  }
-  refreshUsage();
-}
-async function addText(){
-  const box = $("dt-text"), t = box.value.trim();
-  if (!t) return;
-  if (DROP.off || !DROP.col){ dropMsg("The drop box works when the dashboard is open in Claude.", true); return; }
-  if (t.length > TEXT_MAX){ dropMsg("That text is too long. The limit is 100,000 characters.", true); return; }
-  const b = $("dt-save"); b.disabled = true;
-  try { await DROP.col.add({kind: "text", text: t, from: deviceLabel(), addedAt: Date.now(), expiresAt: keepMs()}); box.value = ""; dropMsg(""); }
-  catch (e){ dropMsg("Couldn't save that text. Try again.", true); }
-  finally { b.disabled = false; }
-}
-
-let jszipP = null;
-function loadJSZip(){
-  if (window.JSZip) return Promise.resolve(window.JSZip);
-  if (!jszipP) jszipP = new Promise((res, rej) => {
-    const sc = document.createElement("script");
-    sc.src = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";
-    sc.onload = () => res(window.JSZip); sc.onerror = () => { jszipP = null; rej({code: "zip"}); };
-    document.head.appendChild(sc);
-  });
-  return jszipP;
-}
-async function zipOne(name, blob){ const JSZip = await loadJSZip(); const z = new JSZip(); z.file(name, blob); return z.generateAsync({type: "blob"}); }
-async function fileBlob(it){
-  const r = await fetch("/_blob/" + it.assetId);
-  if (!r.ok) throw {code: r.status === 404 ? "gone" : "fetch"};
-  if (!it.wrap) return r.blob();
-  const bin = atob((await r.text()).trim()), u = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
-  return new Blob([u]);
-}
-async function downloadItem(it, btn){
-  if (!DROP.dl){ dropMsg("Downloads aren't available in this view. Open the dashboard in the Claude app or claude.ai.", true); return; }
-  const label = btn.textContent; btn.disabled = true; btn.textContent = "Preparing…"; dropMsg("");
-  try {
-    let blob = await fileBlob(it), name = it.name;
-    if (!SAVE_OK.has(extOf(name))){ blob = await zipOne(name, blob); name += ".zip"; }
-    try { await DROP.dl.save({filename: name, data: blob}); }
-    catch (e){
-      if (e && e.code === "rejected_extension" && !/\.zip$/i.test(name)){ await DROP.dl.save({filename: name + ".zip", data: await zipOne(name, blob)}); }
-      else throw e;
-    }
-  } catch (e){
-    const c = e && e.code;
-    if (c === "declined") {}
-    else if (c === "gone") dropMsg(it.name + " is no longer stored.", true);
-    else if (c === "zip") dropMsg("Couldn't prepare " + it.name + " for download. Check your connection and try again.", true);
-    else if (c === "rate_limited") dropMsg("A download prompt is already open. Finish that one first.", true);
-    else if (c === "extension_not_enabled") dropMsg("This kind of file can't be downloaded in this view.", true);
-    else dropMsg("Couldn't download " + it.name + ". Try again." + (c ? " (" + c + ")" : ""), true);
-  } finally { btn.disabled = false; btn.textContent = label; }
-}
-function copyText(t, btn){
-  const done = ok => { const l = btn.textContent; btn.textContent = ok ? "Copied" : "Select and copy"; setTimeout(() => { btn.textContent = l; }, 1600); };
-  try { navigator.clipboard.writeText(t).then(() => done(true), () => done(false)); } catch (e){ done(false); }
-}
-async function deleteItem(it){
-  DROP.armed = null;
-  try {
-    if (it.kind === "file"){
-      if (!DROP.assets){ dropMsg("Deleting files needs the dashboard open in Claude.", true); return; }
-      await DROP.assets.delete(it.assetId);
-    }
-    await DROP.col.doc(it.id).delete();
-  } catch (e){ dropMsg("Couldn't delete " + (it.name || "that text") + ". Try again.", true); }
-  refreshUsage();
-}
-async function clearExpired(btn){
-  btn.disabled = true;
-  for (const it of DROP.items.filter(it => it.expiresAt && it.expiresAt <= Date.now())) await deleteItem(it);
-  btn.disabled = false;
-}
-function armDelete(it){
-  if (DROP.armed === it.id){ deleteItem(it); return; }
-  DROP.armed = it.id; renderDrop();
-  clearTimeout(DROP.armT); DROP.armT = setTimeout(() => { DROP.armed = null; renderDrop(); }, 4000);
-}
-function dropRow(it, exp){
-  const li = el("li", "di" + (exp ? " exp" : ""));
-  const ic = el("div", "di-ic");
-  const badge = () => { ic.textContent = it.kind === "text" ? (/^https?:\/\//i.test(it.text) ? "LINK" : "TEXT") : (extOf(it.name) || "FILE").toUpperCase().slice(0, 4); };
-  if (it.kind === "file" && !it.wrap && /^image\//.test(it.type)){
-    const img = el("img"); img.alt = ""; img.loading = "lazy"; img.src = "/_blob/" + it.assetId;
-    img.onerror = () => { img.remove(); badge(); }; ic.appendChild(img);
-  } else badge();
-  li.appendChild(ic);
-  const main = el("div", "di-main");
-  main.appendChild(el("div", it.kind === "text" ? "di-text" : "di-name", it.kind === "text" ? it.text : it.name));
-  const meta = [it.kind === "file" ? fmtSize(it.size) : null, "from " + (it.from || "another device"), whenLabel(it.addedAt),
-                it.expiresAt ? (exp ? "expired" : "deletes " + untilLabel(it.expiresAt)) : "kept until you delete it"].filter(Boolean).join(" · ");
-  main.appendChild(el("div", "di-meta", meta));
-  li.appendChild(main);
-  const act = el("div", "di-act");
-  if (it.kind === "text"){
-    const c = el("button", "btn", "Copy"); c.type = "button"; c.addEventListener("click", () => copyText(it.text, c)); act.appendChild(c);
-    if (/^https?:\/\/\S+$/i.test(it.text)){ const a = el("a", "btn", "Open ↗"); a.href = it.text; a.target = "_blank"; a.rel = "noopener noreferrer"; act.appendChild(a); }
-  } else {
-    const d = el("button", "btn", "Download"); d.type = "button"; d.addEventListener("click", () => downloadItem(it, d)); act.appendChild(d);
-  }
-  const armed = DROP.armed === it.id;
-  const del = el("button", "btn del" + (armed ? " armed" : "")); del.type = "button";
-  del.setAttribute("aria-label", armed ? "Confirm delete" : "Delete " + (it.name || "this text"));
-  if (armed) del.textContent = "Delete?"; else del.innerHTML = TRASH_SVG;
-  del.addEventListener("click", () => armDelete(it));
-  act.appendChild(del);
-  li.appendChild(act);
-  return li;
-}
-function renderDrop(){
-  const ul = $("drop-list"); ul.textContent = "";
-  const now = Date.now();
-  const live = DROP.items.filter(it => !it.expiresAt || it.expiresAt > now), expired = DROP.items.filter(it => it.expiresAt && it.expiresAt <= now);
-  $("drop-n").textContent = live.length ? String(live.length) : "";
-  for (const b of DROP.busy){
-    const li = el("li", "di"); li.appendChild(el("div", "di-ic", (extOf(b.name) || "FILE").toUpperCase().slice(0, 4)));
-    const m = el("div", "di-main"); m.appendChild(el("div", "di-name", b.name)); m.appendChild(el("div", "di-meta", fmtSize(b.size) + " · uploading…"));
-    li.appendChild(m); li.appendChild(el("span")); ul.appendChild(li);
-  }
-  if (DROP.off) ul.appendChild(el("li", "empty", "The drop box works when the dashboard is open in Claude."));
-  else if (!DROP.ready) ul.appendChild(el("li", "empty", "Loading your drop box…"));
-  else if (!live.length && !DROP.busy.length) ul.appendChild(el("li", "empty", "Nothing here yet. Anything you drop shows up on every device you open the dashboard on."));
-  for (const it of live) ul.appendChild(dropRow(it, false));
-  if (expired.length){
-    const li = el("li", "drop-exp"); li.appendChild(el("span", null, expired.length + (expired.length === 1 ? " expired item" : " expired items")));
-    const b = el("button", "linkbtn", "Delete expired"); b.type = "button"; b.addEventListener("click", () => clearExpired(b)); li.appendChild(b);
-    ul.appendChild(li);
-    for (const it of expired) ul.appendChild(dropRow(it, true));
-  }
-}
-(function initDrop(){
-  const keep = $("dk-keep");
-  for (const [v, t] of KEEP_OPTS){ const o = el("option", null, t); o.value = v; keep.appendChild(o); }
-  let k = "7"; try { k = localStorage.getItem("ld-keep") || "7"; } catch (e){}
-  keep.value = KEEP_OPTS.some(o => o[0] === k) ? k : "7";
-  keep.addEventListener("change", () => { try { localStorage.setItem("ld-keep", keep.value); } catch (e){} });
-  const dz = $("dz"), inp = $("dz-file");
-  /* If a tap opens no file picker (some in-app views block it), say so instead of doing nothing. */
-  let pickT = null;
-  const picked = () => { clearTimeout(pickT); pickT = null; };
-  inp.addEventListener("click", () => {
-    picked(); dropMsg("");
-    pickT = setTimeout(() => {
-      if (!pickT) return;
-      dropMsg(DROP.why || "If no file picker opened, this app view is blocking it. Open the dashboard at claude.ai in Safari or Chrome to upload from your phone. Text and links still work here.", true);
-    }, 2500);
-  });
-  window.addEventListener("blur", picked);
-  document.addEventListener("visibilitychange", () => { if (document.hidden) picked(); });
-  inp.addEventListener("cancel", picked);
-  inp.addEventListener("change", () => { picked(); if (inp.files.length) addFiles(inp.files); inp.value = ""; });
-  dz.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); inp.click(); } });
-  dz.addEventListener("dragover", e => { e.preventDefault(); dz.classList.add("over"); });
-  dz.addEventListener("dragleave", () => dz.classList.remove("over"));
-  dz.addEventListener("drop", e => { e.preventDefault(); dz.classList.remove("over"); if (e.dataTransfer && e.dataTransfer.files.length) addFiles(e.dataTransfer.files); });
-  $("dt-save").addEventListener("click", addText);
-  $("dt-text").addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)){ e.preventDefault(); addText(); } });
-  $("dt-text").addEventListener("paste", e => { const f = e.clipboardData && e.clipboardData.files; if (f && f.length){ e.preventDefault(); addFiles(f); } });
-  if (window.claude && window.claude.use){
-    DROP.capsP = Promise.all([window.claude.use("assets"), window.claude.use("downloads"), window.claude.use("permissions")])
-      .then(async ([a, d, perms]) => {
-        DROP.assets = a; DROP.dl = d; DROP.perms = perms;
-        if (!a){
-          let st = "unavailable";
-          try { if (perms) st = await perms.state("assets"); } catch (e){}
-          DROP.why = st === "denied"
-            ? "File uploads are turned off for this dashboard. Tap \"Turn on file uploads\" below."
-            : "This app view doesn't allow file uploads. Open the dashboard at claude.ai in your phone's browser (Safari or Chrome) to upload. Text still works here.";
-          const note = $("dz-note"); note.hidden = false;
-          note.textContent = st === "denied" ? "File uploads are turned off" : "Uploads aren't available in this view";
-          $("dz-perm").hidden = st !== "denied";
-        }
-        refreshUsage();
-      });
-    $("dz-perm").addEventListener("click", async () => {
-      try { await DROP.perms.manage(); location.reload(); }
-      catch (e){ dropMsg("Open the dashboard's Permissions menu and turn on file uploads, then reload.", true); }
-    });
-  } else { DROP.off = true; }
-  renderDrop();
-})();
-
 /* ---------- hide from dashboard (Heads up, Key emails) ---------- */
 const CHECK_SVG = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.4 6.4 11.6 13 4.6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 function isHidden(k){ return !!(k && S.hidden[k]); }
@@ -2654,7 +2337,6 @@ function saveNote(){
 }
 function localFallback(){
   noteLocal = true;
-  DROP.off = true; renderDrop();
   HK.off = true; renderHack();
   ME.off = true; renderMind(); renderResume();
   TODO.local = true;
@@ -2673,10 +2355,6 @@ async function bootStore(){
   const uid = await user.id();
   if (!uid){ localFallback(); return; }
   const col = db.collection("data/users/" + uid);
-  DROP.col = db.doc("data/users/" + uid + "/drop").collection("items");
-  DROP.col.orderBy("addedAt", "desc").onSnapshot(snap => {
-    DROP.items = snap.docs.map(d => Object.assign({id: d.id}, d.data())); DROP.ready = true; renderDrop();
-  }, () => { dropMsg("Drop box sync stopped. Reopen the page.", true); });
   HK.meta = db.doc("data/users/" + uid + "/hackathons");
   HK.meta.onSnapshot(s => { HK.updated = (s.data() || {}).updatedAt || null; renderHack(); }, () => {});
   db.doc("data/users/" + uid + "/hackathons").collection("items").onSnapshot(snap => {
@@ -2756,7 +2434,7 @@ $("refresh").addEventListener("click", async () => {
 setInterval(() => {
   const k = ymd(new Date());
   if (k !== S.dayKey && S.mcp){ S.dayKey = k; resubscribeDay(); }
-  renderHeader(); renderToday(); renderHeadsUp(); if (DROP.items.length) renderDrop(); renderTodo(); todoCleanup(); if (HK.ready) renderHack();
+  renderHeader(); renderToday(); renderHeadsUp(); renderTodo(); todoCleanup(); if (HK.ready) renderHack();
 }, 30000);
 
 renderAll();

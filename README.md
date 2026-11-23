@@ -12,7 +12,7 @@ A personal dashboard that pulls my Google Calendar and Gmail into one dark, quie
 
 | Part | What it is | Where it runs |
 |---|---|---|
-| **Dashboard** | One page with today's events as a to-do list (time, color, details), the next 7 days, key emails, a heads-up list, a to-do list, a free-time finder, a hackathon list, a drop box, a sticky note, and a "Me" tab with a mindmap and resume tracker | Claude artifact, reading Calendar and Gmail live each time it opens |
+| **Dashboard** | One page with today's events as a to-do list (time, color, details), the next 7 days, key emails, a heads-up list, a to-do list, a free-time finder, a hackathon list, a sticky note, and a "Me" tab with a mindmap and resume tracker | Claude artifact, reading Calendar and Gmail live each time it opens |
 | **Laptop launcher** | Opens the dashboard as an app window about 5–10 seconds after Windows sign-in | Windows Startup folder |
 | **Morning brief** | Push at 05:47 with today's events only | Claude scheduled task (cloud) |
 | **Tomorrow preview** | Push at 21:44 with tomorrow's events, flagging early starts | Claude scheduled task (cloud) |
@@ -56,6 +56,7 @@ I built this over two days by describing what I wanted to Claude, testing the re
 15. **Fix: pushes stopped arriving.** Two runs in a row showed "Push failed" instead of my schedule: the runs could read my calendar, but the push tool they used was no longer there. The "run finished" notification, though, reached my phone every time. So the runs now put the brief itself in that notification and use no separate push at all. If Google Calendar can't be read, the message says Claude's connectors are failing and tells me to double-check my schedule, instead of telling me to reconnect.
 16. **Feature: a "Me" tab with a mindmap and a resume tracker.** I wanted one place that shows what's going on in my life right now, and a running list of my activities so I never have to dig for them when filling out an application. The mindmap puts me in the center with a branch for each area. Branches I mark with a ★ feed the resume: when I complete one, a confirm card opens pre-filled so I can add my role and result. The resume has a University tab and a High School tab, sorts entries into six categories (education, activities, awards, projects, experience, languages), keeps each one in Korean and English, can be filled by typing a sentence that Claude sorts into fields, and can be copied as text or printed to PDF.
 17. **Redesign: the mindmap as a tree of life domains.** The first mindmap felt unorganized, so I wrote out the structure I actually wanted: five life domains (academics, work, career, leadership, personal growth), each nesting categories, projects or organizations, and milestones, focused on big milestones rather than day-to-day tasks. The map now drills down: click a node to make it the center, with a breadcrumb back up, and on a phone it becomes a folding outline. Just for fun, the ring can be grabbed and spun around the center like a disc, and it coasts when let go. A ★ comes in two kinds: on one thing (an organization) it makes that node a resume entry; on a group (projects, hackathons, scholarships) it makes each item inside its own entry. Finishing a milestone anywhere below adds it to that entry as a result line instead of creating a duplicate.
+18. **Cleanup: removing what I didn't need.** I had Claude list every redundancy in the project without deleting anything, then picked what to cut: dead code left behind by earlier versions, styles defined twice, three copies of the same "click again to delete" logic, two near-identical task prompts (now one template), the D-n countdown in the to-do list (Heads up already warns two days ahead), and the drop box, which I wasn't using.
 
 What I take from this: the AI wrote the code quickly, but every bug above was found by using the thing for real. The AI's tests didn't catch any of them. Most of my work was in deciding what it should do and noticing when it didn't.
 
@@ -71,8 +72,7 @@ windows/
   Remove from Startup.cmd    Undo
 scheduled-tasks/
   README.md                  Schedules and cron expressions
-  morning-brief.md           Prompt for the 05:47 push
-  tomorrow-preview.md        Prompt for the 21:44 push
+  daily-brief.md             One prompt for the 05:47 and 21:44 pushes
   weekly-preview-email.md    Prompt for the Sunday email
 ```
 
@@ -82,7 +82,7 @@ This is not a standalone web app. The page uses Claude's artifact runtime (`wind
 
 1. In claude.ai, connect the **Google Calendar** and **Gmail** connectors.
 2. Ask Claude to publish `dashboard/life-dashboard.html` as an artifact with these capabilities:
-   `mcp` (Google Calendar: `list_calendars`, `list_events`; Gmail: `search_threads`), `db`, `user`, `assets`, `downloads` and `sample`.
+   `mcp` (Google Calendar: `list_calendars`, `list_events`; Gmail: `search_threads`), `db`, `user`, `downloads` and `sample`.
    Then replace the placeholder calendar IDs in `CAL_COLORS` with your own and set their colors.
 3. Ask Claude to create the three scheduled tasks from the files in `scheduled-tasks/`. Replace `YOUR_EMAIL@gmail.com` and adjust the time zone if you are not in Seoul.
 4. On Windows, put your artifact link in place of `YOUR_ARTIFACT_ID` in `windows/install.ps1` and `windows/launch.ps1`, keep the folder somewhere permanent and double-click `Install Life Dashboard.cmd`.
