@@ -2120,7 +2120,7 @@ function initMe(){
 /* A crossed-out task stays visible until midnight, is then stored (hidden but restorable),
    and is deleted 24 hours after that, i.e. at the second midnight after it was crossed out.
    This is worked out from timestamps, so it holds even if the dashboard was closed at midnight. */
-const TODO_GROUPS = [["과제", "#009688"], ["시험", "#d50000"], ["알바", "#3f51b5"], ["그 외", "#8b949f"]];
+const TODO_GROUPS = [["과제", "#009688"], ["시험", "#d50000"], ["알바", "#3f51b5"], ["대외활동", "#f6bf26"], ["그 외", "#8b949f"]];
 const TODO = { items: [], col: null, local: false, ready: false, showStored: false, armed: null, armT: null, deleting: new Set(), group: "과제" };
 try { const g = localStorage.getItem("ld-todo-group"); if (TODO_GROUPS.some(x => x[0] === g)) TODO.group = g; } catch (e){}
 const TD_CHECK = '<svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.3 6.3 4.8 8.7 9.7 3.4" stroke="#0f1215" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>';
