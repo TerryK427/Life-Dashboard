@@ -391,6 +391,29 @@ ul{list-style:none;margin:0;padding:0}
   .hk-lbl{display:inline;margin-right:6px}
 }
 
+/* 단기 알바 */
+.gg-card{container-type:inline-size}
+.gg{display:grid;grid-template-columns:minmax(0,1.6fr) 150px minmax(0,1fr) 120px 112px;gap:14px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--raise);text-decoration:none;color:var(--fg)}
+.gg:hover{border-color:var(--accent)}
+.gg:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.gg.closed{opacity:.6}
+.gg-tag{display:inline-block;font-size:10.5px;font-weight:600;padding:1px 7px;border-radius:999px;border:1px solid var(--line-strong);color:var(--muted);white-space:nowrap;margin-right:6px;vertical-align:1px}
+.gg-tag.on{color:var(--accent);border-color:var(--accent)}
+.gg-who{font-size:12px;color:var(--muted);margin-top:2px;overflow-wrap:anywhere}
+.gg-note{font-size:11.5px;color:var(--warn);margin-top:3px;word-break:keep-all;overflow-wrap:anywhere}
+.gg-pay{font-family:var(--mono);font-size:12.5px;font-variant-numeric:tabular-nums;font-weight:600}
+.gg-pay small{display:block;font-family:var(--sans);font-weight:400;color:var(--dim);font-size:11.5px;margin-top:1px}
+.gg-more{font-size:11.5px;color:var(--dim);margin:8px 2px 0;display:flex;flex-wrap:wrap;gap:4px 12px}
+.gg-more a{color:var(--muted)}
+@container (max-width:720px){
+  .gg{grid-template-columns:minmax(0,1fr) auto;gap:4px 12px}
+  .gg .hk-main{grid-column:1;grid-row:1}
+  .gg .hk-st{grid-column:2;grid-row:1;align-self:start}
+  .gg .hk-when,.gg .hk-host,.gg .gg-pay{grid-column:1/-1}
+  .gg .hk-lbl{display:inline;margin-right:6px}
+  .gg-pay small{display:inline;margin-left:6px}
+}
+
 /* Free-time finder */
 .ff-card{container-type:inline-size}
 .ff{display:grid;grid-template-columns:252px minmax(0,1fr);gap:28px;align-items:start}
@@ -551,6 +574,19 @@ ul{list-style:none;margin:0;padding:0}
         <span class="card-tools"><span class="note-s" id="hk-upd"></span><button class="linkbtn" id="hk-toggle" type="button" aria-pressed="false">Show closed</button></span>
       </div>
       <div id="hk-box"><div class="empty">Loading hackathons…</div></div>
+    </section>
+
+    <section class="card span gg-card" aria-labelledby="h-gg">
+      <div class="card-h"><h2 id="h-gg">단기 알바 <span class="n" id="gg-n"></span></h2>
+        <span class="card-tools"><span class="note-s" id="gg-upd"></span><button class="linkbtn" id="gg-toggle" type="button" aria-pressed="false">Show closed</button></span>
+      </div>
+      <div id="gg-box"><div class="empty">Loading gigs…</div></div>
+      <div class="gg-more">Find more:
+        <a href="https://www.albamon.com/jobs/part?parts=4200&amp;areas=I000" target="_blank" rel="noopener noreferrer">알바몬 행사스텝 ↗</a>
+        <a href="https://www.albamon.com/jobs/short-term?sortType=POSTED_DATE&amp;areas=I000" target="_blank" rel="noopener noreferrer">알바몬 단기 ↗</a>
+        <a href="https://www.saramin.co.kr/zf_user/search/recruit?searchword=%ED%86%B5%EC%97%AD%EC%95%8C%EB%B0%94" target="_blank" rel="noopener noreferrer">사람인 통역알바 ↗</a>
+        <a href="https://aded.co.kr/main/notice_list.php?nt_type=event" target="_blank" rel="noopener noreferrer">좌담회 ↗</a>
+      </div>
     </section>
   </div>
 
@@ -1391,6 +1427,97 @@ function renderHack(){
     renderHack();
   });
   renderHack();
+})();
+
+/* 단기 알바: 1–2 day gigs in 서울 + 용인 (remote 통번역 tagged Online).
+   Excludes 쿠팡, 물류센터, 주방·서빙, 새벽·야간, and gigs needing training or a certificate.
+   Claude refreshes data/users/<uid>/gigs when asked. */
+const GG = { items: [], ready: false, off: false, err: false, updated: null, showClosed: false };
+try { GG.showClosed = localStorage.getItem("ld-gg-closed") === "1"; } catch (e){}
+const KDOW = ["일","월","화","수","목","금","토"];
+function ggLast(it){ return it.end || it.start || ""; }
+function ggState(it){
+  const today = ymd(new Date());
+  if (it.closed || (it.deadline && it.deadline < today)) return {cls: "", text: "Closed", open: false};
+  if (it.start){
+    const d = Math.round((parseDateOnly(it.start) - sod(new Date())) / 86400000);
+    if (d <= 0) return {cls: "soon", text: ggLast(it) > today ? "On now" : "Today", open: true};
+    if (d === 1) return {cls: "soon", text: "Tomorrow", open: true};
+  }
+  if (it.deadline){
+    const days = Math.round((parseDateOnly(it.deadline) - sod(new Date())) / 86400000);
+    if (days === 0) return {cls: "soon", text: "Closes today", open: true};
+    if (days <= 3) return {cls: "soon", text: "Closes in " + days + "d", open: true};
+  }
+  return {cls: "open", text: "Open", open: true};
+}
+function ggDates(it){
+  const f = d => { const x = parseDateOnly(d); return (x.getMonth() + 1) + "/" + x.getDate() + " " + KDOW[x.getDay()]; };
+  if (!it.start) return "Date TBA";
+  return it.end && it.end !== it.start ? f(it.start) + " – " + f(it.end) : f(it.start);
+}
+function ggPay(it){
+  if (!it.pay) return "Not listed";
+  return (it.payUnit || "") + " " + Number(it.pay).toLocaleString("ko-KR") + "원";
+}
+function renderGig(){
+  const box = $("gg-box"); box.textContent = "";
+  $("gg-upd").textContent = "서울 · 용인" + (GG.updated ? " · checked " + md(new Date(GG.updated)) : "");
+  const tg = $("gg-toggle");
+  tg.textContent = GG.showClosed ? "Open only" : "Show closed";
+  tg.setAttribute("aria-pressed", GG.showClosed ? "true" : "false");
+  if (GG.off){ box.appendChild(el("div", "empty", "The gig list works when the dashboard is open in Claude.")); return; }
+  if (GG.err){ box.appendChild(el("div", "empty", "Couldn't load the gig list. Reopen the page.")); return; }
+  if (!GG.ready){ box.appendChild(el("div", "empty", "Loading gigs…")); return; }
+  const today = ymd(new Date());
+  const upcoming = GG.items.filter(it => !ggLast(it) || ggLast(it) >= today).map(it => Object.assign({st: ggState(it)}, it));
+  const open = upcoming.filter(x => x.st.open), closed = upcoming.filter(x => !x.st.open);
+  $("gg-n").textContent = open.length ? open.length + " open" : "";
+  const byDate = (a, b) => (a.start || "9999").localeCompare(b.start || "9999");
+  open.sort(byDate); closed.sort(byDate);
+  const shown = GG.showClosed ? open.concat(closed) : open;
+  if (!shown.length){
+    box.appendChild(el("div", "empty", (closed.length ? closed.length + " upcoming " + (closed.length === 1 ? "gig has" : "gigs have") + " closed. " : "No 1–2 day gigs on the list right now. ") + "Ask Claude to check for new ones, or try the links below."));
+    return;
+  }
+  const list = el("div", "hk-list");
+  for (const it of shown){
+    const a = el("a", "gg" + (it.st.open ? "" : " closed"));
+    if (/^https?:\/\//i.test(it.url || "")){ a.href = it.url; a.target = "_blank"; a.rel = "noopener noreferrer"; }
+    a.setAttribute("aria-label", it.title + ", " + (it.type || "") + ", " + ggDates(it) + ", " + ggPay(it) + ", " + it.st.text + ", opens the posting in a new tab");
+    const main = el("div", "hk-main");
+    const nm = el("div", "hk-name"); nm.appendChild(el("span", null, it.title)); nm.appendChild(el("span", "ext", "↗"));
+    main.appendChild(nm);
+    const who = el("div", "gg-who");
+    if (it.type) who.appendChild(el("span", "gg-tag", it.type));
+    who.appendChild(document.createTextNode([it.employer, it.source].filter(Boolean).join(" · ")));
+    main.appendChild(who);
+    if (it.note) main.appendChild(el("div", "gg-note", it.note));
+    a.appendChild(main);
+    const when = el("div", "hk-when"); when.appendChild(el("span", "hk-lbl", "Date")); when.appendChild(document.createTextNode(ggDates(it)));
+    when.appendChild(el("small", null, it.hours || "Hours not listed"));
+    a.appendChild(when);
+    const where = el("div", "hk-host"); where.appendChild(el("span", "hk-lbl", "Where"));
+    if (it.online) where.appendChild(el("span", "gg-tag on", "Online"));
+    if (it.location) where.appendChild(document.createTextNode(it.location));
+    where.appendChild(el("div", "gg-who", "Language: " + (it.langs || "None needed")));
+    a.appendChild(where);
+    const pay = el("div", "gg-pay"); pay.appendChild(el("span", "hk-lbl", "Pay")); pay.appendChild(document.createTextNode(ggPay(it)));
+    if (it.payNote) pay.appendChild(el("small", null, it.payNote));
+    a.appendChild(pay);
+    a.appendChild(el("span", "hk-st " + it.st.cls, it.st.text));
+    list.appendChild(a);
+  }
+  box.appendChild(list);
+  if (!GG.showClosed && closed.length) box.appendChild(el("div", "hk-sub", closed.length + " more upcoming " + (closed.length === 1 ? "gig has" : "gigs have") + " closed. Use “Show closed” to see " + (closed.length === 1 ? "it" : "them") + "."));
+}
+(function initGig(){
+  $("gg-toggle").addEventListener("click", () => {
+    GG.showClosed = !GG.showClosed;
+    try { localStorage.setItem("ld-gg-closed", GG.showClosed ? "1" : "0"); } catch (e){}
+    renderGig();
+  });
+  renderGig();
 })();
 
 /* ---------- Me: mindmap + resume ---------- */
@@ -2396,6 +2523,7 @@ function saveNote(){
 function localFallback(){
   noteLocal = true;
   HK.off = true; renderHack();
+  GG.off = true; renderGig();
   ME.off = true; renderMind(); renderResume();
   TODO.local = true;
   try { TODO.items = JSON.parse(localStorage.getItem("ld-todo") || "[]"); } catch (e){ TODO.items = []; }
@@ -2418,6 +2546,10 @@ async function bootStore(){
   db.doc("data/users/" + uid + "/hackathons").collection("items").onSnapshot(snap => {
     HK.items = snap.docs.map(d => Object.assign({id: d.id}, d.data())); HK.ready = true; renderHack();
   }, () => { HK.err = true; renderHack(); });
+  db.doc("data/users/" + uid + "/gigs").onSnapshot(s => { GG.updated = (s.data() || {}).updatedAt || null; renderGig(); }, () => {});
+  db.doc("data/users/" + uid + "/gigs").collection("items").onSnapshot(snap => {
+    GG.items = snap.docs.map(d => Object.assign({id: d.id}, d.data())); GG.ready = true; renderGig();
+  }, () => { GG.err = true; renderGig(); });
   meBoot(db, uid);
   TODO.col = db.doc("data/users/" + uid + "/todo").collection("items");
   TODO.col.orderBy("createdAt", "asc").onSnapshot(snap => {
@@ -2492,7 +2624,7 @@ $("refresh").addEventListener("click", async () => {
 setInterval(() => {
   const k = ymd(new Date());
   if (k !== S.dayKey && S.mcp){ S.dayKey = k; resubscribeDay(); }
-  renderHeader(); renderToday(); renderHeadsUp(); renderTodo(); todoCleanup(); if (HK.ready) renderHack();
+  renderHeader(); renderToday(); renderHeadsUp(); renderTodo(); todoCleanup(); if (HK.ready) renderHack(); if (GG.ready) renderGig();
 }, 30000);
 
 renderAll();
