@@ -351,7 +351,7 @@ ul{list-style:none;margin:0;padding:0}
 
 @media print{
   body.print-rs{background:#fff;color:#000;padding:0}
-  body.print-rs .top,body.print-rs #view-dash,body.print-rs .mm-card,body.print-rs .rs-card .card-h,body.print-rs .rs-quick,body.print-rs #rs-msg,body.print-rs .rs-tools-e,body.print-rs .badge,body.print-rs dialog{display:none!important}
+  body.print-rs .top,body.print-rs #view-dash,body.print-rs #view-opp,body.print-rs .mm-card,body.print-rs .rs-card .card-h,body.print-rs .rs-quick,body.print-rs #rs-msg,body.print-rs .rs-tools-e,body.print-rs .badge,body.print-rs dialog{display:none!important}
   body.print-rs #view-me{display:block!important}
   body.print-rs .card{border:0;box-shadow:none;background:#fff;padding:0}
   body.print-rs .print-only{display:block}
@@ -484,7 +484,8 @@ ul{list-style:none;margin:0;padding:0}
     <div class="topright">
       <div class="views" role="tablist" aria-label="View">
         <button type="button" role="tab" id="tab-dash" aria-controls="view-dash" aria-selected="true">Dashboard</button>
-        <button type="button" role="tab" id="tab-me" aria-controls="view-me" aria-selected="false" tabindex="-1">Me</button>
+        <button type="button" role="tab" id="tab-opp" aria-controls="view-opp" aria-selected="false" tabindex="-1">Opportunities</button>
+        <button type="button" role="tab" id="tab-me" aria-controls="view-me" aria-selected="false" tabindex="-1">Career</button>
       </div>
       <div class="fresh" id="fresh">Connecting to Calendar and Gmail…</div>
       <button class="btn" id="refresh" type="button">Refresh</button>
@@ -568,7 +569,9 @@ ul{list-style:none;margin:0;padding:0}
       <textarea id="note" placeholder="Write anything. It saves as you type." spellcheck="false"></textarea>
     </section>
     </div>
+  </div>
 
+  <div class="me" id="view-opp" role="tabpanel" aria-labelledby="tab-opp" hidden>
     <section class="card span hk-card" aria-labelledby="h-hk">
       <div class="card-h"><h2 id="h-hk">Hackathons <span class="n" id="hk-n"></span></h2>
         <span class="card-tools"><span class="note-s" id="hk-upd"></span><button class="linkbtn" id="hk-toggle" type="button" aria-pressed="false">Show closed</button></span>
@@ -1537,6 +1540,7 @@ const RS_CATS = [
 const catsFor = st => RS_CATS.filter(c => !(st === "hs" && c[0] === "lang"));
 const rsCat = k => RS_CATS.find(c => c[0] === k) || RS_CATS[0];
 const MM_COLORS = ["#86b7c9", "#7fc39b", "#e3b263", "#b39ddb", "#e0796d", "#4db6ac", "#f48fb1", "#a1887f"];
+const VIEWS = ["dash", "opp", "me"];
 const ME = {
   off: false, err: false, mindReady: false, rsReady: false, nodes: [], rs: [], mindCol: null, rsCol: null,
   sel: null, armed: null, armT: null, lang: "ko", view: "map", hideDone: false, tab: "dash", stage: "uni",
@@ -1547,7 +1551,7 @@ try {
   ME.hideDone = localStorage.getItem("ld-mm-hide") === "1";
   ME.lang = localStorage.getItem("ld-rs-lang") === "en" ? "en" : "ko";
   ME.stage = localStorage.getItem("ld-rs-stage") === "hs" ? "hs" : "uni";
-  ME.tab = localStorage.getItem("ld-view") === "me" ? "me" : "dash";
+  { const v = localStorage.getItem("ld-view"); ME.tab = VIEWS.includes(v) ? v : "dash"; }
 } catch (e){}
 
 function meMsg(t){ showMsg($("mm-msg"), t); }
@@ -2194,13 +2198,16 @@ async function quickAdd(text){
 function setTab(t, focus){
   ME.tab = t;
   try { localStorage.setItem("ld-view", t); } catch (e){}
-  $("view-dash").hidden = t !== "dash"; $("view-me").hidden = t !== "me";
-  for (const [id, v] of [["tab-dash", "dash"], ["tab-me", "me"]]){
-    const b = $(id); b.setAttribute("aria-selected", t === v ? "true" : "false"); b.tabIndex = t === v ? 0 : -1;
+  for (const v of VIEWS){
+    $("view-" + v).hidden = t !== v;
+    const b = $("tab-" + v); b.setAttribute("aria-selected", t === v ? "true" : "false"); b.tabIndex = t === v ? 0 : -1;
     if (focus && t === v) b.focus();
   }
   if (t === "me"){ renderMind(); renderResume(); }
 }
+function stepTab(dir, focus){ const i = VIEWS.indexOf(ME.tab); setTab(VIEWS[(i + dir + VIEWS.length) % VIEWS.length], focus); }
+/* Tab / Shift+Tab switch views, except while typing in a field or with a dialog open. */
+function isTyping(t){ return !!t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)); }
 function meBoot(db, uid){
   ME.mindCol = db.doc("data/users/" + uid + "/mind").collection("nodes");
   ME.rsCol = db.doc("data/users/" + uid + "/resume").collection("items");
@@ -2215,10 +2222,15 @@ function meBoot(db, uid){
   }, () => { ME.err = true; rsMsg("Resume sync stopped. Reopen the page."); renderResume(); });
 }
 function initMe(){
-  $("tab-dash").addEventListener("click", () => setTab("dash"));
-  $("tab-me").addEventListener("click", () => setTab("me"));
+  for (const v of VIEWS) $("tab-" + v).addEventListener("click", () => setTab(v));
   $("tab-dash").parentElement.addEventListener("keydown", e => {
-    if (e.key === "ArrowRight" || e.key === "ArrowLeft"){ e.preventDefault(); setTab(ME.tab === "dash" ? "me" : "dash", true); }
+    if (e.key === "ArrowRight" || e.key === "ArrowLeft"){ e.preventDefault(); stepTab(e.key === "ArrowRight" ? 1 : -1, true); }
+  });
+  document.addEventListener("keydown", e => {
+    if (e.key !== "Tab" || e.altKey || e.ctrlKey || e.metaKey || e.isComposing) return;
+    if (isTyping(e.target) || document.querySelector("dialog[open]") || document.body.classList.contains("print-rs")) return;
+    e.preventDefault();
+    stepTab(e.shiftKey ? -1 : 1, e.target && e.target.closest && !!e.target.closest(".views"));
   });
   initSpin();
   $("mm-v-map").addEventListener("click", () => { ME.view = "map"; try { localStorage.setItem("ld-mm-view", "map"); } catch (e){} renderMind(); });
