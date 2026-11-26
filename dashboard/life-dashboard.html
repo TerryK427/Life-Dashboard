@@ -414,6 +414,24 @@ ul{list-style:none;margin:0;padding:0}
   .gg-pay small{display:inline;margin-left:6px}
 }
 
+/* 장학금 · 대외활동 · 공모전·인턴십 */
+.op-card{container-type:inline-size}
+.op{display:grid;grid-template-columns:minmax(0,1.7fr) 150px minmax(0,1fr) 112px;gap:14px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--raise);text-decoration:none;color:var(--fg)}
+.op:hover{border-color:var(--accent)}
+.op:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.op.closed{opacity:.6}
+.op-elig{font-size:11.5px;color:var(--dim);margin-top:3px;word-break:keep-all;overflow-wrap:anywhere}
+.op-ben{font-size:12.5px;color:var(--fg);word-break:keep-all;overflow-wrap:anywhere}
+.op-ben small{display:block;color:var(--dim);font-size:11.5px;margin-top:1px}
+@container (max-width:720px){
+  .op{grid-template-columns:minmax(0,1fr) auto;gap:4px 12px}
+  .op .hk-main{grid-column:1;grid-row:1}
+  .op .hk-st{grid-column:2;grid-row:1;align-self:start}
+  .op .hk-when,.op .op-ben{grid-column:1/-1}
+  .op .hk-lbl{display:inline;margin-right:6px}
+  .op-ben small{display:inline;margin-left:6px}
+}
+
 /* Free-time finder */
 .ff-card{container-type:inline-size}
 .ff{display:grid;grid-template-columns:252px minmax(0,1fr);gap:28px;align-items:start}
@@ -589,6 +607,41 @@ ul{list-style:none;margin:0;padding:0}
         <a href="https://www.albamon.com/jobs/short-term?sortType=POSTED_DATE&amp;areas=I000" target="_blank" rel="noopener noreferrer">알바몬 단기 ↗</a>
         <a href="https://www.saramin.co.kr/zf_user/search/recruit?searchword=%ED%86%B5%EC%97%AD%EC%95%8C%EB%B0%94" target="_blank" rel="noopener noreferrer">사람인 통역알바 ↗</a>
         <a href="https://aded.co.kr/main/notice_list.php?nt_type=event" target="_blank" rel="noopener noreferrer">좌담회 ↗</a>
+      </div>
+    </section>
+
+    <section class="card span op-card" aria-labelledby="h-op-sch">
+      <div class="card-h"><h2 id="h-op-sch">장학금 <span class="n" id="op-sch-n"></span></h2>
+        <span class="card-tools"><span class="note-s" id="op-sch-upd"></span><button class="linkbtn" id="op-sch-toggle" type="button" aria-pressed="false">Show closed</button></span>
+      </div>
+      <div id="op-sch-box"><div class="empty">Loading scholarships…</div></div>
+      <div class="gg-more">Find more:
+        <a href="https://www.kosaf.go.kr" target="_blank" rel="noopener noreferrer">한국장학재단 ↗</a>
+        <a href="https://www.dreamspon.com/scholarship/list.html" target="_blank" rel="noopener noreferrer">드림스폰 ↗</a>
+      </div>
+    </section>
+
+    <section class="card span op-card" aria-labelledby="h-op-act">
+      <div class="card-h"><h2 id="h-op-act">대외활동 · 서포터즈 <span class="n" id="op-act-n"></span></h2>
+        <span class="card-tools"><span class="note-s" id="op-act-upd"></span><button class="linkbtn" id="op-act-toggle" type="button" aria-pressed="false">Show closed</button></span>
+      </div>
+      <div id="op-act-box"><div class="empty">Loading activities…</div></div>
+      <div class="gg-more">Find more:
+        <a href="https://linkareer.com/list/activity" target="_blank" rel="noopener noreferrer">링커리어 대외활동 ↗</a>
+        <a href="https://www.contestkorea.com/sub/list.php?int_gbn=2&amp;Txt_bcode=040110001" target="_blank" rel="noopener noreferrer">콘테스트코리아 ↗</a>
+      </div>
+    </section>
+
+    <section class="card span op-card" aria-labelledby="h-op-con">
+      <div class="card-h"><h2 id="h-op-con">공모전 · 인턴십 <span class="n" id="op-con-n"></span></h2>
+        <span class="card-tools"><span class="note-s" id="op-con-upd"></span><button class="linkbtn" id="op-con-toggle" type="button" aria-pressed="false">Show closed</button></span>
+      </div>
+      <div id="op-con-box"><div class="empty">Loading contests and internships…</div></div>
+      <div class="gg-more">Find more:
+        <a href="https://linkareer.com/list/contest" target="_blank" rel="noopener noreferrer">링커리어 공모전 ↗</a>
+        <a href="https://linkareer.com/list/intern" target="_blank" rel="noopener noreferrer">링커리어 인턴 ↗</a>
+        <a href="https://unrecruit.mofa.go.kr/new/internship/notice.jsp" target="_blank" rel="noopener noreferrer">국제기구 인사센터 ↗</a>
+        <a href="https://www.koica.go.kr/sites/internship_kr/index.do" target="_blank" rel="noopener noreferrer">KOICA 인턴 ↗</a>
       </div>
     </section>
   </div>
@@ -1514,6 +1567,93 @@ function renderGig(){
   box.appendChild(list);
   if (!GG.showClosed && closed.length) box.appendChild(el("div", "hk-sub", closed.length + " more upcoming " + (closed.length === 1 ? "gig has" : "gigs have") + " closed. Use “Show closed” to see " + (closed.length === 1 ? "it" : "them") + "."));
 }
+/* 장학금 · 대외활동 · 공모전·인턴십: three lists sharing one renderer.
+   Items: {title, org, tag, source, eligibility, benefit, benefitNote, openFrom, deadline, start, end, location, url, closed}.
+   Claude refreshes data/users/<uid>/<coll> every Sunday and when asked. */
+const OPP = {
+  sch: { coll: "scholarships", what: "scholarships", none: "No scholarships you can apply to right now." },
+  act: { coll: "activities", what: "activities", none: "Nothing open in your fields right now." },
+  con: { coll: "contests", what: "contests or internships", none: "No contests or internships open in your fields right now." }
+};
+for (const k in OPP) Object.assign(OPP[k], { key: k, items: [], ready: false, off: false, err: false, updated: null, showClosed: false });
+try { for (const k in OPP) OPP[k].showClosed = localStorage.getItem("ld-op-" + k + "-closed") === "1"; } catch (e){}
+function opDays(d){ return Math.round((parseDateOnly(d) - sod(new Date())) / 86400000); }
+function opMD(d){ const x = parseDateOnly(d); return (x.getMonth() + 1) + "/" + x.getDate() + " " + KDOW[x.getDay()]; }
+function opState(it){
+  const today = ymd(new Date());
+  if (it.closed || (it.deadline && it.deadline < today)) return {cls: "", text: "Closed", open: false};
+  if (it.openFrom && it.openFrom > today) return {cls: "", text: "Opens " + opMD(it.openFrom).split(" ")[0], open: true};
+  if (it.deadline){
+    const n = opDays(it.deadline);
+    if (n === 0) return {cls: "soon", text: "Due today", open: true};
+    if (n <= 3) return {cls: "soon", text: "Due in " + n + "d", open: true};
+  }
+  return {cls: "open", text: "Open", open: true};
+}
+function opPeriod(it){
+  if (!it.start) return "";
+  return it.end && it.end !== it.start ? opMD(it.start) + " – " + opMD(it.end) : opMD(it.start);
+}
+function renderOpp(k){
+  const L = OPP[k], box = $("op-" + k + "-box"); box.textContent = "";
+  $("op-" + k + "-upd").textContent = L.updated ? "checked " + md(new Date(L.updated)) : "";
+  const tg = $("op-" + k + "-toggle");
+  tg.textContent = L.showClosed ? "Open only" : "Show closed";
+  tg.setAttribute("aria-pressed", L.showClosed ? "true" : "false");
+  if (L.off){ box.appendChild(el("div", "empty", "This list works when the dashboard is open in Claude.")); return; }
+  if (L.err){ box.appendChild(el("div", "empty", "Couldn't load this list. Reopen the page.")); return; }
+  if (!L.ready){ box.appendChild(el("div", "empty", "Loading " + L.what + "…")); return; }
+  const all = L.items.map(it => Object.assign({st: opState(it)}, it));
+  const open = all.filter(x => x.st.open), closed = all.filter(x => !x.st.open);
+  $("op-" + k + "-n").textContent = open.length ? open.length + " open" : "";
+  open.sort((a, b) => (a.deadline || "9999").localeCompare(b.deadline || "9999"));
+  closed.sort((a, b) => (b.deadline || "").localeCompare(a.deadline || ""));
+  const shown = L.showClosed ? open.concat(closed) : open;
+  if (!shown.length){
+    box.appendChild(el("div", "empty", L.none + " The list refreshes every Sunday, or ask Claude to check now."));
+    return;
+  }
+  const list = el("div", "hk-list");
+  for (const it of shown){
+    const a = el("a", "op" + (it.st.open ? "" : " closed"));
+    if (/^https?:\/\//i.test(it.url || "")){ a.href = it.url; a.target = "_blank"; a.rel = "noopener noreferrer"; }
+    a.setAttribute("aria-label", it.title + (it.deadline ? ", due " + opMD(it.deadline) : "") + ", " + it.st.text + ", opens the posting in a new tab");
+    const main = el("div", "hk-main");
+    const nm = el("div", "hk-name"); nm.appendChild(el("span", null, it.title)); nm.appendChild(el("span", "ext", "↗"));
+    main.appendChild(nm);
+    const who = el("div", "gg-who");
+    if (it.tag) who.appendChild(el("span", "gg-tag", it.tag));
+    who.appendChild(document.createTextNode([it.org, it.source !== it.org ? it.source : ""].filter(Boolean).join(" · ")));
+    main.appendChild(who);
+    if (it.eligibility) main.appendChild(el("div", "op-elig", it.eligibility));
+    a.appendChild(main);
+    const when = el("div", "hk-when");
+    when.appendChild(document.createTextNode(it.deadline ? "Due " + opMD(it.deadline) : "No deadline"));
+    const per = opPeriod(it), sub = [it.openFrom && it.openFrom > ymd(new Date()) ? "Opens " + opMD(it.openFrom) : "", per, it.location].filter(Boolean).join(" · ");
+    if (sub) when.appendChild(el("small", null, sub));
+    a.appendChild(when);
+    const ben = el("div", "op-ben"); ben.appendChild(el("span", "hk-lbl", "Benefit"));
+    ben.appendChild(document.createTextNode(it.benefit || "—"));
+    if (it.benefitNote) ben.appendChild(el("small", null, it.benefitNote));
+    a.appendChild(ben);
+    a.appendChild(el("span", "hk-st " + it.st.cls, it.st.text));
+    list.appendChild(a);
+  }
+  box.appendChild(list);
+  if (!L.showClosed && closed.length) box.appendChild(el("div", "hk-sub", closed.length + " more " + (closed.length === 1 ? "has" : "have") + " closed. Use “Show closed” to see " + (closed.length === 1 ? "it" : "them") + "."));
+}
+function renderAllOpp(){ for (const k in OPP) renderOpp(k); }
+(function initOpp(){
+  for (const k in OPP){
+    $("op-" + k + "-toggle").addEventListener("click", () => {
+      OPP[k].showClosed = !OPP[k].showClosed;
+      try { localStorage.setItem("ld-op-" + k + "-closed", OPP[k].showClosed ? "1" : "0"); } catch (e){}
+      renderOpp(k);
+    });
+  }
+  renderAllOpp();
+})();
+
 (function initGig(){
   $("gg-toggle").addEventListener("click", () => {
     GG.showClosed = !GG.showClosed;
@@ -2536,6 +2676,7 @@ function localFallback(){
   noteLocal = true;
   HK.off = true; renderHack();
   GG.off = true; renderGig();
+  for (const k in OPP) OPP[k].off = true; renderAllOpp();
   ME.off = true; renderMind(); renderResume();
   TODO.local = true;
   try { TODO.items = JSON.parse(localStorage.getItem("ld-todo") || "[]"); } catch (e){ TODO.items = []; }
@@ -2562,6 +2703,13 @@ async function bootStore(){
   db.doc("data/users/" + uid + "/gigs").collection("items").onSnapshot(snap => {
     GG.items = snap.docs.map(d => Object.assign({id: d.id}, d.data())); GG.ready = true; renderGig();
   }, () => { GG.err = true; renderGig(); });
+  for (const k in OPP){
+    const L = OPP[k], ref = db.doc("data/users/" + uid + "/" + L.coll);
+    ref.onSnapshot(s => { L.updated = (s.data() || {}).updatedAt || null; renderOpp(k); }, () => {});
+    ref.collection("items").onSnapshot(snap => {
+      L.items = snap.docs.map(d => Object.assign({id: d.id}, d.data())); L.ready = true; renderOpp(k);
+    }, () => { L.err = true; renderOpp(k); });
+  }
   meBoot(db, uid);
   TODO.col = db.doc("data/users/" + uid + "/todo").collection("items");
   TODO.col.orderBy("createdAt", "asc").onSnapshot(snap => {
@@ -2637,6 +2785,7 @@ setInterval(() => {
   const k = ymd(new Date());
   if (k !== S.dayKey && S.mcp){ S.dayKey = k; resubscribeDay(); }
   renderHeader(); renderToday(); renderHeadsUp(); renderTodo(); todoCleanup(); if (HK.ready) renderHack(); if (GG.ready) renderGig();
+  for (const k in OPP) if (OPP[k].ready) renderOpp(k);
 }, 30000);
 
 renderAll();
